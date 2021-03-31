@@ -11,10 +11,22 @@
         - "A17": autumn quarter 2017
         - "A16": autumn quarter 2016
         - "A18": autumn quarter 2018
-        - "20194": autumn quarter 2019
-    - `course` (character):
-    - `course.fullid` (character):
-    - `TAsect` (character):
+        - "20194": autumn quarter 2019. UW Registrar's office refers to autumn quarter as "4", since it is the fourth quarter that occurs in a calendar year.
+    - `course` (character): course number and course section
+        - "142AB": CHEM 142, course sections A and B. Instructor taught both A and B sections.
+        - "142D": CHEM 142, course section D
+        - _NA_
+    - `course.fullid` (character): Unique course identifier, of the structure "CHEM_142_\<COURSE SECT>_\<YEAR>_4"
+        - "CHEM_142_A_2017_4" 
+        - "CHEM_142_B_2017_4" 
+        - "CHEM_142_A_2016_4" 
+        - "CHEM_142_B_2016_4" 
+        - "CHEM_142_D_2018_4"
+    - `TAsect` (character): two-letter code for TA-lead subsection of a course, containing up to 24 students. 
+        - _values in 142A_: "AK" "AH" "AU" "AC" "AB" "AL" "AI" "AA" "AJ" "AW" "AP" "AQ" "AS" "AN" "AV" "AD" "AO" "AF" "AE" "AG" "AT" "AR" "AY" "AZ" "AM" "AX" 
+        - _values in 142B_: "BF" "BM" "BH" "BZ" "BA" "BX" "BW" "BV" "BU" "BI" "BB" "BQ" "BJ" "BR" "BE" "BL" "BD" "BP" "BC" "BY" "BN" "BT" "BG" "BS" "BO" "BK" 
+        - _values in 142D_: "DW" "DX" "DC" "DL" "DJ" "DR" "DT" "DH" "DB" "DE" "DM" "DN" "DF" "DK" "DG" "DU" "DA" "DO" "DQ" "DS" "DD" "DP" "DI" "DV" 
+        - _don't know the course these values refer to_: "T"  "CR" "D" "Q"  "U" NA   "H"  "Z"  "A"  "B"
     - `exam1predict` (numeric):
     - `exam2predict` (numeric):
     - `finalexampredict` (numeric):
