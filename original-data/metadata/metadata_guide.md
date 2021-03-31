@@ -35,16 +35,17 @@
             - `exam1` (20 5-pt MC + 1 3-pt FR; range 10 to 103; max possible 103): 142 Exam 1 coverage: quantum mechanics, Lewis structures, VSEPR. 
             - `exam2` (20 5-pt MC + 1 3-pt FR; range 0 to 103, max possible 103): 142 Exam 2 coverage: stoichiometry, aqueous-phase reaction classes, molarity, differential rate laws
             - `finalexam` (35**?????** equally-weighted MC + 1 3-pt FR; range 0 to 154.29, max possible 155 **CHECK THIS VALUE. DOES THIS DEPEND ON THE YEAR??**): 142 Final Exam coverage: all prior material + gas laws, integrated rate laws, reaction mechanisms, collision theory
-    - `instructorgrade` (numeric):
-    - `exam` (character):
-    - `ver` (character):
-    - `num_items` (numeric):
-    - `length_min` (numeric):
-    - `min_per_ques` (numeric):
-    - `item_num` (numeric):
-    - `stud_ans` (character):
-    - `exam_key` (character):
-    - `corr` (numeric):
+    - `instructorgrade` (numeric; range -0.2 to 4.0): Grade assigned to student. **NOTE: The fact that this range starts at -0.2 makes me wonder what source Michael Mack used when he compiled these data. This looks like a case where the equation I used calculated a literal value of -0.2, but I would have converted this to a 0.0 before submitting to the registrar. I wonder what other minor deviations in the actual posted grades might exist in this dataset?**
+    - `exam` (character): Name of exam for the purposes of the Bloom's and complexity item analysis. Values are "Exam1", "Exam2", "FinalExam" in 2016, 2017, and 2018. Values are "exam1", "exam2", and "finalexam" in 2019.
+    - `num_items` (numeric): Number of MC items on each exam. Exams 1 and 2 both had 20 MC items, and the Final Exam had 35 MC items. These numbers were the same in all years of the study.
+    - `length_min` (numeric): Number of minutes allowed for the exam. Students were allowed 45 min for each of Exams 1 and 2, and 105 min for the Final exam. These values were the same in all years of the study.
+    - `min_per_ques` (numeric): Ratio of `length_min` to `num_items`. Exams 1 and 2: 2.25 min/ques; Final exam: 3 min/ques. These values were the same in all years of the study.
+    - `item_num` (numeric): Number of exam item for the purposes of the Bloom's and complexity item analysis.
+        - Exams 1 and 2: 1-20
+        - Final Exam: 1 -35
+    - `stud_ans` (character): Answer that student chose for `item_num` on `exam`. Questions had up to five choices (only one correct answer). Values include: "A", "B", "C", "D", "E", and "Z". The "Z" responses were put in place during the creation of the item analysis data set in 2018. This was a catchall for any blanks or multi-marks on the Scantron form. **CHECk THIS!!!**
+    - `exam_key` (character): Correct answer to `item_num` on `exam`. Values include: "A", "B", "C", "D", and "E". 
+    - `corr` (numeric): Indication of whether the student chose the corect answer to `item_num` on `exam`. Values: "0" (for incorrect), "1" (for correct)
     - `bloom_rating` (numeric):
     - `complexity_rating_mean` (numeric):
     - `complexity_rating_median` (numeric):
