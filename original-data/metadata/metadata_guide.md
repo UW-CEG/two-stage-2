@@ -2,7 +2,7 @@
 
 ## master_2s_deidentified (DO NOT TOUCH).csv
 
-1. **Bibliographic citation for the original data file.** _NA_ This file was created from data obtained under IRB#???????? from the UW registrar and the instructor for the courses analyzed herein, and then collated by student number which was subsequently redacted.
+1. **Bibliographic citation for the original data file.** _NA_ This file was created from data obtained under _IRB#????????_ from the UW registrar and the instructor for the courses analyzed herein, and then collated by student number which was subsequently redacted.
 1. **Digital object identifier (DOI) for the data file.** _DOI TBD_
 1. **The date on which the author first downloaded, or obtained in some other way, the original data files.** _NEED TO ADD THIS_
 1. **A written explanation of how an interested reader can obtain a copy of the original data file.** _Archive location TBD_
@@ -27,12 +27,14 @@
         - _values in 142B_: "BF" "BM" "BH" "BZ" "BA" "BX" "BW" "BV" "BU" "BI" "BB" "BQ" "BJ" "BR" "BE" "BL" "BD" "BP" "BC" "BY" "BN" "BT" "BG" "BS" "BO" "BK" 
         - _values in 142D_: "DW" "DX" "DC" "DL" "DJ" "DR" "DT" "DH" "DB" "DE" "DM" "DN" "DF" "DK" "DG" "DU" "DA" "DO" "DQ" "DS" "DD" "DP" "DI" "DV" 
         - _don't know the course these values refer to_: "T"  "CR" "D" "Q"  "U" NA   "H"  "Z"  "A"  "B"
-    - `exam1predict` (numeric):
-    - `exam2predict` (numeric):
-    - `finalexampredict` (numeric):
-    - `exam1` (numeric):
-    - `exam2` (numeric):
-    - `finalexam` (numeric):
+    - `exam1predict`, `exam2predict`, `finalexampredict` (all numeric; _intended_ range 0 to 100): Score that students predicted they would earn on the exam. This was asked as the last question on the exam, and was worth three points.These points were added to the straight exam score, so a midterm for example was worth 103 points (100 for 20 multiple-choice questions worth 5 pts/ea. + this single free-response question worth 3 pts). The exact wording of the question changed over the years included in the study, but the intention was always that students would predict an integer score between 0% and 100%, even on the final exam, which was scored out of 150 points. (**2021-03-31: NEED TO CHECK HOW WE HANDLED NON-INTEGER DATA SUCH AS LETTERS, THE SPEED OF LIGHT, ETC. CHECK THE DUNNING-KRUGER WORK...**)
+            - actual range `exam1predict`: 0 to 100
+            - actual range `exam2predict`: 0 to 880
+            - actual range `finalexampredict`: 0 to 300
+    - `exam1`, `exam2`, `finalexam` (all numeric): Student scores on exams. 
+            - `exam1` (20 5-pt MC + 1 3-pt FR; range 10 to 103; max possible 103): 142 Exam 1 coverage: quantum mechanics, Lewis structures, VSEPR. 
+            - `exam2` (20 5-pt MC + 1 3-pt FR; range 0 to 103, max possible 103): 142 Exam 2 coverage: stoichiometry, aqueous-phase reaction classes, molarity, differential rate laws
+            - `finalexam` (35**?????** equally-weighted MC + 1 3-pt FR; range 0 to 154.29, max possible 155 **CHECK THIS VALUE. DOES THIS DEPEND ON THE YEAR??**): 142 Final Exam coverage: all prior material + gas laws, integrated rate laws, reaction mechanisms, collision theory
     - `instructorgrade` (numeric):
     - `exam` (character):
     - `ver` (character):
