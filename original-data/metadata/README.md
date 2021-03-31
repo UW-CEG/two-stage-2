@@ -18,16 +18,14 @@ The Metadata Guide should be organized into one or more sections; each section s
 1. *A bibliographic citation for the original data file.* This citation should be in a format consistent with the editorial style (e.g., APA or Chicago) used in the main paper or report on the study.
 1. *A digital object identifier (DOI) for the data file (if one has been assigned).* If a DOI is included in the bibliographic citation, it need not be repeated.
 1. *The date on which the author first downloaded, or obtained in some other way, the original data file.* If a date is included in the bibliographic citation, it need not be repeated.
-1. *A written explanation of how an interested reader can obtain a copy 
-of the original data file.* In many cases, this explanation will give the 
+1. *A written explanation of how an interested reader can obtain a copy of the original data file.* In many cases, this explanation will give the 
 URL of a website from which the data can be accessed, along with 
 instructions for downloading a file identical to the original data file 
 you obtained from that site.In all cases, this explanation should be 
 complete and precise enough to allow an independent researcher to 
 locate and obtain the data file without any additional information or 
 assistance.
-1. *Whatever additional information an independent researcher would need 
-to understand and use the data in the original data file.* The particular 
+1. *Whatever additional information an independent researcher would need to understand and use the data in the original data file.* The particular 
 information required can vary a great deal depending on the nature of 
 the original data file in question, and deciding what additional 
 information to provide therefore requires thoughtful consideration and 
