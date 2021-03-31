@@ -7,7 +7,7 @@ in response to the implementation of two-stage quizzes and exams.
 
 This repository follows the [TIER Documentation Protocol](https://www.projecttier.org/tier-protocol/specifications-3-0/#overview-of-the-documentation) ([GitHub repo](https://github.com/ProjectTIER/projecttier.org)), 
 instructions for assembling a set of electronic files that document 
-all the steps of data processing and analysis you conduct for an
+all the steps of data processing and analysis conducted for an
 empirical research paper. 
 
 
