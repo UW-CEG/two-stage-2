@@ -56,22 +56,25 @@
     - `complexity_rating_mean` and `complexity_rating_median` (both numeric): Mean and median of the complexity rating assigned to a given question by three expert raters according to [Knaus, et al.](https://dx.doi.org/10.1021/ed900070y). The higher the rating, the more complex the problem was considered to be. 
             - Values for `complexity_rating_mean` range from 1 to 6, with some fractional values owing to division by three to obtain the mean (e.g., 2.67, 3.33). 
             - Values for `complexity_rating_median` range from 1 to 6, with no fractional values.
-    - `item_code` (character):
-    - `stem` (character):
-    - `mastered_topics_initial_kc` (numeric):
-    - `time_initial_kc` (character):
-    - `satmath` (numeric):
-    - `satverbal` (numeric):
-    - `high_sch_gpa` (numeric):
-    - `cci_total_1` (numeric):
-    - `cci_total_2` (numeric):
-    - `project1` (character):
-    - `experiment1` (character):
-    - `eop.id` (character):
-    - `sex.id` (character):
-    - `fgn.id` (character):
-    - `urm.id` (character):
-    - `ethnicity` (character):
+    - `item_code` (character): A unique identifier for `item_num` on `exam` in a master list of general chemistry exam questions. This code has the general form `ML-<\d\d\d>`, where "ML" stands for "master list", and the three digit code represents the location of the item in the master list. The questions in the master list were intentionally jumbled across instructors and years, so the `item_code`s in this set are not numerically inclusive.
+    - `stem` (character): The test of the question stem from `item_num` on `exam`. (The text of the answer choices was not absorbed into the data set.)
+    - `mastered_topics_initial_kc` (numeric; range 0 to 147): The number of topics a student indicated mastery of during the initial Knowledge Check in [ALEKS](https://www.aleks.com/). Students completed the initial KC during the first week of the quarter. The total number of topics included in the ALEKS course varied slightly by year: **LOOK THESE VALUES UP!!!**
+    - `time_initial_kc` (character): Time the student took to complete their initial knowledge check in ALEKS. These data come in the unfortunate form "HhMMm", e.g. "1h43m".
+    - `satmath` (numeric; range 360 to 800): Student's SAT Math score 
+    - `satverbal` (numeric; range 370 to 800): Student's SAT Verbal score 
+    - `high_sch_gpa` (numeric; range 2.46 to 4.00): Student's high school GPA, on a 4.0 scale (**IS THIS DATA SELF-REPORTED BY THE STUDENT? HOW DID WE OBTAIN THIS**)
+    - `cci_total_1` and `cci_total_2` (both numeric; range for both 0 to 16 (**WHY IS 16 THE MAX? THE CCI HAS 22 QUESITONS**)): Student scores on the [Chemistry Concept Inventory](https://www.chemedx.org/JCEDLib/QBank/collection/CQandChP/CQs/ConceptsInventory/CCIIntro.html) trial 1 (at the beginning of the quarter) and trial 2 (at the end of the quarter).
+    -  (numeric):
+    - `project1` (character): Indicator of the project this student's data is used in. Values: 
+            - "TESTING": refers to the two-stage assessment project, conducted in Autumn 2017. Students in the "TESTING" treatment were taught using a standard lecture approach in class and took standard individual midterm and final exams, but completed two-stage quizzes during their weekly quiz section. In the first stage, students had 20 min to complete a 10-question multiple choice quiz individually, and submitted their answers on a Scantron form. In the second stage, students assembled into assigned groups to complete the same quiz again in 15 min, and submitted their answers on an [IF-AT card](http://www.epsteineducation.com/home/).  
+            - "ACTIVATE142": refers to the "activate 142" project in Autumn 2018, in which the course delivery was reformed to explicitly employ active learning techniques in class. Students in this cohort did not complete two-stage quizzes.
+            - "ACTIVATE": refers to a second iteration of the "activate 142" project, in Autumn 2019. 
+    - `experiment1` (character): Indicates whether this student's data is part of the "EXPERIMENTAL" group (in A17, A18, and A19) or the "CONTROL" group (in A16).
+    - `eop.id` (character): Indicator of student's participation in the [Educational Opportunity Program (EOP)](https://depts.washington.edu/omadcs/eop/). This is used as an indicator of a student's socioeconomic status, since students from low-income backgrounds qualify for the program. These data were obtained as-is (**CHECK THIS**) from the UW Registrar's office. Values: "EOP", "non-EOP"
+    - `sex.id` (character): Indicator of student's self-reported binary gender identity. These data were obtained as-is (**CHECK THIS**) from the UW Registrar's office. Values: "Female", "Male"
+    - `fgn.id` (character): Indicator of student's first- or continuing-generation higher-education status. These data were inferred from information about parents' highest education level, which was obtained from the UW Registrar's office. (**CHECK ON EXACTLY HOW FGN STATUS WAS INFERRED FROM PARENTAL EDUCATION**) Values: "FGN", "non-FGN"
+    - `urm.id` (character): Indicator of student's under-represented minority status. These data were inferred from ethnicity and nationality data obtained from the UW Registrar's office. Students from caucasian and asian ethnicities and international students were not classified as under-represented minorities. (**CHECK THIS...AND WHAT WAS THE LIST OF ETHNICITIES THAT WERE INCLUDED AS URM?**) Values: "URM", "non-URM"
+    - `ethnicity` (character): Self-reported ethnicity data for student. These data were obtained from the UW Registrars office. Values: "HISPANIC", "ASIAN", "MULTI", "CAUCASN", "INTERNATIONAL", "AFRO-AM", "AMER-IND", "HAW/PAC", "NOT IND" (**HOW DID WE CLASSIFY "MULTI" AND "NOT IND" STUDENTS?**)
     - `group.id` (character):
     - `questionnum` (numeric):
     - `quiznum` (numeric):
