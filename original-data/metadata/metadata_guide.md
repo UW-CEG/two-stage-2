@@ -34,8 +34,8 @@
     - `exam1`, `exam2`, `finalexam` (all numeric): Student scores on exams. 
             - `exam1` (20 5-pt MC + 1 3-pt FR; range 10 to 103; max possible 103): 142 Exam 1 coverage: quantum mechanics, Lewis structures, VSEPR. 
             - `exam2` (20 5-pt MC + 1 3-pt FR; range 0 to 103, max possible 103): 142 Exam 2 coverage: stoichiometry, aqueous-phase reaction classes, molarity, differential rate laws
-            - `finalexam` (35**?????** equally-weighted MC + 1 3-pt FR; range 0 to 154.29, max possible 155 **CHECK THIS VALUE. DOES THIS DEPEND ON THE YEAR??**): 142 Final Exam coverage: all prior material + gas laws, integrated rate laws, reaction mechanisms, collision theory
-    - `instructorgrade` (numeric; range -0.2 to 4.0): Grade assigned to student. **NOTE: The fact that this range starts at -0.2 makes me wonder what source Michael Mack used when he compiled these data. This looks like a case where the equation I used calculated a literal value of -0.2, but I would have converted this to a 0.0 before submitting to the registrar. I wonder what other minor deviations in the actual posted grades might exist in this dataset?**
+            - `finalexam` (35 **?????** equally-weighted MC + 1 3-pt FR; range 0 to 154.29, max possible 155 (**CHECK THIS VALUE. DOES THIS DEPEND ON THE YEAR??**)): 142 Final Exam coverage: all prior material + gas laws, integrated rate laws, reaction mechanisms, collision theory
+    - `instructorgrade` (numeric; range -0.2 to 4.0): Grade assigned to student. (**NOTE: The fact that this range starts at -0.2 makes me wonder what source Michael Mack used when he compiled these data. This looks like a case where the equation I used calculated a literal value of -0.2, but I would have converted this to a 0.0 before submitting to the registrar. I wonder what other minor deviations in the actual posted grades might exist in this dataset?**)
     - `exam` (character): Name of exam for the purposes of the Bloom's and complexity item analysis. Values are "Exam1", "Exam2", "FinalExam" in 2016, 2017, and 2018. Values are "exam1", "exam2", and "finalexam" in 2019.
     - `num_items` (numeric): Number of MC items on each exam. Exams 1 and 2 both had 20 MC items, and the Final Exam had 35 MC items. These numbers were the same in all years of the study.
     - `length_min` (numeric): Number of minutes allowed for the exam. Students were allowed 45 min for each of Exams 1 and 2, and 105 min for the Final exam. These values were the same in all years of the study.
@@ -43,12 +43,19 @@
     - `item_num` (numeric): Number of exam item for the purposes of the Bloom's and complexity item analysis.
         - Exams 1 and 2: 1-20
         - Final Exam: 1 -35
-    - `stud_ans` (character): Answer that student chose for `item_num` on `exam`. Questions had up to five choices (only one correct answer). Values include: "A", "B", "C", "D", "E", and "Z". The "Z" responses were put in place during the creation of the item analysis data set in 2018. This was a catchall for any blanks or multi-marks on the Scantron form. **CHECk THIS!!!**
+    - `stud_ans` (character): Answer that student chose for `item_num` on `exam`. Questions had up to five choices (only one correct answer). Values include: "A", "B", "C", "D", "E", and "Z". The "Z" responses were put in place during the creation of the item analysis data set in 2018. This was a catchall for any blanks or multimarks on the Scantron form. **CHECk THIS!!!**
     - `exam_key` (character): Correct answer to `item_num` on `exam`. Values include: "A", "B", "C", "D", and "E". 
-    - `corr` (numeric): Indication of whether the student chose the corect answer to `item_num` on `exam`. Values: "0" (for incorrect), "1" (for correct)
-    - `bloom_rating` (numeric):
-    - `complexity_rating_mean` (numeric):
-    - `complexity_rating_median` (numeric):
+    - `corr` (numeric): Indication of whether the student chose the correct answer to `item_num` on `exam`. Values: "0" (for incorrect), "1" (for correct)
+    - `bloom_rating` (numeric): Level of Bloom's taxonomy applied to the question. Ratings were based on the original 1956 version of Bloom's. (For more information about the scheme applied to this question set, see the Chemistry in Bloom matrix in the `/supplements` folder.) Values in this dataset (the highest level of Bloom's, Evaluation, was not observed in this set of multiple-choice questions):
+        - 1:   Knowledge
+        - 2:   Comprehension
+        - 3:   Application, Low-order cognitive skill
+        - 3.5: Application, high-order cognitive skill
+        - 4:   Analysis
+        - 5:   Synthesis
+    - `complexity_rating_mean` and `complexity_rating_median` (both numeric): Mean and median of the complexity rating assigned to a given question by three expert raters according to [Knaus, et al.](https://dx.doi.org/10.1021/ed900070y). The higher the rating, the more complex the problem was considered to be. 
+            - Values for `complexity_rating_mean` range from 1 to 6, with some fractional values owing to division by three to obtain the mean (e.g., 2.67, 3.33). 
+            - Values for `complexity_rating_median` range from 1 to 6, with no fractional values.
     - `item_code` (character):
     - `stem` (character):
     - `mastered_topics_initial_kc` (numeric):
