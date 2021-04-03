@@ -67,7 +67,6 @@
     -  (numeric):
     - `project1` (character): Indicator of the project this student's data is used in. Values: 
             - "TESTING": refers to the two-stage assessment project, conducted in Autumn 2017. Students in the "TESTING" treatment were taught using a standard lecture approach in class and took standard individual midterm and final exams, but completed two-stage quizzes during their weekly quiz section. In the first stage, students had 20 min to complete a 10-question multiple choice quiz individually, and submitted their answers on a Scantron form. In the second stage, students assembled into assigned groups to complete the same quiz again in 15 min, and submitted their answers on an [IF-AT card](http://www.epsteineducation.com/home/).  
-<<<<<<< HEAD
             - "ACTIVATE142": refers to the "activate 142" project in Autumn 2018, in which the course delivery was reformed to explicitly employ active learning techniques in class. Students in this cohort did not complete two-stage quizzes.
             - "ACTIVATE": refers to a second iteration of the "activate 142" project, in Autumn 2019. 
     - `experiment1` (character): Indicates whether this student's data is part of the "EXPERIMENTAL" group (in A17, A18, and A19) or the "CONTROL" group (in A16).
@@ -85,7 +84,6 @@
     - `ind.response` (character): Students response to `questionnum` during the the first stage of the quiz, individual where they complete it individually. Values: "A", "B", "C", "D", "E", or "0 (**WHY WOULD THERE BE A ZERO??**)
     - `quizversion` (character): Version of the quiz that the stduent took. There were four versions delierved each each. Values: "A", "B", "C", "D"
     - `quiz_key` (character): Answer to `questionnum` on `quiznum`, version `quizversion`. Values: "A", "B", "C", "D", "E"
-=======
             - "ACTIVATE142": refers to the "activate 142" project in Autumn 2018, in which the course delivery was reformed to explicitly employ active learning techniques in class. Studnets in this cohort did not complete two-stage quizzes.
             - "ACTIVATE": refers to a second iteration of the "activate 142" project, in Autumn 2019. 
     - `experiment1` (character): Indicates whether this student's data is part of the "EXPERIMENTAL" group (in A17, A18, and A19) or the "CONTROL" group (in A16).
@@ -103,7 +101,7 @@
     - `ind.response` (character):
     - `quizversion` (character):
     - `quiz_key` (character):
->>>>>>> 3f507031275a5422e93dad60e89e514a1eff706a
+
 
 1. **Supplementary documents with additional metadata.** 
 
