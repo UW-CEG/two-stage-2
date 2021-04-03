@@ -75,9 +75,9 @@
     - `fgn.id` (character): Indicator of student's first- or continuing-generation higher-education status. These data were inferred from information about parents' highest education level, which was obtained from the UW Registrar's office. (**CHECK ON EXACTLY HOW FGN STATUS WAS INFERRED FROM PARENTAL EDUCATION**) Values: "FGN", "non-FGN"
     - `urm.id` (character): Indicator of student's under-represented minority status. These data were inferred from ethnicity and nationality data obtained from the UW Registrar's office. Students from caucasian and asian ethnicities and international students were not classified as under-represented minorities. (**CHECK THIS...AND WHAT WAS THE LIST OF ETHNICITIES THAT WERE INCLUDED AS URM?**) Values: "URM", "non-URM"
     - `ethnicity` (character): Self-reported ethnicity data for student. These data were obtained from the UW Registrars office. Values: "HISPANIC", "ASIAN", "MULTI", "CAUCASN", "INTERNATIONAL", "AFRO-AM", "AMER-IND", "HAW/PAC", "NOT IND" (**HOW DID WE CLASSIFY "MULTI" AND "NOT IND" STUDENTS?**)
-    - `group.id` (character):
-    - `questionnum` (numeric):
-    - `quiznum` (numeric):
+    - `group.id` (character): Group student was assigned to for working on the second stage of the two-stage quiz during discussion section. Groups contained up to four members, and were assigned by the instructor to explicitly minimize the number of out-numbered female and URM students whenever possible. We did not attempt to minimize thee number of out-numbered EOP or FGN students, as this would have introduced further complexity, and these characteristics are not necessarily visually apparent in the ways that gender and ethnicity can be. Format of `group.id`: "\<GROUP NUMBER>\<TA SECT>", e.g., "5AL", "2BQ". Each quiz section of 24 students had up to six quiz groups, and these groups persisted for the entire term. If a student was absent in a given week, or if a student dropped the class, the remaining group members were often left to work as a three- or two-some, rather than rearranging the group assignments.
+    - `questionnum` (numeric): Number of a quiz question. Quizzes 2-8 had 10 multiple-choice questions. Values: [1-10]
+    - `quiznum` (numeric): Number of the quiz delivered in a given week. Quiz 1 had only five questions, so it was nto included in this analysis. Quizzes 2-8 all had 10 MC questions. Values: [2-8]
     - `all.response` (character):
     - `first.response` (character):
     - `responsenum` (numeric):
