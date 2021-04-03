@@ -80,9 +80,11 @@
     - `quiznum` (numeric): Number of the quiz delivered in a given week. Quiz 1 had only five questions, so it was not included in this analysis. Quizzes 2-8 all had 10 MC questions. Values: [2-8]
     - `all.response` (character): Record of the group's response(s) in the second stage, which was completed on an [IF-AT card](http://www.epsteineducation.com/home/). Since in most cases we could not tell the order in which the group picked their responses, the `all.response` values are presented in alphabetical order. For example, "CE", BCE", "ABCDE". However, a single response to a questions during the group stage was by far the most common observation. Values: strings of single, double, triple, quadruple, or quintuple letters.
     - `first.response` (character): In cases where at least one incorrect answer was chosen in addition to the correct answer, we attributed all the incorrect answers chosen as the "first" response of the group (assuming that once they fouND the correct answer, they would move on to the neXt question). So, the `first.response` variable is the string leftover once the correct answer is extracted. Values: strings of single, double, triple, quadruple, or quintuple letters. (**NOTE: THE QUINTUPLE LETTER STRINGS MUST BE AN ERROR, SINCE ONCE THE CORRECT ANSWER IS EXTRACTED THE MAXIMUM STRTING LENGTH FOR THIS VARIABLE SHOULD BE FOUR. WHAT OTHER ERRORS LURK??**)
-    - `responsenum` (numeric):
-    - `ind.response` (character):
-    - `quizversion` (character):
-    - `quiz_key` (character):
+    - `responsenum` (numeric; range 0 to 5): How many tries did it take the group to obtain the correct answer. If `all.response` is a single character, `responsenum = 1`. If `all.response` is three characters, `responsenum = 2`. A "0" value is observed if `all.response = NA`.
+    - `ind.response` (character): Students response to `questionnum` during the the first stage of the quiz, individual where they complete it individually. Values: "A", "B", "C", "D", "E", or "0 (**WHY WOULD THERE BE A ZERO??**)
+    - `quizversion` (character): Version of the quiz that the stduent took. There were four versions delierved each each. Values: "A", "B", "C", "D"
+    - `quiz_key` (character): Answer to `questionnum` on `quiznum`, version `quizversion`. Values: "A", "B", "C", "D", "E"
 
-1. **Supplementary documents with additional metadata.** _NA currently_
+1. **Supplementary documents with additional metadata.** 
+
+* **ChemistryInBloom_19_07_01.docx, ChemistryInBloom_19_07_01.pdf**: Tool for applying Bloom's taxonomy to multiple-choice general chemistry questions. 
