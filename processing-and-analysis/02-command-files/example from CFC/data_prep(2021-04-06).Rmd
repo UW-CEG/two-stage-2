@@ -1,0 +1,317 @@
+---
+title: "Two Stage Analysis Data Prep"
+author: "Colleen Craig"
+date: "3/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(skimr)
+library(moderndive)
+library(here)
+```
+## Set Working Directories
+
+```{r}
+proj_dir <- here()
+importable_data_dir <- here("processing-and-analysis", "importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+## Data Import
+
+Import data from...
+
+* CHEM 142 exam item analysis: Bloom's and complexity 
+* Project Convince: an attempt to find demographics patterns in two-stage quiz project
+
+```{r}
+# Leave out `master` for now...I'll need it for CHEM 152 later.
+# master <- read_rds(paste0(importable_data_dir, "UW-CHEM-MASTERDATA-A16-A19 (DO NOT TOUCH).rds"))
+
+item_analysis <- read_rds(paste0(importable_data_dir, "UW-CHEM-MASTERDATA-Item-Analysis-A16-A19-20200215 (DO NOT TOUCH).rds"))
+
+metadata <- read_csv(paste0(metadata_dir, "UW-CHEM-MASTERDATA-metadata-20200218.csv"))
+
+convince_0110 <- read_rds(paste0(importable_data_dir, "MASTER-convince-1-10-2019 (DO NOT TOUCH).rds"))
+convince_0516 <- read_rds(paste0(importable_data_dir, "MASTER-convince-5-16-19 (DO NOT TOUCH).rds"))
+
+item_analysis %>% distinct(course.fullid)
+item_analysis %>% distinct(project1)
+```
+
+Looks like I really only need the `item-analysis` df, since it appears to contain 
+all the exam item analysis I wrangled in 2019, as well as Michael Mack's previous 
+master data.
+
+Actually that's not true...the `item_analysis` df only contains 142 data, since it was 
+for the ACTIVATE 142 analysis. I'll have to extract the 152 data from `master` if
+I end up pursuing that analysis.
+
+## Data Selection for Two-stage Quiz Analysis in CHEM 142
+
+(_I'll come back to CHEM 152 later..._)
+
+### Filter relevant rows from `item-analysis`
+
+Filter all rows from `item_analysis` that correspond to `inst == inst1` (that's me! =).
+
+```{r}
+inst1_df <- item_analysis %>% filter(inst == "inst1")
+inst1_df %>% distinct(project1)
+inst1_df %>% distinct(experiment1)
+inst1_df %>% distinct(course.fullid, experiment1, project1)
+```
+Some of the 2016 data have `NA` instead of `CONTROL` for `experiment1`, and some 
+of the 2017 data have `NA` instead of `EXPERIMENTAL` for `experiment1`. I'll explore this
+after winnowing down the columns to just those I care about.
+
+Now, select the following columns: `studID`, `qtr`, `course`, `course.fullid`, `TAsect`, `exam1predict`,
+`exam2predict`, `finalexampredict`, `exam1`, `exam2`, `finalexam`, `instructorgrade`,
+`exam`, `ver`, `num_items`, `length_min`, `min_per_ques`, `item_num`, `stud_ans`, `key`, `corr`, `bloom_rating`, `complexity_rating_mean`, `complexity_rating_median`, `item_code`, `stem`, `mastered_topics_initial_kc`, `time_initial_kc`, `satmath`, `satverbal`, `high_sch_gpa`, `cci_total_1`, `cci_total_2`, `project1`, `experiment1`, `eop.id`, `sex.id`, `fgn.id`, `urm.id`, `ethnicity` 
+
+```{r}
+inst1_df2 <- inst1_df %>% 
+  select("studID", "qtr", "course", "course.fullid", "TAsect", "exam1predict",
+         'exam2predict', "finalexampredict", "exam1", "exam2", "finalexam", "instructorgrade",
+         "exam", "ver", "num_items", "length_min", "min_per_ques", "item_num", "stud_ans", 
+         "key", "corr", "bloom_rating", "complexity_rating_mean", "complexity_rating_median", 
+         "item_code", "stem", "mastered_topics_initial_kc", "time_initial_kc", "satmath", 
+         "satverbal", "high_sch_gpa", "cci_total_1", "cci_total_2", "project1", "experiment1", 
+         "eop.id", "sex.id", "fgn.id", "urm.id", "ethnicity")
+
+inst1_df2 %>% distinct(qtr, course.fullid, project1) %>% arrange(project1)
+```
+
+Finally, `filter` out just the 2016 and 2017 data:
+
+```{r}
+inst1_df3 <- inst1_df2 %>% filter((qtr == "A16") | (qtr == "A17"))
+
+inst1_df3 %>% distinct(qtr, course.fullid, project1) %>% arrange(project1)
+```
+
+
+```{r}
+#inst1_df2 %>% filter(is.na(experiment1))
+na_exp1 <- inst1_df3 %>% filter(is.na(experiment1)) %>% distinct(studID) 
+na_proj1 <- inst1_df3 %>% filter(is.na(project1)) %>% distinct(studID) 
+
+na_exp1 == na_proj1
+```
+
+The same students that have `NA` for `experiment1` also have `NA` for `project1`.
+
+```{r}
+inst1_df3 %>% select(studID, course.fullid, satmath) %>% 
+  filter(is.na(satmath)) %>% 
+  distinct(studID) %>% 
+  tally()
+```
+There are 95 students who have `NA` for `satamth`. 
+
+I will also have to track down the two-stage quiz data and combine it with the `inst1_df3`
+data.
+
+Save `inst1_df3` to the analysis-data folder:
+
+```{r}
+write_rds(inst1_df3, paste0(analysis_data_dir, "inst1_df3.rds"))
+```
+
+### Explore the two-stage quiz datasets created in Project Convince
+
+From the Project Convince exploration in 2019, there were two master data files created:
+
+* MASTER-convince-1-10-2019 (DO NOT TOUCH).rds
+* MASTER-convince-5-16-19 (DO NOT TOUCH).rds
+
+I found some scripts in the `ChEdR Project Convince` share drive that were used to 
+create at least the Jan 10 master file. I put copies of them in a subfolder of `command-files`.
+`They were written `Filter.R` and `First-response.R` were written by Michael Mack, 
+and `correct.R` was written by Abbie Pickering, based on `First-response.R`. I have not
+dug too much into the code in these scripts yet, but `Filter.R` definitely creates the Jan 10
+master data set (csv and rds versions), and `First-response.R` conducts some regression
+analyses on the two-stage data. (This file appears to have been created in Dec 2018, 
+but I remember Michael telling me about the disappointing lack of a signal in the 
+two-stage analysis long before then. I don't (currently) know where that analysis is.
+The one here in `First-response.R` must be his first noodlings on Project Convince
+before we brought Abbie and Sam Gunnerson on board.)
+
+There is no reference to the creation of the May 16 master data set in any of these 
+scripts, though it must have been created in R since it is an rds file. 
+
+ANYWAY. Let's take a look at these two data sets to see what the difference is.
+
+```{r}
+head(convince_0110)
+head(convince_0516)
+```
+Differences between the 01-10 and 05-16 master data sets:
+
+* These dfs have the same number of rows (82,910), but the 0516 df has one more column 
+(444 vs. 443). 
+* The extra column in 0516 is the very first one, simply named `X`, containing integers.
+Generally the integers are increasing from top to bottom and are the same as the row numbers,
+except occasionally there is a very different number...see row 5 in 0516, where `X = 5733`.
+But, row 5733 in 0110 has the same data as row 5 in 0516, except for the `X` column, and
+trivial differences in the date formatin the `final_kc_start_date` and `final_kc_end_date`
+columns. (Check out the following code chunk for a brute force comparison of these rows.)
+* There are also some cases in the 0110 dataset in which the `group.id` has an underscore,
+and these are removed in the 0516 dataset.
+
+```{r}
+jan10 <- convince_0110 %>% slice(5733)
+may16 <- convince_0516 %>% slice(5)
+
+may16 <- may16 %>% select(-X)
+
+combo <- bind_rows(jan10, may16)
+
+```
+
+I think the `X` column is related to some kind of error checking that Sam Gunnerson
+did, but in the code she [uploaded to Github](https://github.com/cfcraig/project-convince),
+I can't find a reference to creating the 0516 file anywhere, although it is the one she 
+opens in [this script](https://github.com/cfcraig/project-convince/blob/master/Sam's%20Scripts/useful/1_condense_build.R)
+(see line 47). 
+
+It's also not clear why certain rows were reordered, in ways that 
+don't make sense. Row 5 in 0516 contains data for a completely different student from 
+a completely different sewction 
+than in rows 1-4 and row 6 (and beyond). There seem to be other rows like it. Further,
+since the data in these two rows is identical, it doesn't appear that there were any 
+corrections made when 0110 was converted to 0516. 
+
+(_I need to dig into this mystery further...consult the Project Convince meeting notes..._)
+
+FOR NOW: I will push forward with the 0516 dataset. 
+
+### Extract relevant data from the 05-16 master data set
+
+```{r}
+convince_0516
+```
+Now, select the following columns from 0516 dataset: `studentnum`, `course.fullid`, `group.id`,
+`questionnum`, `quiznum`, `all.response`, `first.response`, `responsenum`, `ind.response`,
+`quizversion`, `key`, `project1`
+
+```{r}
+two_stage <- convince_0516 %>% 
+  select("studentnum", "course.fullid", "group.id", "questionnum", "quiznum", 
+         "all.response", "first.response", "responsenum", "ind.response", "quizversion", 
+         "key", "project1")
+
+two_stage %>% distinct(course.fullid, project1) %>% arrange(project1)
+two_stage %>% distinct(course.fullid, project1)
+two_stage %>% distinct(course.fullid) 
+```
+
+### Combine the data sets 
+
+Since two-stage quiz data are only in 2017_4, and there may be students who took 142 
+in both 2016 and 2017, I will create a 2017_4-only df from `inst1_df3` and then 
+join it to the `two-stage` df by student id. Then, I'll use `bind_rows` to combine the 
+2017_4 data with 2016_4.
+
+```{r}
+# Both dfs have a `key` variable, so update names to make them more specific
+inst1_df3 <- inst1_df3 %>% rename(exam_key = key)
+two_stage <- two_stage %>% rename(quiz_key = key)
+```
+
+
+#### First, create year-specific versions of the `inst1_df3` data
+
+Filter out the 2017_4 data.
+
+```{r}
+only_2017_4 <- 
+  inst1_df3 %>% filter(str_detect(course.fullid, "2017_4"))
+
+only_2017_4 %>% distinct(course.fullid)
+```
+
+Filter out everything else.
+
+```{r}
+not_2017_4 <- 
+  inst1_df3 %>% filter(!str_detect(course.fullid, "2017_4"))
+
+not_2017_4
+
+not_2017_4 %>% distinct(course.fullid)
+```
+
+#### Next, `left_join` the `only_2017_4` and `two_stage` dfs
+
+```{r}
+# Change `studentnum` in `two_stage` from integer to character
+two_stage$studentnum <- as.character(two_stage$studentnum)
+
+# Remove `project1` and `course.fullid` columns from `two_stage` since they are 
+# redundant with `only_2017_4`
+two_stage <- two_stage %>% select(!project1)
+two_stage <- two_stage %>% select(!course.fullid)
+
+joined_2017_4 <- 
+  left_join(only_2017_4, two_stage, by = c("studID" = "studentnum"))
+```
+
+#### Finally, `bind_row`s between `not_2017_4` and `joined_2017_4`
+
+```{r}
+master_two_stage <- 
+  bind_rows(joined_2017_4, not_2017_4)
+```
+
+
+#### Deidentify the data for Ganling and Jackson
+
+Create a codebook of student id numbers and two-stage quiz analysis id numbers.
+
+```{r} 
+# Extract `studID` from `master_two_stage`
+code_book_2s <- master_two_stage %>% distinct(studID) 
+
+# Randomize the order of the student numbers
+code_book_2s <- code_book_2s %>% sample_frac()
+
+# Add new column to `code_book_2s` for the two-stage id
+code_book_2s <- code_book_2s %>% mutate(two_stage_id = NA)
+
+# Create two-stage id values
+for (i in 1:nrow(code_book_2s)) {
+  code_book_2s$two_stage_id[[i]] <- paste0("chem142_2s_", i) 
+}
+
+tail(code_book_2s)
+
+```
+
+Apply code book to `master_two_stage`.
+
+```{r}
+# Join `master_two_stage` and `code_book_2s` by `studID`
+master_two_stage <- master_two_stage %>% left_join(code_book_2s, by = "studID") 
+
+# Move `two_stage_id` to the first column 
+master_two_stage <- master_two_stage %>% relocate(two_stage_id)
+
+# Remove `studID` from `master_two_stage` and save as new df
+master_2s_deidentified <- master_two_stage %>% select(-studID)
+
+```
+
+Save to disk!
+
+```{r}
+write_rds(master_two_stage, paste0(analysis_data_dir, "master_two_stage.rds"))
+write_csv(master_two_stage, paste0(analysis_data_dir, "master_two_stage.csv"))
+write_rds(master_2s_deidentified, paste0(analysis_data_dir, "master_2s_deidentified.rds"))
+write_csv(master_2s_deidentified, paste0(analysis_data_dir, "master_2s_deidentified.csv"))
+```
+
