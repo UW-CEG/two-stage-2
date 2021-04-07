@@ -7,13 +7,13 @@
 1. **The date on which the author first downloaded, or obtained in some other way, the original data files.** _NEED TO ADD THIS_
 1. **A written explanation of how an interested reader can obtain a copy of the original data file.** _Archive location TBD_
 1. **Whatever additional information an independent researcher would need to understand and use the data in the original data file.** The particular information required can vary a great deal depending on the nature of the original data file in question, and deciding what additional information to provide therefore requires thoughtful consideration and judgment.In many cases, the relevant information is similar to what is found in a codebook or users' guide for a dataset: variable names and definitions, coding schemes and units of measurement, and details of the sampling method and weight variables.In some cases, it is also necessary to include information about the file structure (e.g., the delimiters used to separate variables, or, in rectangular files without delimiters, the columns in which the variables are stored).Any other unique or idiosyncratic aspects of the data that an independent user of the data would need to understand should be explained as well.
-    - `two_stage_id` (character): Randomly generated id number for students included in the two-stage quiz analysis.
+    - `two_stage_id` (character): Randomly generated id number for students included in the two-stage quiz analysis. Format: "chem\_142\_2s\_\<RANDOM NUMBER\>"
     - `qtr` (character): Academic quarter. Values: 
         - "A17": autumn quarter 2017
         - "A16": autumn quarter 2016
     - `course` (character): course number and course section
         - "142AB": CHEM 142, course sections A and B. Instructor taught both A and B sections.
-    - `course.fullid` (character): Unique course identifier, of the structure "CHEM_142_\<COURSE SECT>_\<YEAR>_4"
+    - `course.fullid` (character): Unique course identifier, of the structure "CHEM\_142\_\<COURSE SECT\>\_\<YEAR\>\_4"
         - "CHEM_142_A_2017_4" 
         - "CHEM_142_B_2017_4" 
         - "CHEM_142_A_2016_4" 
