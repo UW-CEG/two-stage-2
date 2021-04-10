@@ -9,31 +9,44 @@ output:
 
 
 
-## R Markdown
+## Exploring the `master_2s_small_deidentified.rds` data set
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### _BEFORE MAKING ANY CHANGES TO THIS DOCUMENT..._
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Create a new git branch in Rstudio. Call it something like "explore-2s-dataset".
+
+### Import data 
+
+1. Import `master_2s_small_deidentified (NO NOT TOUCH).rds` using `here()` and `read_rds()`
+into a dataframe called `two_stage_df`.
 
 
-```r
-summary(cars)
-```
 
-```
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
-```
+### Relationships to Consider for the Plots and Summary Statstics
 
-## Including Plots
+1. Scores for Exam 1, 2, and Final by...
+    a. `course_fullid`
+    a. `course_fullid` and `ver`
+    a. `course_fullid` and demographic `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
+1. Scores for each of the A17 individual quiz scores (e.g. `q1_ind`) by...
+    a. `ver`
+    a. `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
+1. Scores for each of the A17 group quiz scores (e.g. `q1_grp`) by...
+    a. `ver`
+    a. `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
+1. Scores for each of the A17 total quiz scores (e.g. `q1_total`) by...
+    a. `ver`
+    a. `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
 
-You can also embed plots, for example:
+**Note**: The Exam 1, 2, and Final data is formatted in a "long" fashion in 
+`master_2s_small_deidentified (NO NOT TOUCH).rds`, whereas the A17 quiz data are 
+formatted in a "wide" fashion. This means you will need to use `filter()` on the 
+`exam` column to obtain rows relevant to each exam, and you will need to use `select()`
+to obtain columns relevant to each quiz. (Here's some info on [long vs. wide data](http://jonathansoma.com/tutorials/d3/wide-vs-long-data/).)
 
-![](explore_2s_data_files/figure-html/pressure-1.png)<!-- -->
+### Create Faceted Histograms
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Create Faceted Boxplots
+
+### Calculate Summary Statistics
+
