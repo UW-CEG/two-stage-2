@@ -1,0 +1,253 @@
+---
+# title: "En-smallening the Data Set"
+# author: "Colleen Craig"
+# date: "4/6/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(readxl)
+library(janitor)
+```
+
+# En-smallening the Data Set
+##### Colleen Craig
+##### 2021-04-09
+
+## Overview
+
+The first version of the data set that I made in `data_prep.Rmd` is waaaaay too big to be useful 
+without access to a computer cluster. Here, I will remake the data set so that it does
+not contain per-question information from the two-stage quizzes. For now, I *will* keep the
+per-question information from the exams, since we might be able to analyze that in a 
+meaningful way.
+
+## Plan of attack:
+
+### Exam, demographics, and prior academic attainment data
+
+I can start with `inst1_df3.rds`, which I created in `data_prep.Rmd`. This file contains
+the following variables:
+
+```
+"studID", "qtr", "course", "course.fullid", "TAsect", "exam1predict",
+'exam2predict', "finalexampredict", "exam1", "exam2", "finalexam", "instructorgrade",
+"exam", "ver", "num_items", "length_min", "min_per_ques", "item_num", "stud_ans", 
+"key", "corr", "bloom_rating", "complexity_rating_mean", "complexity_rating_median", 
+"item_code", "stem", "mastered_topics_initial_kc", "time_initial_kc", "satmath", 
+"satverbal", "high_sch_gpa", "cci_total_1", "cci_total_2", "project1", "experiment1", 
+"eop.id", "sex.id", "fgn.id", "urm.id", "ethnicity"
+```
+
+### Two-stage quiz data
+
+Here, I just want the individual and group scores for each quiz. I will grab the grade 
+spreadsheets from Fall 2017 and extract from there. **Should I also extract the exam scores,
+and use those in place of the exam scores in `inst1_df3`?**
+
+
+## Data Import and Manipulation
+
+Set Working Directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+```
+
+Import data:
+
+```{r}
+# Load the exams, demographics, and prior academic attainment data 
+inst1_df3 <- read_rds(paste0(analysis_data_dir, "inst1_df3.rds"))
+
+# Load the gradebooks from A17 CHEM 142 A & B, which contain the two-stage quiz 
+# performance data
+chem142_A <- read_excel(paste0(original_data_dir, "CHEM_142A_AUTUMN_2017__--_CRAIG TO UPLOAD - Copy.xls"))
+chem142_A
+chem142_B <- read_excel(paste0(original_data_dir, "CHEM_142B_AUTUMN_2017_--_CRAIG TO UPLOAD.xls"))
+chem142_B
+```
+
+### Wrangle A17 Class Data
+
+For `chem142_A` and `chem142_B`, the actual column names are in row 3. I need to pull out
+that row from each df and then rename the columns with those values.
+
+```{r}
+# Get the row with the actual column names. The output will be a one-row dataframe
+A_row3_df <- chem142_A %>% filter(...2 == "Last Name")
+B_row3_df <- chem142_B %>% filter(...2 == "Last Name")
+
+# Convert the one-row dataframe to a vector of unnamed character values. NOte that 
+# specifying `[1,]` (row 1, all columns) is not strictly necessary because there is
+# only one row in these dataframes.
+A_colnames <- unname(unlist(A_row3_df[1,]))
+str(A_colnames)
+B_colnames <- unname(unlist(B_row3_df[1,]))
+str(B_colnames)
+
+# Use the base R fxn `colnames` to replace the names of all the columns at once.
+colnames(chem142_A) <- A_colnames
+colnames(chem142_B) <- B_colnames
+```
+
+Note: The original `chem142_B` dataframe has two extra columns compared to the original 
+`chem142_A` dataframe, because the lab report scores in A17 142 B had to be normed to reduce
+grading discrepancies among TAs. This did not have to be done in A17 142 A. The extra columns
+in `chem142_B` are "Lab Rpts, Raw" and "Lab Rpts, Normed".
+
+
+Remove the rows that don't contain student data.
+
+```{r}
+# Remove rows that contain NAs
+chem142_A <- chem142_A %>% filter(!is.na(`Last Name`))
+chem142_A %>% tail()
+chem142_B <- chem142_B %>% filter(!is.na(`Last Name`))
+chem142_B %>% tail()
+
+# Remove the new first row, which contains just the column names
+chem142_A <- chem142_A %>% filter(Username != "Username")
+chem142_B <- chem142_B %>% filter(Username != "Username")
+
+```
+
+
+Now, select just the columns of interest:
+
+```{r}
+chem142_A <- chem142_A %>% select(`Student Number`, `Section/Group`, matches("Q\\d"),
+                     "Ex 1 Version", "Ex 1 MC",
+                     "Ex 2 Version", "Ex 2 MC Score",
+                     `Final Version`, `Final MC Score`)
+
+chem142_B <- chem142_B %>% select(`Student Number`, `Section/Group`, matches("Q\\d"),
+                     "Ex 1 Version", "Ex 1 MC",
+                     "Ex 2 Version", "Ex 2 MC Score",
+                     `Final Version`, `Final MC Score`)
+
+```
+
+### Change Variable Names and Types 
+
+Use the `clean_names` fxn from the `janitor` package to convert all column names to 
+"snake case", in which all words are lowercase and "_" is used as a separator. 
+
+```{r}
+chem142_A <- chem142_A %>% clean_names()
+chem142_B <- chem142_B %>% clean_names()
+inst1_df3 <- inst1_df3 %>% clean_names()
+```
+
+This introduced an error in the "TA section" column name in `inst1_df3`, so fix that:
+
+```{r}
+inst1_df3 <- inst1_df3 %>% rename(ta_sect = t_asect)
+```
+
+Convert obvious numbers to numeric type
+
+```{r}
+chem142_A <- chem142_A %>% type_convert()
+chem142_B <- chem142_B %>% type_convert()
+inst1_df3 <- inst1_df3 %>% type_convert()
+```
+
+Student ID values in `inst1_df3` remained character type after conversion, but those in
+the `chem142_*` dfs were converted to numeric. Not sure why that is. Let's convert
+the student IDs back to character in these dataframes, and make them all 7-digits long
+as well. I'll have to do some hardcoding cuz I don't have time to figure out how to 
+make it generalizable!
+
+```{r}
+# Convert student id values to character type
+chem142_A$student_number <- chem142_A$student_number %>% as.character()
+chem142_B$student_number <- chem142_B$student_number %>% as.character()
+
+# Add leading zeroes to student ids that are less than seven characters. This
+# gives them the correct year reference.
+chem142_A$student_number[[1]] <- paste0("0", chem142_A$student_number[[1]])
+chem142_A$student_number[[2]] <- paste0("0", chem142_A$student_number[[2]])
+
+chem142_B$student_number[[1]] <- paste0("0", chem142_B$student_number[[1]])
+chem142_B$student_number[[2]] <- paste0("0", chem142_B$student_number[[2]])
+```
+
+For now, I will extract just the quiz data from the `chem142_*` dfs and merge it with 
+the `inst1_df3` df. Later I'll create my own quiz + exam dfs from from original gradebooks.
+
+```{r}
+chem142_A_quizzes <- chem142_A %>% select(student_number, matches("^q\\d"))
+chem142_B_quizzes <- chem142_B %>% select(student_number, matches("^q\\d"))
+```
+
+Now row bind the quizzes-only dfs:
+
+```{r}
+chem142_quizzes <- bind_rows(chem142_A_quizzes, chem142_B_quizzes)
+```
+
+Join `inst1_df3` and `chem142_quizzes`
+
+```{r}
+master_2s_small <- left_join(inst1_df3, chem142_quizzes, by = c("stud_id" = "student_number"))
+```
+
+Write to disk!
+
+```{r}
+write_csv(master_2s_small, paste0(analysis_data_dir, "master_2s_small.csv"))
+write_rds(master_2s_small, paste0(analysis_data_dir, "master_2s_small.rds"))
+```
+
+#### Deidentify the data for Ganling and Jackson
+
+Create a codebook of student id numbers and two-stage quiz analysis id numbers.
+
+```{r} 
+# Extract `studID` from `master_2s_small`
+code_book_2s <- master_2s_small %>% distinct(stud_id) 
+
+# Randomize the order of the student numbers
+code_book_2s <- code_book_2s %>% sample_frac()
+
+# Add new column to `code_book_2s` for the two-stage id
+code_book_2s <- code_book_2s %>% mutate(two_stage_id = NA)
+
+# Create two-stage id values
+for (i in 1:nrow(code_book_2s)) {
+  code_book_2s$two_stage_id[[i]] <- paste0("chem142_2s_", i) 
+}
+
+tail(code_book_2s)
+
+```
+
+Apply code book to `master_two_stage`.
+
+```{r}
+# Join `master_2s_small` and `code_book_2s` by `stud_id`
+master_2s_small <- master_2s_small %>% left_join(code_book_2s, by = "stud_id") 
+
+# Move `two_stage_id` to the first column 
+master_2s_small <- master_2s_small %>% relocate(two_stage_id)
+
+# Remove `stud_id` from `master_2s_small` and save as new df
+master_2s_small_deidentified <- master_2s_small %>% select(-stud_id)
+
+```
+
+Write to disk!
+
+```{r}
+write_csv(master_2s_small_deidentified, paste0(analysis_data_dir, "master_2s_small_deidentified.csv"))
+write_rds(master_2s_small_deidentified, paste0(analysis_data_dir, "master_2s_small_deidentified.rds"))
+```
