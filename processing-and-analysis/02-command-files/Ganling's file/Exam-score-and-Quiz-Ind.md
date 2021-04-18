@@ -12,11 +12,7 @@ library(here)
 ```
 
 ```
-## Warning: package 'here' was built under R version 4.0.4
-```
-
-```
-## here() starts at G:/Shared drives/CEG R Coding Practice/Ganling/two-stage-2
+## here() starts at G:/Shared drives/CEG Two-Stage Exams Analysis (4 REAL)/two-stage-2
 ```
 
 ```r
@@ -24,25 +20,43 @@ library(tidyverse)
 ```
 
 ```
-## -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
+## -- Attaching packages ------------------------------------------------------------------ tidyverse 1.3.0 --
 ```
 
 ```
 ## v ggplot2 3.3.2     v purrr   0.3.4
-## v tibble  3.0.4     v dplyr   1.0.2
-## v tidyr   1.1.2     v stringr 1.4.0
-## v readr   1.4.0     v forcats 0.5.0
+## v tibble  3.0.3     v dplyr   1.0.1
+## v tidyr   1.1.1     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.5.0
 ```
 
 ```
-## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## Warning: package 'ggplot2' was built under R version 4.0.3
+```
+
+```
+## -- Conflicts --------------------------------------------------------------------- tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()
 ```
 
 ```r
 library(skimr)
+```
+
+```
+## Warning: package 'skimr' was built under R version 4.0.3
+```
+
+```r
 library(moderndive)
+```
+
+```
+## Warning: package 'moderndive' was built under R version 4.0.3
+```
+
+```r
 library(ggplot2)
 library(dplyr)
 library(readr)
