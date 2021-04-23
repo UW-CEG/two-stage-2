@@ -22,15 +22,13 @@ proj_dir = here()
 importable_data_dir = here("processing-and-analysis", "importable-data")
 analysis_data_dir = here("processing-and-analysis", "analysis-data")
 metadata_dir = here("original-data", "metadata")
-setwd("G:/Shared drives/CEG Two-Stage Exams Analysis (4 REAL)/two-stage-2/processing-and-analysis/02-command-files/2s-practice-jackson")
+original_data_dir = here("original-data", "/")
 ```
 
 ### Import dataset
 
-**Note:** There seems to be trouble with uploading the data through google file stream and the "here" package, so the data will be uploaded through my local device.
-
 ```{r}
-master = read.csv("C:/Users/jacks/Downloads/master_2s_small_deidentified (DO NOT TOUCH).csv")
+master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
