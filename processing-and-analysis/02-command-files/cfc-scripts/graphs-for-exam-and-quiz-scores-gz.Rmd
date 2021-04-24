@@ -48,9 +48,12 @@ file.copy(copy_from, copy_to)
 
 Read in data.
 ```{r}
-`master_2s_small_deidentified (DO NOT TOUCH)` <- readRDS("G:/Shared drives/CEG R Coding Practice/Ganling/two-stage-2/processing-and-analysis/01-importable-data/dataset/master_2s_small_deidentified (DO NOT TOUCH).rds")
+# `master_2s_small_deidentified (DO NOT TOUCH)` <- readRDS("G:/Shared drives/CEG R Coding Practice/Ganling/two-stage-2/processing-and-analysis/01-importable-data/dataset/master_2s_small_deidentified (DO NOT TOUCH).rds")
 
-data_2s <- `master_2s_small_deidentified (DO NOT TOUCH)`
+# data_2s <- `master_2s_small_deidentified (DO NOT TOUCH)`
+
+# CFC: IMport data set from `importable_data_dir`
+data_2s <- readRDS(paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
 ```
 
 ### Before starting to make historgrams and boxplots, I would like to remove all the duplicating rows and make a new data frame
