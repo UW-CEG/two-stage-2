@@ -25,6 +25,19 @@ metadata_dir = here("original-data", "metadata", "/")
 original_data_dir = here("original-data", "/")
 ```
 
+### Copy rds file from original data directory
+
+```{r}
+#file.copy(paste0(original_data_dir, "master_2s_small_deidenitified.rds"),
+#          paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
+
+copy_from <- paste0(original_data_dir, "master_2s_small_deidenitified.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deidenitified.rds")
+
+file.copy(copy_from, copy_to)
+```
+
+
 ### Import dataset
 
 ```{r}
