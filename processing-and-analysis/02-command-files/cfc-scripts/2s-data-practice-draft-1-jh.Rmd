@@ -31,12 +31,16 @@ original_data_dir = here("original-data", "/")
 #file.copy(paste0(original_data_dir, "master_2s_small_deidenitified.rds"),
 #          paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
 
+# CFC: Copy rds file from the `original_data_dir` to the `importable_data_dir`.
 copy_from <- paste0(original_data_dir, "master_2s_small_deidentified.rds")
 copy_to <- paste0(importable_data_dir, "master_2s_small_deidentified.rds")
 
 file.copy(copy_from, copy_to)
 
-file.exists(copy_from)
+# CFC: This line was used to determine if the original data file could be
+# detected, since I kept running into errors. I finally fixed the
+# issue...it was a spelling error in the file name.
+# file.exists(copy_from)
 ```
 
 
@@ -45,6 +49,7 @@ file.exists(copy_from)
 ```{r}
 # master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
 
+# CFC: IMport data set from `importable_data_dir`
 master <- readRDS(paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
 
 ```
