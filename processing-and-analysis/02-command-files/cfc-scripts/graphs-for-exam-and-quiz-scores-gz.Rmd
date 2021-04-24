@@ -20,8 +20,9 @@ library(readr)
 #read the files using here package
 ```{r}
 proj_dir <- here()
-importable_data_dir <- here("processing-and-analysis", "importable-data", "/")
-analysis_data_dir <- here("processing-and-analysis", "analysis-data", "/")
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
 metadata_dir <- here("original-data", "metadata", "/")
 
 `master_2s_small_deidentified (DO NOT TOUCH)` <- readRDS("G:/Shared drives/CEG R Coding Practice/Ganling/two-stage-2/processing-and-analysis/01-importable-data/dataset/master_2s_small_deidentified (DO NOT TOUCH).rds")
