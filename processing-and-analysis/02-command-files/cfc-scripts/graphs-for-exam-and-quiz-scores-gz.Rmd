@@ -1,0 +1,238 @@
+---
+title: "data_2s_summary"
+author: "Ganling"
+date: "4/19/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+#Load the packages
+```{r}
+library(here)
+library(tidyverse)
+library(skimr)
+library(moderndive)
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
+#read the files using here package
+```{r}
+proj_dir <- here()
+importable_data_dir <- here("processing-and-analysis", "importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+
+`master_2s_small_deidentified (DO NOT TOUCH)` <- readRDS("G:/Shared drives/CEG R Coding Practice/Ganling/two-stage-2/processing-and-analysis/01-importable-data/dataset/master_2s_small_deidentified (DO NOT TOUCH).rds")
+
+data_2s <- `master_2s_small_deidentified (DO NOT TOUCH)`
+```
+###Before starting to make historgrams and boxplots, I would like to remove all the duplicating rows and make a new data frame
+```{r}
+data_2s_extras_removed = subset(data_2s, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+
+data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
+View(data_2s_unique)
+
+data_2s_exam_score <- data_2s_unique %>% select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id)
+
+data_2s_exam_score_true <- na.omit(data_2s_exam_score)
+```
+#Now I would like to graph the histogram and boxplots for exam scores and course_id
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID")) + facet_wrap(~ course_fullid, nrow = 1 )
+```
+# next, we want to look at exam score, course id and version 
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= course_fullid, y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and version")) + facet_wrap(~ course_fullid + ver, nrow = 3 )
+```
+#course id and eop status
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and eop")) + facet_wrap(~ course_fullid + eop_id, nrow = 3 )
+```
+#course id and sex id
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and sex")) + facet_wrap(~ course_fullid + sex_id, nrow = 3 )
+```
+#course id and fgn status
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and fgn")) + facet_wrap(~ course_fullid + fgn_id, nrow = 3 )
+```
+#urm status and course id
+```{r}
+#histogram for coruse_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam1)) + geom_histogram(color = "white") + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= exam2)) + geom_histogram(color = "white") + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(x= finalexam)) + geom_histogram(color = "white") + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+
+#boxplot for course_id
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam1)) + geom_boxplot() + labs(x = "Exam 1 score", y= "number of students", title = ("Exam 1 score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= exam2)) + geom_boxplot() + labs(x = "Exam 2 score", y= "number of students", title = ("Exam 2 score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+
+ggplot(data = data_2s_exam_score_true, mapping = aes(y= finalexam)) + geom_boxplot() + labs(x = "Final exam score", y= "number of students", title = ("Final exam score Distributions by Course ID and urm")) + facet_wrap(~ course_fullid + urm_id, nrow = 3 )
+```
+#Now I want to look at A17 individual quiz score by ver, eop_id, sex_id, fgn_id and urm_id
+```{r}
+#filter out the right data set
+data_2s_exam_score_true_A17 <- data_2s_unique %>% filter(course_fullid %in% c("CHEM_142_A_2017_4")) %>% select(q1_ind, q1_grp, q1_total, course_fullid, ver, eop_id, sex_id, fgn_id, urm_id)
+
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_ind)) + geom_histogram(color = "white") + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_ind)) + geom_histogram(color = "white") + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_ind)) + geom_histogram(color = "white") + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_ind)) + geom_histogram(color = "white") + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_ind)) + geom_histogram(color = "white") + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+
+##boxplots
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_ind)) + geom_boxplot() + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_ind)) + geom_boxplot() + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_ind)) + geom_boxplot() + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_ind)) + geom_boxplot() + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_ind)) + geom_boxplot() + labs(x = "Quiz 1 Individual score", y= "number of students", title = ("Quiz 1 individual score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+
+```
+
+
+#Now I want to look at A17 individual quiz score by ver, eop_id, sex_id, fgn_id and urm_id
+```{r}
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_grp)) + geom_histogram(color = "white") + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_grp)) + geom_histogram(color = "white") + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_grp)) + geom_histogram(color = "white") + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_grp)) + geom_histogram(color = "white") + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_grp)) + geom_histogram(color = "white") + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+
+##boxplots
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_grp)) + geom_boxplot() + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_grp)) + geom_boxplot() + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_grp)) + geom_boxplot() + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_grp)) + geom_boxplot() + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_grp)) + geom_boxplot() + labs(x = "Quiz 1 group score", y= "number of students", title = ("Quiz 1 group score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+```
+```{r}
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_total)) + geom_histogram(color = "white") + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_total)) + geom_histogram(color = "white") + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_total)) + geom_histogram(color = "white") + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_total)) + geom_histogram(color = "white") + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(x= q1_total)) + geom_histogram(color = "white") + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+
+##boxplots
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_total)) + geom_boxplot() + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by version during A17")) + facet_wrap(~ ver, nrow = 3 )
+
+#by eop
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_total)) + geom_boxplot() + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by eop during A17")) + facet_wrap(~ eop_id, nrow = 3 )
+
+#by sex
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_total)) + geom_boxplot() + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by sex during A17")) + facet_wrap(~ sex_id, nrow = 3 )
+
+#by fgn
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_total)) + geom_boxplot() + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by first generation status during A17")) + facet_wrap(~ fgn_id, nrow = 3 )
+
+#by urm
+ggplot(data = data_2s_exam_score_true_A17, mapping = aes(y= q1_total)) + geom_boxplot() + labs(x = "Quiz 1 total score", y= "number of students", title = ("Quiz 1 total score Distributions by representation during A17")) + facet_wrap(~ urm_id, nrow = 3 )
+```
+#Now I am done with the graphs, I will come back and make the box plots look prettier
+
+
