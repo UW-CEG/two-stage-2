@@ -28,7 +28,10 @@ original_data_dir = here("original-data", "/")
 ### Import dataset
 
 ```{r}
-master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+# master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
+
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
