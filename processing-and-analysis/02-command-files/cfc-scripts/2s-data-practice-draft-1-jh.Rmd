@@ -206,7 +206,7 @@ ggplot(master_unique, aes(x = finalexam)) +
   facet_wrap(~ course_fullid + urm_id, nrow = 3)
 ```
 
-### Faceted Histograms of Scores for Exam 1, 2, and Final by `course_fullid` and demographic `eop_id`, `sex_id`, `fgn_id`, `urm_id`:
+### Faceted Boxplots of Scores for Exam 1, 2, and Final by `course_fullid` and demographic `eop_id`, `sex_id`, `fgn_id`, `urm_id`:
 
 ```{r}
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
