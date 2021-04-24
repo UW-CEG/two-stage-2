@@ -14,6 +14,9 @@ output:
 
 ```r
 proj_dir = here()
+
+# CFC: Add backslash to the strings, and add the numbers to the `importable-data` 
+# and `analysis-data` directory names.
 importable_data_dir = here("processing-and-analysis", "01-importable-data", "/")
 analysis_data_dir = here("processing-and-analysis", "03-analysis-data", "/")
 metadata_dir = here("original-data", "metadata", "/")
@@ -35,7 +38,7 @@ file.copy(copy_from, copy_to)
 ```
 
 ```
-## [1] TRUE
+## [1] FALSE
 ```
 
 ```r
