@@ -7,6 +7,8 @@ output:
     keep_md: yes
 ---
 
+ADD MINOR CHANGE TO GZ'S ORIGINAL SCRIPT
+
 #Load the packages
 ```{r}
 library(here)
