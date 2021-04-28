@@ -7,8 +7,6 @@ output:
     keep_md: yes
 ---
 
-MINOR CHANGE TO JH'S SCRIPT
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(here)
