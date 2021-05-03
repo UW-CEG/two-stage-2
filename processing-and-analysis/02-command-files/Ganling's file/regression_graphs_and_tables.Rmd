@@ -209,8 +209,48 @@ ggplot(exam1_regression_satm, aes(x = satmath, y = exam1, color = course_fullid)
   geom_point() +
   labs(x = "SAT Math Score", y = "Exam 1 score", color = "Class") +
   geom_parallel_slopes(se = FALSE)
-```
 
+#now lets do it for exam 2 and sat math score
+exam2_regression_satm <- data_2s_leveled %>% 
+  select(course_fullid, exam2, satmath)
+ggplot(exam2_regression_satm, aes(x = satmath, y = exam2, color = course_fullid)) +
+  geom_point() +
+  labs(x = "SAT Math Score", y = "Exam 2 score", color = "Class") +
+  geom_parallel_slopes(se = FALSE)
+
+#final exam and sat math score
+finalexam_regression_satm <- data_2s_leveled %>% 
+  select(course_fullid, finalexam, satmath)
+ggplot(finalexam_regression_satm, aes(x = satmath, y = finalexam, color = course_fullid)) +
+  geom_point() +
+  labs(x = "SAT Math Score", y = "Final Exam score", color = "Class") +
+  geom_parallel_slopes(se = FALSE)
+```
+```{r}
+#SAT verbal scores and exam 1 score 
+exam1_regression_satv <- data_2s_leveled %>% 
+  select(course_fullid, exam1, satverbal)
+ggplot(exam1_regression_satv, aes(x = satverbal, y = exam1, color = course_fullid)) +
+  geom_point() +
+  labs(x = "SAT Verbal Score", y = "Exam 1 score", color = "Class") +
+  geom_parallel_slopes(se = FALSE)
+
+#SAT verbal scores and exam 1 score 
+exam2_regression_satv <- data_2s_leveled %>% 
+  select(course_fullid, exam2, satverbal)
+ggplot(exam2_regression_satv, aes(x = satverbal, y = exam2, color = course_fullid)) +
+  geom_point() +
+  labs(x = "SAT Verbal Score", y = "Exam 2 score", color = "Class") +
+  geom_parallel_slopes(se = FALSE)
+
+#SAT verbal scores and exam 1 score 
+finalexam_regression_satv <- data_2s_leveled %>% 
+  select(course_fullid, finalexam, satverbal)
+ggplot(finalexam_regression_satv, aes(x = satverbal, y = finalexam, color = course_fullid)) +
+  geom_point() +
+  labs(x = "SAT Verbal Score", y = "Final Exam score", color = "Class") +
+  geom_parallel_slopes(se = FALSE)
+```
 
 
 
