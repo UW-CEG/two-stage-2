@@ -1,0 +1,19 @@
+---
+# title: "Regression Template"
+# author: "Colleen Craig"
+# date: "5/3/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+# Regression Template
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(skimr)
+library(moderndive)
+```
+
