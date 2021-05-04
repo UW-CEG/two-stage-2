@@ -11,15 +11,16 @@ output:
   html_document:
     keep_md: yes
 ---
+
 #Load the libraries
 ```{r}
 library(here)
 library(tidyverse)
 library(skimr)
 library(moderndive)
-library(ggplot2)
-library(dplyr)
-library(readr)
+# library(ggplot2)
+# library(dplyr)
+# library(readr)
 ```
 #Load the data using the directory 
 ```{r}
@@ -52,8 +53,8 @@ Read in data.
 
 ```{r}
 #CFC: IMport data set from `importable_data_dir`
-data_2s <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2/processing-and-analysis/01-importable-data/master_2s_small_deidentified.rds")
-#data_2s <- readRDS(paste0(importable_data_dir, "master_2s_small_deidenitified.rds")) (still does not work for some reason)
+#data_2s <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2/processing-and-analysis/01-importable-data/master_2s_small_deidentified.rds")
+data_2s <- readRDS(paste0(importable_data_dir, "master_2s_small_deidentified.rds")) 
 ```
 
 #Before starting to make historgrams and boxplots, I would like to remove all the duplicating rows and make a new data frame
