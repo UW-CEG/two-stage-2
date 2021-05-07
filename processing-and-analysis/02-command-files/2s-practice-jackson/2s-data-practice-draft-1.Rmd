@@ -162,8 +162,18 @@ master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)]
 master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)] %>% sort()
 ```
 
-Considering the first two duplicates given above as examples:
+#### Considering the first two duplicates given above as examples:
 
+Student chem142_2s_1003 took the course in both A16 and A17, whereas chem142_2s_1060
+has a duplicate record within the A17 data set, due to a missing `ta_sect` value. 
+
+```{r}
+master_unique_3 %>% filter(two_stage_id == "chem142_2s_1003")
+master_unique_3 %>% filter(two_stage_id == "chem142_2s_1060")
+```
+
+There must be some automated way to pull out all of the duplicates. Maybe I could play 
+around with mapping?
 
 
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
