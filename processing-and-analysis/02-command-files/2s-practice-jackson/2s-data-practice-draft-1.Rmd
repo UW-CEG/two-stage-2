@@ -26,10 +26,21 @@ analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
 
 ### Copy data set from `original-data` to `01-importable-data`
 
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deidentified.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deidentified.rds")
+
+# CFC: If the file already exists in the target directory, the file will not be 
+# overwritten and this command will return `FALSE`.
+file.copy(copy_from, copy_to)
+```
+
+
 ### Import dataset
 
 ```{r}
-master <- read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+# master <- read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+master <- readRDS(paste0(original_data_dir, "master_2s_small_deidentified.rds"))
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
