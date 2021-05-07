@@ -78,12 +78,12 @@ master_unique <- unique(master_extras_removed, incomparables = FALSE)
 How many student records are in each course?
 
 ```{r}
-master_unique %>% 
-  group_by(course_fullid) %>% 
-  skim(exam1)
-
-# This is not useful as written
-summary(master_unique)
+# master_unique %>% 
+#   group_by(course_fullid) %>% 
+#   skim(exam1)
+# 
+# # This is not useful as written
+# summary(master_unique)
 
 master_unique <- master_unique %>% mutate(course_fullid = factor(course_fullid))
 
@@ -118,10 +118,56 @@ So, the presence of the `exam` column explains three of the repeated `two_stage_
 values. The fourth is due to some mysterious NAs in the `num_items`, `length_min`, etc.,
 columns for `exam == FinalExam`. There appears to be two final exam rows per student, 
 one with data in these columns and one with NAs. This is surely some artifact of the 
-Frankenstein approach I've taken to preparing this dataset. 
+Frankenstein approach I've taken to preparing this dataset. **YET MORE REASON TO RECREATE
+MYSELF FROM SCRATCH!!!** 
+
+#### Create a new version of the unique records df
 
 ```{r}
+master_extras_removed_3 <- master %>% 
+   select(!c(item_num, stud_ans, exam_key, corr, bloom_rating, 
+             complexity_rating_mean, complexity_rating_median, 
+             item_code, stem, exam, ver, num_items, length_min, min_per_ques))
+
+# Create a df from the remaining unique records
+master_unique_3 <- unique(master_extras_removed_3, incomparables = FALSE)
+```
+
+#### Check number of student records again
+
+```{r}
+master_unique_3 %>% 
+  group_by(course_fullid) %>% 
+  tally()
+
+master_unique_3 %>% 
+  group_by(course_fullid) %>% 
+  select(two_stage_id) %>% 
+  unique() %>% 
+  tally()
+
+master_unique_3 %>% 
+  select(two_stage_id) %>% 
+ # unique() %>% 
+  tally()
+```
+
+Ok...situation is better, there are still some duplicates.
+
+```{r}
+master_unique_3 %>% group_by(course_fullid) %>% select(two_stage_id) %>% duplicated()
+
+master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)]
+
+master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)] %>% sort()
+```
+
+Considering the first two duplicates given above as examples:
+
+
+
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
+
 
 ```{r}
 ggplot(master_unique, aes(x = exam1)) +
