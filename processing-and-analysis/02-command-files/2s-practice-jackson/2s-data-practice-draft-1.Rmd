@@ -295,7 +295,7 @@ ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
 ```{r}
 fall_2017 <- master %>% 
   filter(course_fullid == "CHEM_142_A_2017_4" | course_fullid == "CHEM_142_B_2017_4")
-fall_2017 = na.omit(fall_2017)
+fall_2017 <- na.omit(fall_2017)
 ```
 
 ### Faceted histograms of `q1_ind` by `ver`:
