@@ -75,6 +75,42 @@ all_equal(master_extras_removed, master_extras_removed_2)
 master_unique <- unique(master_extras_removed, incomparables = FALSE)
 ```
 
+How many student records are in each course?
+
+```{r}
+master_unique %>% 
+  group_by(course_fullid) %>% 
+  skim(exam1)
+
+# This is not useful as written
+summary(master_unique)
+
+master_unique <- master_unique %>% mutate(course_fullid = factor(course_fullid))
+
+master_unique %>% 
+  group_by(course_fullid) %>% 
+  tally()
+
+```
+
+These numbers seem way too high for these courses. What's going on?
+
+```{r}
+master_unique %>% 
+  group_by(course_fullid) %>% 
+  select(two_stage_id) %>% 
+  unique() %>% 
+  tally()
+```
+
+This looks much more reasonable. Let's take a look at the data set.
+
+```{r}
+
+```
+
+
+```{r}
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
 
 ```{r}
