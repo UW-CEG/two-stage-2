@@ -1,6 +1,6 @@
 ---
-# title: "Two-Stage Data Practice"
-# author: "Jackson Hughes"
+title: "Two-Stage Data Practice"
+author: "Jackson Hughes"
 date: "4/11/2021"
 output: 
   html_document:
