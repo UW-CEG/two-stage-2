@@ -48,14 +48,30 @@ master <- readRDS(paste0(original_data_dir, "master_2s_small_deidentified.rds"))
 * `course_fullid` and `ver`
 * `course_fullid` and demographic `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
 
-### Remove duplicate rows of student data:
+### Remove duplicate rows of student data: 
+
+The master df contains per-exam-question data in a "long" format (as well as the 2017
+quiz data in a "wide" format). This means that there are 72 duplicates of each student's 
+exam score (there are 72 exam question records for each student). To create meaningful
+visualizations of the exam scores, we need to remove these excess records.
 
 ```{r}
+# Anti-select those columns that are related to the question-level records.
 master_extras_removed <- subset(master, 
                                 select = -c(item_num, stud_ans, exam_key, corr, 
                                             bloom_rating, complexity_rating_mean,
                                             complexity_rating_median, item_code, stem))
 
+# An alternative method to the above 
+master_extras_removed_2 <- master %>% 
+   select(!c(item_num, stud_ans, exam_key, corr, 
+          bloom_rating, complexity_rating_mean,
+          complexity_rating_median, item_code, stem))
+
+# the dfs are identical
+all_equal(master_extras_removed, master_extras_removed_2)
+
+# Create a df from the remaining unique records
 master_unique <- unique(master_extras_removed, incomparables = FALSE)
 ```
 
