@@ -18,17 +18,17 @@ library(moderndive)
 ### Set working directories
 
 ```{r}
-proj_dir = here()
-importable_data_dir = here("processing-and-analysis", "importable-data")
-analysis_data_dir = here("processing-and-analysis", "analysis-data")
-metadata_dir = here("original-data", "metadata")
-original_data_dir = here("original-data", "/")
+proj_dir  <-  here()
+importable_data_dir <- here("processing-and-analysis", "importable-data")
+analysis_data_dir <- here("processing-and-analysis", "analysis-data")
+metadata_dir <- here("original-data", "metadata")
+original_data_dir <- here("original-data", "/")
 ```
 
 ### Import dataset
 
 ```{r}
-master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+master <- read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
@@ -39,9 +39,9 @@ master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
 ### Remove duplicate rows of student data:
 
 ```{r}
-master_extras_removed = subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
 
-master_unique = unique(master_extras_removed, incomparables = FALSE)
+master_unique <- unique(master_extras_removed, incomparables = FALSE)
 ```
 
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
@@ -254,7 +254,7 @@ ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
 ### Condense dataset to only include Autumn 2017 data:
 
 ```{r}
-fall_2017 = master %>% 
+fall_2017 <- master %>% 
   filter(course_fullid == "CHEM_142_A_2017_4" | course_fullid == "CHEM_142_B_2017_4")
 fall_2017 = na.omit(fall_2017)
 ```
@@ -454,60 +454,60 @@ ggplot(fall_2017, aes(x = urm_id, y = q1_total)) +
 
 ### Exam Scores by `course_fullid`:
 ```{r}
-fall_2016_A = filter(master_unique, course_fullid == "CHEM_142_A_2016_4")
-fall_2016_B = filter(master_unique, course_fullid == "CHEM_142_B_2016_4")
-fall_2017_A = filter(master_unique, course_fullid == "CHEM_142_A_2017_4")
-fall_2017_B = filter(master_unique, course_fullid == "CHEM_142_B_2017_4")
+fall_2016_A <- filter(master_unique, course_fullid == "CHEM_142_A_2016_4")
+fall_2016_B <- filter(master_unique, course_fullid == "CHEM_142_B_2016_4")
+fall_2017_A <- filter(master_unique, course_fullid == "CHEM_142_A_2017_4")
+fall_2017_B <- filter(master_unique, course_fullid == "CHEM_142_B_2017_4")
 
-summary_exam1_fall_2016_A = fall_2016_A %>% 
+summary_exam1_fall_2016_A <- fall_2016_A %>% 
   summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A
-summary_exam2_fall_2016_A = fall_2016_A %>% 
+summary_exam2_fall_2016_A <- fall_2016_A %>% 
   summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
 summary_exam2_fall_2016_A
-summary_final_fall_2016_A = fall_2016_A %>% 
+summary_final_fall_2016_A <- fall_2016_A %>% 
   summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
 summary_final_fall_2016_A
 
-summary_exam1_fall_2016_B = fall_2016_B %>% 
+summary_exam1_fall_2016_B <- fall_2016_B %>% 
   summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_B
-summary_exam2_fall_2016_B = fall_2016_B %>% 
+summary_exam2_fall_2016_B <- fall_2016_B %>% 
   summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
 summary_exam2_fall_2016_B
-summary_final_fall_2016_B = fall_2016_B %>% 
+summary_final_fall_2016_B <- fall_2016_B %>% 
   summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
 summary_final_fall_2016_B
 
-summary_exam1_fall_2017_A = fall_2017_A %>% 
+summary_exam1_fall_2017_A <- fall_2017_A %>% 
   summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2017_A
-summary_exam2_fall_2017_A = fall_2017_A %>% 
+summary_exam2_fall_2017_A <- fall_2017_A %>% 
   summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
 summary_exam2_fall_2017_A
-summary_final_fall_2017_A = fall_2017_A %>% 
+summary_final_fall_2017_A <- fall_2017_A %>% 
   summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
 summary_final_fall_2017_A
 
-summary_exam1_fall_2017_B = fall_2017_B %>% 
+summary_exam1_fall_2017_B <- fall_2017_B %>% 
   summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2017_B
-summary_exam2_fall_2017_B = fall_2017_B %>% 
+summary_exam2_fall_2017_B <- fall_2017_B %>% 
   summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
 summary_exam2_fall_2017_B
-summary_final_fall_2017_B = fall_2017_B %>% 
+summary_final_fall_2017_B <- fall_2017_B %>% 
   summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
 summary_final_fall_2017_B
 ```
 
 ### Exam Scores by `course_fullid` and `eop_id`:
 ```{r}
-summary_exam1_fall_2016_A_eop = fall_2016_A %>%
+summary_exam1_fall_2016_A_eop <- fall_2016_A %>%
   filter(eop_id == "EOP") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_eop
 
-summary_exam1_fall_2016_A_non_eop = fall_2016_A %>%
+summary_exam1_fall_2016_A_non_eop <- fall_2016_A %>%
   filter(eop_id == "non-EOP") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_non_eop
@@ -515,12 +515,12 @@ summary_exam1_fall_2016_A_non_eop
 
 ### Exam Scores by `course_fullid` and `sex_id`:
 ```{r}
-summary_exam1_fall_2016_A_male = fall_2016_A %>%
+summary_exam1_fall_2016_A_male <- fall_2016_A %>%
   filter(sex_id == "Male") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_male
 
-summary_exam1_fall_2016_A_female = fall_2016_A %>%
+summary_exam1_fall_2016_A_female <- fall_2016_A %>%
   filter(eop_id == "Female") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_female
@@ -528,7 +528,7 @@ summary_exam1_fall_2016_A_female
 
 ### Exam Scores by `course_fullid` and `fgn_id`:
 ```{r}
-summary_exam1_fall_2016_A_fgn = fall_2016_A %>%
+summary_exam1_fall_2016_A_fgn <- fall_2016_A %>%
   filter(fgn_id == "FGN") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_fgn
@@ -546,7 +546,7 @@ summary_exam1_fall_2016_A_urm = fall_2016_A %>%
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_urm
 
-summary_exam1_fall_2016_A_non_urm = fall_2016_A %>%
+summary_exam1_fall_2016_A_non_urm <- fall_2016_A %>%
   filter(urm_id == "non-URM") %>% 
   summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_non_urm
