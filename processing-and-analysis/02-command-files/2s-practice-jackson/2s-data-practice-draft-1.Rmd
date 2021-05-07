@@ -106,9 +106,19 @@ master_unique %>%
 This looks much more reasonable. Let's take a look at the data set.
 
 ```{r}
-
+master_unique %>% arrange(two_stage_id)
 ```
 
+There are four duplicate rows for each `two_stage_id`. This is because the df still contains
+the `exam`, `ver`, `num_items`, `length_min`, and `min_per_ques` columns, which are specific
+to the Bloom's/complexity analysis (all of the other Bloom's related columns were removed
+above). 
+
+So, the presence of the `exam` column explains three of the repeated `two_stage_id` 
+values. The fourth is due to some mysterious NAs in the `num_items`, `length_min`, etc.,
+columns for `exam == FinalExam`. There appears to be two final exam rows per student, 
+one with data in these columns and one with NAs. This is surely some artifact of the 
+Frankenstein approach I've taken to preparing this dataset. 
 
 ```{r}
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
