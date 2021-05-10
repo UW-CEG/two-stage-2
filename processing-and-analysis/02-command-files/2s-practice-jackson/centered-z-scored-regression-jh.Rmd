@@ -1,0 +1,263 @@
+---
+title: "Exploring Regression"
+author: "Jackson Hughes"
+date: "5/5/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+```
+
+# Preliminary setup and data wrangling
+
+## Data import
+
+### Set working directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+### Copy data from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import master dataset
+
+```{r}
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling
+
+### Condense dataset to only include unique rows; omit NAs
+
+```{r}
+master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+master_unique_1 <- unique(master_extras_removed, incomparables = FALSE)
+
+master_unique_2 <- master_unique_1 %>% 
+  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master_unique <- na.omit(master_unique_2)
+```
+
+# Regression
+
+## Multiple Regression with the "centered" data
+
+### 1. Regression of `final_c` on `experiment1`
+
+```{r}
+final_c_model <- lm(final_c ~ experiment1, data = master_unique)
+summary(final_c_model)
+```
+
+### 2. Regression of `final_c` on `experiment1`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, and `hsgpa_c`
+
+```{r}
+final_c_model_controlled <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(final_c_model_controlled)
+```
+
+### 3. Regression of `final_c` on `experiment1`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, `hsgpa_c`, and `sex_id`
+
+```{r}
+final_c_model_controlled_sex <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + sex_id, data = master_unique)
+summary(final_c_model_controlled_sex)
+```
+
+### 4. Regression of `final_c` on `experiment1`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, `hsgpa_c`, and `eop_id`
+
+```{r}
+final_c_model_controlled_eop <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + eop_id, data = master_unique)
+summary(final_c_model_controlled_eop)
+```
+
+### 5. Regression of `final_c` on `experiment1`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, `hsgpa_c`, and `fgn_id`
+
+```{r}
+final_c_model_controlled_fgn <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + fgn_id, data = master_unique)
+summary(final_c_model_controlled_fgn)
+```
+
+### 6. Regression of `final_c` on `experiment1`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, `hsgpa_c`, and `urm_id`
+
+```{r}
+final_c_model_controlled_urm <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + urm_id, data = master_unique)
+summary(final_c_model_controlled_urm)
+```
+
+## Multiple Regression with the "z-scored" ("scaled") data
+
+### 1. Regression of `final_z` on `experiment1`
+
+```{r}
+final_z_model <- lm(final_z ~ experiment1, data = master_unique)
+summary(final_z_model)
+```
+
+### 2. Regression of `final_z` on `experiment1`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, and `hsgpa_z`
+
+```{r}
+final_z_model_controlled <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z, data = master_unique)
+summary(final_z_model_controlled)
+```
+
+### 3. Regression of `final_z` on `experiment1`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, `hsgpa_z`, and `sex_id`
+
+```{r}
+final_z_model_controlled_sex <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + sex_id, data = master_unique)
+summary(final_z_model_controlled_sex)
+```
+
+### 4. Regression of `final_z` on `experiment1`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, `hsgpa_z`, and `eop_id`
+
+```{r}
+final_z_model_controlled_eop <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + eop_id, data = master_unique)
+summary(final_z_model_controlled_eop)
+```
+
+### 5. Regression of `final_z` on `experiment1`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, `hsgpa_z`, and `fgn_id`
+
+```{r}
+final_z_model_controlled_fgn <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + fgn_id, data = master_unique)
+summary(final_z_model_controlled_fgn)
+```
+
+### 6. Regression of `final_z` on `experiment1`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, `hsgpa_z`, and `urm_id`
+
+```{r}
+final_z_model_controlled_urm <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + urm_id, data = master_unique)
+summary(final_z_model_controlled_urm)
+```
+
+## Multiple Regression + interactions with the centered data:
+
+### 1. Regression of `final_c` on `experiment1` with interactions from `sex_id`
+
+```{r}
+final_c_model_sex_int <- lm(final_c ~ experiment1*sex_id, data = master_unique)
+summary(final_c_model_sex_int)
+```
+
+### 2. Regression of `final_c` on `experiment1` with interactions from `sex_id`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, and `hsgpa_c`
+
+```{r}
+final_c_model_sex_int_controlled <- lm(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(final_c_model_sex_int_controlled)
+```
+
+### 3. Regression of `final_c` on `experiment1` with interactions from `eop_id`
+
+```{r}
+final_c_model_eop_int <- lm(final_c ~ experiment1*eop_id, data = master_unique)
+summary(final_c_model_eop_int)
+```
+
+### 4. Regression of `final_c` on `experiment1` with interactions from `eop_id`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, and `hsgpa_c`
+
+```{r}
+final_c_model_eop_int_controlled <- lm(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(final_c_model_eop_int_controlled)
+```
+
+### 5. Regression of `final_c` on `experiment1` with interactions from `fgn_id`
+
+```{r}
+final_c_model_fgn_int <- lm(final_c ~ experiment1*fgn_id, data = master_unique)
+summary(final_c_model_fgn_int)
+```
+
+### 6. Regression of `final_c` on `experiment1` with interactions from `fgn_id`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, and `hsgpa_c`
+
+```{r}
+final_c_model_fgn_int_controlled <- lm(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(final_c_model_fgn_int_controlled)
+```
+
+### 7. Regression of `final_c` on `experiment1` with interactions from `urm_id`
+
+```{r}
+final_c_model_urm_int <- lm(final_c ~ experiment1*urm_id, data = master_unique)
+summary(final_c_model_urm_int)
+```
+
+### 8. Regression of `final_c` on `experiment1` with interactions from `urm_id`, controlling for `satm_c`, `satv_c`, `aleksikc_c`, and `hsgpa_c`
+
+```{r}
+final_c_model_urm_int_controlled <- lm(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(final_c_model_urm_int_controlled)
+```
+
+## Multiple Regression + interactions with the z-scored (scaled) data:
+
+### 1. Regression of `final_z` on `experiment1` with interactions from `sex_id`
+
+```{r}
+final_z_model_sex_int <- lm(final_z ~ experiment1*sex_id, data = master_unique)
+summary(final_z_model_sex_int)
+```
+
+### 2. Regression of `final_z` on `experiment1` with interactions from `sex_id`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, and `hsgpa_z`
+
+```{r}
+final_z_model_sex_int_controlled <- lm(final_z ~ experiment1*sex_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = master_unique)
+summary(final_z_model_sex_int_controlled)
+```
+
+### 3. Regression of `final_z` on `experiment1` with interactions from `eop_id`
+
+```{r}
+final_z_model_eop_int <- lm(final_z ~ experiment1*eop_id, data = master_unique)
+summary(final_z_model_eop_int)
+```
+
+### 4. Regression of `final_z` on `experiment1` with interactions from `eop_id`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, and `hsgpa_z`
+
+```{r}
+final_z_model_eop_int_controlled <- lm(final_z ~ experiment1*eop_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = master_unique)
+summary(final_z_model_eop_int_controlled)
+```
+
+### 5. Regression of `final_z` on `experiment1` with interactions from `fgn_id`
+
+```{r}
+final_z_model_fgn_int <- lm(final_z ~ experiment1*fgn_id, data = master_unique)
+summary(final_z_model_fgn_int)
+```
+
+### 6. Regression of `final_z` on `experiment1` with interactions from `fgn_id`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, and `hsgpa_z`
+
+```{r}
+final_z_model_fgn_int_controlled <- lm(final_z ~ experiment1*fgn_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = master_unique)
+summary(final_z_model_fgn_int_controlled)
+```
+
+### 7. Regression of `final_z` on `experiment1` with interactions from `urm_id`
+
+```{r}
+final_z_model_urm_int <- lm(final_z ~ experiment1*urm_id, data = master_unique)
+summary(final_z_model_urm_int)
+```
+
+### 8. Regression of `final_z` on `experiment1` with interactions from `urm_id`, controlling for `satm_z`, `satv_z`, `aleksikc_z`, and `hsgpa_z`
+
+```{r}
+final_z_model_urm_int_controlled <- lm(final_z ~ experiment1*urm_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = master_unique)
+summary(final_z_model_urm_int_controlled)
+```
