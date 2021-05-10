@@ -6,7 +6,7 @@ output:
   html_document:
     keep_md: yes
 ---
-# Load the libraries
+### Load the libraries
 ```{r}
 library(here)
 library(tidyverse)
@@ -16,7 +16,7 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 ```
-#Load the data using the directory 
+### Load the data using the directory 
 ```{r}
 proj_dir <- here()
 #add original original data directory sting
@@ -27,7 +27,7 @@ importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/"
 analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
 metadata_dir <- here("original-data", "metadata", "/")
 ```
-# Copy data from `original-data` to `01-importable-data`
+### Copy data from `original-data` to `01-importable-data`
 ```{r}
 # CFC: Copy rds file from the `original_data_dir` to the `importable_data_dir`.
 copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
@@ -36,14 +36,14 @@ copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
 # overwritten and this command will return `FALSE`.
 file.copy(copy_from, copy_to)
 ```
-# read in the data file 
+### read in the data file 
 ```{r}
 data_2s <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
 #now lets do some data wrangling to make sure everything runs
 data_2s_extras_removed = subset(data_2s, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
 data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
 data_2s_exam_score <- data_2s_unique %>% 
-  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1)
+  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z, final_c)
   
 data_2s_exam_score_true <- na.omit(data_2s_exam_score)
 #making sure the data control and experiment groups are leveled for further regression analysis
@@ -51,7 +51,7 @@ data_2s_leveled <- data_2s_exam_score_true %>%
     mutate(experiment1 = factor(experiment1, 
         levels = c("CONTROL", "EXPERIMENTAL")))
 ```
-#Now, I want to use regression model to see the exam score difference between experiement year and the non experiment year
+### Now, I want to use regression model to see the exam score difference between experiement year and the non experiment year
 ```{r}
 exam1_regression <- data_2s_leveled %>%
   select(experiment1, exam1)
@@ -91,7 +91,7 @@ finalexam_regression_stats <- finalexam_regression %>%
 finalexam_model <- lm(finalexam ~ experiment1, data = finalexam_regression)
 get_regression_table(finalexam_model)
 ```
-# now I would like to see the interaction between the scores when we control for sex
+### now I would like to see the interaction between the scores when we control for sex
 ```{r}
 exam1_regression_sex <- data_2s_leveled %>%
   select(experiment1, exam1, sex_id)
@@ -115,7 +115,7 @@ finalexam_regression_sex <- data_2s_leveled %>%
 finalexam_sex_model <- lm(finalexam ~ experiment1 + sex_id, data = finalexam_regression_sex)
 get_regression_table(finalexam_sex_model)
 ```
-# control for eop status 
+### control for eop status 
 ```{r}
 exam1_regression_eop <- data_2s_leveled %>%
   select(experiment1, exam1, eop_id)
@@ -139,7 +139,7 @@ finalexam_regression_eop <- data_2s_leveled %>%
 finalexam_eop_model <- lm(finalexam ~ experiment1 + eop_id, data = finalexam_regression_eop)
 get_regression_table(finalexam_eop_model)
 ```
-# Now we look for fgn status
+### Now we look for fgn status
 ```{r}
 exam1_regression_fgn <- data_2s_leveled %>%
   select(experiment1, exam1, fgn_id)
@@ -162,7 +162,7 @@ finalexam_regression_fgn <- data_2s_leveled %>%
 finalexam_fgn_model <- lm(finalexam ~ experiment1 + fgn_id, data = finalexam_regression_fgn)
 get_regression_table(finalexam_fgn_model)
 ```
-# URM status and score interaction
+### URM status and score interaction
 ```{r}
 exam1_regression_urm <- data_2s_leveled %>%
   select(experiment1, exam1, urm_id)
@@ -185,7 +185,7 @@ finalexam_regression_urm <- data_2s_leveled %>%
 finalexam_urm_model <- lm(finalexam ~ experiment1 + urm_id, data = finalexam_regression_urm)
 get_regression_table(finalexam_urm_model)
 ```
-# Next, I need to do multiple regression tables for two numerical values 
+### Next, I need to do multiple regression tables for two numerical values 
 ```{r}
 #math SAT scores and exam 1 score 
 exam1_regression_satm <- data_2s_leveled %>% 
@@ -211,7 +211,7 @@ ggplot(finalexam_regression_satm, aes(x = satmath, y = finalexam, color = experi
   labs(x = "SAT Math Score", y = "Final Exam score", color = "Experiment") +
   geom_parallel_slopes(se = FALSE)
 ```
-# I need to do multiple regression graphs for two sat verbal 
+### I need to do multiple regression graphs for two sat verbal 
 ```{r}
 #SAT verbal scores and exam 1 score 
 exam1_regression_satv <- data_2s_leveled %>% 
@@ -237,7 +237,7 @@ ggplot(finalexam_regression_satv, aes(x = satverbal, y = finalexam, color = expe
   labs(x = "SAT Verbal Score", y = "Final Exam score", color = "Experiment") +
   geom_parallel_slopes(se = FALSE)
 ```
-# Aleks initial knowledge check score and exam scores 
+### Aleks initial knowledge check score and exam scores 
 ```{r}
 #Aleks initial knowledge check score and exam 1 score 
 exam1_regression_satv <- data_2s_leveled %>% 
@@ -263,7 +263,7 @@ ggplot(finalexam_regression_satv, aes(x = mastered_topics_initial_kc, y = finale
   labs(x = "Aleks Initial Knowledge Check", y = "Final Exam score", color = "Experiment") +
   geom_parallel_slopes(se = FALSE)
 ```
-# High school GPA and exam score 
+### High school GPA and exam score 
 ```{r}
 #High school GPA and exam 1 score 
 exam1_regression_high_school_gpa <- data_2s_leveled %>% 
@@ -291,10 +291,194 @@ ggplot(finalexam_regression_high_school_gpa, aes(x = high_sch_gpa, y = finalexam
 ```
 
 
+## Final Exam Score C Regression Tables
+### 1. final_c and Experiment
+```{r}
+final_c_regression <- data_2s_leveled %>%
+  select(experiment1, final_c)
+#now lets find mean and median scores of final exam C
+final_c_regression_stats <- final_c_regression %>%
+  group_by(experiment1) %>%
+  summarize(exam1_median = median(final_c), 
+            exam1_mean = mean(final_c))
 
+#now lets get the regression table for final exam 
+exam1_model <- lm(final_c ~ experiment1, data = final_c_regression)
+get_regression_table(exam1_model)
+```
+### 2. final score controlled for satm, satv, alekskc, and high school gpa
+```{r}
+final_c_regression_2 <- data_2s_leveled %>%
+  select(experiment1, final_c, satm_c, satv_c, aleksikc_c, hsgpa_c, sex_id, eop_id, urm_id, fgn_id)
 
+#now lets get the regression table for exam 1 
+final_c_model_controlled <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = final_c_regression_2)
+get_regression_table(final_c_model_controlled)
+```
+### 3. Controlling sex_id
+```{r}
+final_c_model_controlled_sex <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + sex_id, data = final_c_regression_2)
+get_regression_table(final_c_model_controlled_sex)
+```
+### 4. Controlling eop_id
+```{r}
+final_c_model_controlled_eop <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + eop_id, data = final_c_regression_2)
+get_regression_table(final_c_model_controlled_eop)
+```
+### 5. Controlling for fgn id
+```{r}
+final_c_model_controlled_fgn <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + fgn_id, data = final_c_regression_2)
+get_regression_table(final_c_model_controlled_fgn)
+```
+### 6. controlling for urm_id
+```{r}
+final_c_model_controlled_urm <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + urm_id, data = final_c_regression_2)
+get_regression_table(final_c_model_controlled_urm)
+```
+## Final Exam Score Z regression tables
+### 1. Final z score and experiment
+```{r}
+final_z_regression <- data_2s_leveled %>%
+  select(experiment1, final_z)
+#now lets find mean and median scores of final exam z
+final_z_regression_stats <- final_z_regression %>%
+  group_by(experiment1) %>%
+  summarize(exam1_median = median(final_z), 
+            exam1_mean = mean(final_z))
 
+#now lets get the regression table for final exam 
+final_z_model <- lm(final_z ~ experiment1, data = final_z_regression)
+get_regression_table(final_z_model)
+```
+### 2. final score controlled for satm, satv, alekskc, and high school gpa
+```{r}
+final_z_regression_2 <- data_2s_leveled %>%
+  select(experiment1, final_z, satm_z, satv_z, aleksikc_z, hsgpa_z, sex_id, eop_id, urm_id, fgn_id)
 
+#now lets get the regression table for exam 1 
+final_z_model_controlled <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z, data = final_z_regression_2)
+get_regression_table(final_z_model_controlled)
+```
+### 3. Controlling sex_id
+```{r}
+final_z_model_controlled_sex <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + sex_id, data = final_z_regression_2)
+get_regression_table(final_z_model_controlled_sex)
+```
+### 4. Controlling eop_id
+```{r}
+final_z_model_controlled_eop <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + eop_id, data = final_z_regression_2)
+get_regression_table(final_z_model_controlled_eop)
+```
+### 5. Controlling fgn_id
+```{r}
+final_z_model_controlled_fgn <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + fgn_id, data = final_z_regression_2)
+get_regression_table(final_z_model_controlled_fgn)
+```
+### 6. Controlling urm_id
+```{r}
+final_z_model_controlled_urm <- lm(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + urm_id, data = final_z_regression_2)
+get_regression_table(final_z_model_controlled_sex)
+```
+## Final Exam Score C interaction Tables
+### 1. Final c score and sex id interaction
+```{r}
+final_c_regression_sex <- data_2s_leveled %>%
+  select(experiment1, final_c, satm_c, satv_c, aleksikc_c, hsgpa_c, sex_id, eop_id, urm_id, fgn_id)
+
+#now lets get the regression table for exam 1 
+final_c_model_sex <- lm(final_c ~ experiment1*sex_id, data = final_c_regression_2)
+get_regression_table(final_c_model_sex)
+```
+### 2. Final c score and sex id interaction controlling other variables
+```{r}
+final_c_regression_sex <- data_2s_leveled %>%
+  select(experiment1, final_c, satm_c, satv_c, aleksikc_c, hsgpa_c, sex_id, eop_id, urm_id, fgn_id)
+
+#now lets get the regression table for exam 1 
+final_c_model_sex <- lm(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = final_c_regression_2)
+get_regression_table(final_c_model_sex)
+```
+### 3. Final c score and eop id interaction
+```{r}
+final_c_regression_eop <- data_2s_leveled %>%
+  select(experiment1, final_c, satm_c, satv_c, aleksikc_c, hsgpa_c, sex_id, eop_id, urm_id, fgn_id)
+
+final_c_model_sex <- lm(final_c ~ experiment1*eop_id, data = final_c_regression_2)
+get_regression_table(final_c_model_sex)
+```
+### 4. Final c score and eop id interaction controlling other variables
+```{r}
+final_c_regression_eop <- data_2s_leveled %>%
+  select(experiment1, final_c, satm_c, satv_c, aleksikc_c, hsgpa_c, sex_id, eop_id, urm_id, fgn_id)
+
+final_c_model_sex <- lm(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = final_c_regression_2)
+get_regression_table(final_c_model_sex)
+```
+### 5.Final C score interacting with fgn status
+```{r}
+final_c_model_fgn <- lm(final_c ~ experiment1*fgn_id, data = final_c_regression_2)
+get_regression_table(final_c_model_sex)
+```
+### 6. Final c score and fgn id interaction controlling other variables
+```{r}
+final_c_model_fgn <- lm(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = final_c_regression_2)
+get_regression_table(final_c_model_fgn)
+```
+### 7.Final C score interacting with urm status
+```{r}
+final_c_model_urm <- lm(final_c ~ experiment1*fgn_id, data = final_c_regression_2)
+get_regression_table(final_c_model_urm)
+```
+### 8. Final c score and fgn id interaction controlling other variables
+```{r}
+final_c_model_urm <- lm(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = final_c_regression_2)
+get_regression_table(final_c_model_urm)
+```
+## Final Exam Score z interaction Tables
+### 1. Final z score and sex id interaction
+```{r}
+final_z_regression_sex <- data_2s_leveled %>%
+  select(experiment1, final_z, satm_z, satv_z, aleksikc_z, hsgpa_z, sex_id, eop_id, urm_id, fgn_id)
+
+#now lets get the regression table for final exam 
+final_z_model_sex <- lm(final_z ~ experiment1*sex_id, data = final_z_regression_2)
+get_regression_table(final_z_model_sex)
+```
+### 2. Final z score and sex id interaction controlling other variables
+```{r}
+final_z_model_sex <- lm(final_z ~ experiment1*sex_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = final_z_regression_2)
+get_regression_table(final_z_model_sex)
+```
+### 3. Final z score and eop id interaction
+```{r}
+final_z_model_sex <- lm(final_z ~ experiment1*eop_id, data = final_z_regression_2)
+get_regression_table(final_z_model_sex)
+```
+### 4. Final z score and eop id interaction controlling other variables
+```{r}
+final_z_model_sex <- lm(final_z ~ experiment1*eop_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = final_z_regression_2)
+get_regression_table(final_z_model_sex)
+```
+### 5.Final z score interacting with fgn status
+```{r}
+final_z_model_fgn <- lm(final_z ~ experiment1*fgn_id, data = final_z_regression_2)
+get_regression_table(final_z_model_sex)
+```
+### 6. Final z score and fgn id interaction controlling other variables
+```{r}
+final_z_model_fgn <- lm(final_z ~ experiment1*fgn_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = final_z_regression_2)
+get_regression_table(final_z_model_fgn)
+```
+### 7.Final z score interacting with urm status
+```{r}
+final_z_model_urm <- lm(final_z ~ experiment1*fgn_id, data = final_z_regression_2)
+get_regression_table(final_z_model_urm)
+```
+### 8. Final z score and fgn id interaction controlling other variables
+```{r}
+final_z_model_urm <- lm(final_z ~ experiment1*urm_id + satm_z + satv_z + aleksikc_z + hsgpa_z, data = final_z_regression_2)
+get_regression_table(final_z_model_urm)
+```
 
 
 
