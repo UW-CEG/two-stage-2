@@ -237,3 +237,70 @@ ggplot(finalexam_regression_satv, aes(x = satverbal, y = finalexam, color = expe
   labs(x = "SAT Verbal Score", y = "Final Exam score", color = "Experiment") +
   geom_parallel_slopes(se = FALSE)
 ```
+# Aleks initial knowledge check score and exam scores 
+```{r}
+#Aleks initial knowledge check score and exam 1 score 
+exam1_regression_satv <- data_2s_leveled %>% 
+  select(experiment1, exam1, mastered_topics_initial_kc)
+ggplot(exam1_regression_satv, aes(x = mastered_topics_initial_kc, y = exam1, color = experiment1)) +
+  geom_point() +
+  labs(x = "Aleks Inital Knowledge Check", y = "Exam 1 score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+
+#Aleks initial knowledge check score and exam 2 score 
+exam2_regression_satv <- data_2s_leveled %>% 
+  select(experiment1, exam2, mastered_topics_initial_kc)
+ggplot(exam2_regression_satv, aes(x = mastered_topics_initial_kc, y = exam2, color = experiment1)) +
+  geom_point() +
+  labs(x = "Aleks Initial Knowledge Check", y = "Exam 2 score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+
+#Aleks initial knowledge check score and final exam score 
+finalexam_regression_satv <- data_2s_leveled %>% 
+  select(experiment1, finalexam, mastered_topics_initial_kc)
+ggplot(finalexam_regression_satv, aes(x = mastered_topics_initial_kc, y = finalexam, color = experiment1)) +
+  geom_point() +
+  labs(x = "Aleks Initial Knowledge Check", y = "Final Exam score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+```
+# High school GPA and exam score 
+```{r}
+#High school GPA and exam 1 score 
+exam1_regression_high_school_gpa <- data_2s_leveled %>% 
+  select(experiment1, exam1, high_sch_gpa)
+ggplot(exam1_regression_high_school_gpa, aes(x = high_sch_gpa, y = exam1, color = experiment1)) +
+  geom_point() +
+  labs(x = "High School GPA", y = "Exam 1 score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+
+#Aleks initial knowledge check score and exam 2 score 
+exam2_regression_high_school_gpa <- data_2s_leveled %>% 
+  select(experiment1, exam2, high_sch_gpa)
+ggplot(exam2_regression_high_school_gpa, aes(x = high_sch_gpa, y = exam2, color = experiment1)) +
+  geom_point() +
+  labs(x = "High School GPA", y = "Exam 2 score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+
+#High school GPA and final exam score 
+finalexam_regression_high_school_gpa <- data_2s_leveled %>% 
+  select(experiment1, finalexam, high_sch_gpa)
+ggplot(finalexam_regression_high_school_gpa, aes(x = high_sch_gpa, y = finalexam, color = experiment1)) +
+  geom_point() +
+  labs(x = "High School GPA", y = "Final Exam score", color = "Experiment") +
+  geom_parallel_slopes(se = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
