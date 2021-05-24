@@ -1,0 +1,83 @@
+---
+title: "TA Section Random Effects"
+author: "Ganling"
+date: "5/9/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+```{r}
+library(here)
+library(tidyverse)
+library(skimr)
+library(moderndive)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(lme4)
+```
+### Set working directories
+```{r}
+proj_dir <- here()
+#add original original data directory sting
+original_data_dir <- here("original-data", "/")
+#add numbers to importable and analysis data directory strings
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+#add analysis directory string
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+### load the data set through here directory
+```{r}
+# CFC: Copy rds file from the `original_data_dir` to the `importable_data_dir`.
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled")
+# CFC: If the file already exists in the target directory, the file will not be 
+# overwritten and this command will return `FALSE`.
+file.copy(copy_from, copy_to)
+```
+```{r}
+#data_2s <- readRDS(paste0(metadata_dir, "master_2s_small_deid_scaled.rds"))
+data_2s <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2/original-data/master_2s_small_deid_scaled.rds")
+
+data_2s_extras_removed = subset(data_2s, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
+View(data_2s_unique)
+data_2s_exam_score <- data_2s_unique %>% 
+  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
+  
+data_2s_exam_score_true <- na.omit(data_2s_exam_score)
+```
+###I would like to create a model that could implement the random effects based on the TA sections
+```{r}
+#First, include sex_id as a control variable
+mod1 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect), 
+           data=data_2s_exam_score_true)
+summary(mod1)
+AIC(mod1)
+
+#Include eop_id as a control variable
+mod2 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + eop_id + (1|ta_sect), 
+           data=data_2s_exam_score_true)
+summary(mod2)
+AIC(mod2)
+
+#Include fgn_id as a control variable
+mod3 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + fgn_id + (1|ta_sect), 
+           data=data_2s_exam_score_true)
+summary(mod3)
+AIC(mod3)
+
+#Include urm_id as a control variable
+mod4 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + urm_id + (1|ta_sect), 
+           data=data_2s_exam_score_true)
+summary(mod4)
+AIC(mod4)
+#
+```
+
+
+
+
+
+
