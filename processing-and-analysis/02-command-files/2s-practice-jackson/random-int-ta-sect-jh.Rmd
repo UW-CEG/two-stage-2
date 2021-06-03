@@ -1,0 +1,77 @@
+---
+title: 'MLM: Random Intercepts Model'
+author: "Jackson Hughes"
+date: "5/24/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+```
+
+# Preliminary setup and data wrangling
+
+## Data import
+
+### Set working directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+### Copy data from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import master dataset
+
+```{r}
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling
+
+### Condense dataset to only include unique rows; omit NAs
+
+```{r}
+master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+master_unique_1 <- unique(master_extras_removed, incomparables = FALSE)
+master_unique_2 <- master_unique_1 %>% 
+  select(exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master_unique <- na.omit(master_unique_2)
+```
+
+# Regression
+
+## Random intercepts model for TA section (centered data)
+
+```{r}
+rand_int_mod_c <- lmer(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(rand_int_mod_c)
+```
+
+## Random intercepts model for TA section (z-scored data)
+
+```{r}
+rand_int_mod_z <- lmer(final_z ~ experiment1 + satm_z + satv_z + aleksikc_z + hsgpa_z + (1|ta_sect), data = master_unique)
+summary(rand_int_mod_z)
+```
+
+## Notes
+* Not sure how to interpret the summary data yet
+* What is "Correlation of Fixed Effects"?
