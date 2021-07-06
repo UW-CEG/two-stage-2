@@ -1,0 +1,141 @@
+---
+title: "TA_Random_Effects_Interaction"
+author: "Ganling"
+date: "5/9/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+### Setting up the data set 
+#### Read libraries 
+```{r}
+library(here)
+library(tidyverse)
+library(fs) # file system operations functions
+library(readxl)
+library(janitor)
+library(knitr)
+library(lme4)
+```
+#### Load the data set
+```{r}
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+
+df <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2/original-data/master_2s_small_deid_scaled.rds")
+```
+### data wrangling 
+#### creating data frames with unique `ta_sect` 
+```{r}
+# df2 <- df %>% select(course_fullid)
+
+# df3 <- df2 %>% mutate(year = str_extract(course_fullid, "\\d\\d\\d\\d")) "\\d{4}"
+
+# df4 <- df3 %>% 
+  # mutate(year = ifelse(str_detect(course_fullid, "2016"), 
+                       # paste(year, "A", sep = "_"),
+                       # paste(year, "B", sep = "_")))
+
+# df5 <- df3 %>% 
+  # mutate(year2 = ifelse(str_detect(course_fullid, "2017"), 
+                       # paste(year, "A", sep = "_"),
+                       # paste(year, "B", sep = "_")))
+```
+#### NOTE: I am trying to add A and B after the year, but I can't seem to make it work 
+#### Now using my orginal method.Creating unique rows and remove the ones that are not necessary for this data model
+```{r}
+data_2s_extras_removed = subset(df, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
+View(data_2s_unique)
+data_2s_exam_score <- data_2s_unique %>% 
+  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
+  
+data_2s_exam_score_true <- na.omit(data_2s_exam_score)
+```
+### Make `ta_sect` unique across different data values
+#### First, we need to split the data from into year 16 and year 17 
+```{r}
+data_2s_exam_score_true$ta_sect <- as.character(data_2s_exam_score_true$ta_sect)
+
+#next, split the dataframe in half
+master_unique_2016 <- subset(data_2s_exam_score_true, course_fullid != "CHEM_142_A_2017_4" & course_fullid != "CHEM_142_B_2017_4")
+master_unique_2017 <- subset(data_2s_exam_score_true, course_fullid != "CHEM_142_A_2016_4" & course_fullid != "CHEM_142_B_2016_4")
+```
+#### Use the vectorization function in R, we can add `_16` and `_17` at the end of each TA section 
+```{r}
+master_unique_2016$ta_sect <- paste0(master_unique_2016$ta_sect, "_16")
+master_unique_2017$ta_sect <- paste0(master_unique_2017$ta_sect, "_17")
+```
+#### recombine the dataframes together and make the `ta_sect` factors again
+```{r}
+master_true <- rbind(master_unique_2016, master_unique_2017)
+master_true$ta_sect <- as.factor(master_true$ta_sect)
+```
+### Interaction Models
+#### Creating interaction models based on the demographics, `sex_id`, `eop_id`, `fgn_id` and `urm_id`
+```{r}
+# Without random effect but set `sex_id` as an interacting variable
+mod1 <- lm(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=master_true)
+summary(mod1)
+AIC(mod1)
+#include `sex_id` as an interacting variable
+mod2 <- lmer(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+           data=master_true)
+summary(mod2)
+AIC(mod2)
+
+AIC(mod1, mod2)
+```
+```{r}
+# Without random effect but set `eop_id` as an interacting variable
+mod3 <- lm(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=master_true)
+summary(mod3)
+AIC(mod3)
+#include `sex_id` as an interacting variable
+mod4 <- lmer(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+           data=master_true)
+summary(mod4)
+AIC(mod4)
+
+AIC(mod3, mod4)
+```
+```{r}
+# Without random effect but set `fgn_id` as an interacting variable
+mod5 <- lm(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=master_true)
+summary(mod5)
+AIC(mod5)
+#include `fgn_id` as an interacting variable
+mod6 <- lmer(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+           data=master_true)
+summary(mod6)
+AIC(mod6)
+
+AIC(mod5, mod6)
+```
+```{r}
+# Without random effect but set `urm_id` as an interacting variable
+mod7 <- lm(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=master_true)
+summary(mod7)
+AIC(mod7)
+#include `urm_id` as an interacting variable
+mod8 <- lmer(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+           data=master_true)
+summary(mod8)
+AIC(mod8)
+
+AIC(mod7, mod8)
+```
+#### NOTE: The AIC differences are all greater than 2 when interacting with different demographics.  
+
+
+
+
+
+
+
+
