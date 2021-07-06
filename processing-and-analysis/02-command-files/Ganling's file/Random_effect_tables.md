@@ -89,14 +89,14 @@ file.copy(copy_from, copy_to)
 ```
 ## [1] FALSE
 ```
-###Import and read the data
+### Import and read the data
 
 ```r
 #data_2s <- readRDS(paste0(metadata_dir, "master_2s_small_deid_scaled.rds"))
 data_2s <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2/original-data/master_2s_small_deid_scaled.rds")
 ```
-##Data wrangling
-####Creating unique rows and remove the ones that are not necessary for this data model
+## Data wrangling
+#### Creating unique rows and remove the ones that are not necessary for this data model
 
 ```r
 data_2s_extras_removed = subset(data_2s, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
@@ -107,8 +107,8 @@ data_2s_exam_score <- data_2s_unique %>%
   
 data_2s_exam_score_true <- na.omit(data_2s_exam_score)
 ```
-##Make 'ta_sect'unique across different data values
-####First, we need to split the data from into year 16 and year 17 
+## Make 'ta_sect'unique across different data values
+#### First, we need to split the data from into year 16 and year 17 
 
 ```r
 data_2s_exam_score_true$ta_sect <- as.character(data_2s_exam_score_true$ta_sect)
@@ -117,19 +117,19 @@ data_2s_exam_score_true$ta_sect <- as.character(data_2s_exam_score_true$ta_sect)
 master_unique_2016 <- subset(data_2s_exam_score_true, course_fullid != "CHEM_142_A_2017_4" & course_fullid != "CHEM_142_B_2017_4")
 master_unique_2017 <- subset(data_2s_exam_score_true, course_fullid != "CHEM_142_A_2016_4" & course_fullid != "CHEM_142_B_2016_4")
 ```
-####Use the vectorization function in R, we can add '_16' and '_17'at the end of each TA section 
+#### Use the vectorization function in R, we can add `_16` and `_17`at the end of each TA section 
 
 ```r
 master_unique_2016$ta_sect <- paste0(master_unique_2016$ta_sect, "_16")
 master_unique_2017$ta_sect <- paste0(master_unique_2017$ta_sect, "_17")
 ```
-##recombine the dataframes together and make the 'ta_sect' factors again
+## recombine the dataframes together and make the `ta_sect` factors again
 
 ```r
 master_true <- rbind(master_unique_2016, master_unique_2017)
 master_true$ta_sect <- as.factor(master_true$ta_sect)
 ```
-####I would like to create a model that could implement the random effects based on the TA sections
+#### I would like to create a model that could implement the random effects based on the TA sections
 
 ```r
 #First, include sex_id as a control variable
@@ -350,7 +350,7 @@ AIC(mod4)
 ```r
 #
 ```
-####This is what I got previously by changing out different independent variables, now I wnat to compare only the models with and without random effects
+#### This is what I got previously by changing out different independent variables, now I wnat to compare only the models with and without random effects
 
 ```r
 #First, test that the treatment impacts scores
@@ -454,7 +454,7 @@ AIC(mod1, mod2)
 ## mod1  7 63734.08
 ## mod2  8 63561.45
 ```
-####Again, the change of AIC is much bigger than 2
+#### Again, the change of AIC is much bigger than 2
 
 
 
