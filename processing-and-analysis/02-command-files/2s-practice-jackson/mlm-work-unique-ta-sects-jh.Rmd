@@ -58,139 +58,32 @@ master_unique <- na.omit(master_unique_2)
 
 ### Make `ta_sect` values unique across `course_fullid`
 
-#### First, I'm going to temporarily change `ta_sect` into character values
+#### I'm going to be trying the code that CFC showed us
+
+```{r, eval = FALSE}
+master_unique_3 <- master_unique %>% 
+  select(course_fullid)
+master_unique_4 <- master_unique_3 %>% 
+  mutate(ta_sect = str_extract(course_fullid, "\\d\\d\\d\\d")) "\\d{4}"
+#### This line ^^ is the one that is giving me trouble
+master_true <- master_unique_3 %>% 
+  mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
+```
+
+#### That isn't working... for now I'm just going to split the dataframe and use `paste0`.
 
 ```{r}
 master_unique$ta_sect <- as.character(master_unique$ta_sect)
-```
 
-#### Now, I'm going to split the dataset in half; one only contains 2016 data, and the other only contains 2017 data.
-
-```{r}
 master_unique_2016 <- subset(master_unique, course_fullid != "CHEM_142_A_2017_4" & course_fullid != "CHEM_142_B_2017_4")
 master_unique_2017 <- subset(master_unique, course_fullid != "CHEM_142_A_2016_4" & course_fullid != "CHEM_142_B_2016_4")
-```
 
-#### Now I can individually change the values of the `ta_sect` column without it affecting the `ta_sect` values from the other year
+master_unique_2016$ta_sect <- paste0(master_unique_2016$ta_sect, "_16")
+master_unique_2017$ta_sect <- paste0(master_unique_2017$ta_sect, "_17")
 
-```{r}
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AA", "AA_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AB", "AB_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AC", "AC_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AD", "AD_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AE", "AE_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AF", "AF_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AG", "AG_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AH", "AH_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AI", "AI_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AJ", "AJ_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AK", "AK_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AL", "AL_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AM", "AM_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AN", "AN_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AO", "AO_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AP", "AP_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AQ", "AQ_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AR", "AR_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AS", "AS_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AT", "AT_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AU", "AU_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AV", "AV_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AW", "AW_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AX", "AX_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AY", "AY_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="AZ", "AZ_16")
-
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BA", "BA_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BB", "BB_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BC", "BC_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BD", "BD_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BE", "BE_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BF", "BF_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BG", "BG_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BH", "BH_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BI", "BI_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BJ", "BJ_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BK", "BK_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BL", "BL_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BM", "BM_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BN", "BN_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BO", "BO_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BP", "BP_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BQ", "BQ_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BR", "BR_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BS", "BS_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BT", "BT_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BU", "BU_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BV", "BV_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BW", "BW_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BX", "BX_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BY", "BY_16")
-master_unique_2016$ta_sect <- replace(master_unique_2016$ta_sect, master_unique_2016$ta_sect=="BZ", "BZ_16")
-
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AA", "AA_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AB", "AB_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AC", "AC_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AD", "AD_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AE", "AE_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AF", "AF_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AG", "AG_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AH", "AH_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AI", "AI_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AJ", "AJ_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AK", "AK_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AL", "AL_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AM", "AM_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AN", "AN_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AO", "AO_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AP", "AP_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AQ", "AQ_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AR", "AR_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AS", "AS_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AT", "AT_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AU", "AU_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AV", "AV_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AW", "AW_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AX", "AX_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AY", "AY_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="AZ", "AZ_17")
-
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BA", "BA_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BB", "BB_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BC", "BC_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BD", "BD_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BE", "BE_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BF", "BF_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BG", "BG_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BH", "BH_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BI", "BI_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BJ", "BJ_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BK", "BK_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BL", "BL_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BM", "BM_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BN", "BN_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BO", "BO_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BP", "BP_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BQ", "BQ_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BR", "BR_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BS", "BS_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BT", "BT_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BU", "BU_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BV", "BV_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BW", "BW_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BX", "BX_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BY", "BY_17")
-master_unique_2017$ta_sect <- replace(master_unique_2017$ta_sect, master_unique_2017$ta_sect=="BZ", "BZ_17")
-```
-
-#### That was a lot... anyways now I'm going to join the data frames back together and make `ta_sect` into a factor again!
-
-```{r}
 master_true <- rbind(master_unique_2016, master_unique_2017)
-
 master_true$ta_sect <- as.factor(master_true$ta_sect)
 ```
-
 
 # Regression
 
@@ -201,7 +94,6 @@ mod_1 <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data
 summary(mod_1)
 ```
 
-
 ## MLM random intercepts model for TA section (centered data)
 
 ```{r}
@@ -209,16 +101,49 @@ mod_2 <- lmer(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + (
 summary(mod_2)
 ```
 
+## Random effects models including demographic interactions
+
+### Interactions from `sex_id`
+
+```{r}
+sex_id_mod <- lmer(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+summary(sex_id_mod)
+```
+
+### Interactions from `urm_id`
+
+```{r}
+urm_id_mod <- lmer(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+summary(urm_id_mod)
+```
+
+### Interactions from `eop_id`
+
+```{r}
+eop_id_mod <- lmer(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+summary(eop_id_mod)
+```
+
+### Interactions from `fgn_id`
+
+```{r}
+fgn_id_mod <- lmer(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+summary(fgn_id_mod)
+```
+
 ## Model Selection Using AIC
 
-#### I am going to be comparing the standard regression model with the random intercepts model
+#### Standard regression model vs. random intercepts model (no demographic interactions)
 
 ```{r}
 AIC(mod_1, mod_2)
 ```
 
-#### It appears that for the random intercepts model, the AIC decreases by a significant amount (decreases by MUCH more than 2), so the random intercepts model is a much better fit for the data. Cool!
+#### AIC comparison of all of the demographic interactions random effects models
+
+```{r}
+AIC(sex_id_mod, urm_id_mod, eop_id_mod, fgn_id_mod)
+```
 
 ## Notes
-* The way that I made the `ta_sect` values unique across both years was very long and convoluted. There has to be a better way... right?
-* It's too damn hot out.
+* I'd like to discuss regex some more... I had some trouble implementing the CFC code from the google doc into this data set.
