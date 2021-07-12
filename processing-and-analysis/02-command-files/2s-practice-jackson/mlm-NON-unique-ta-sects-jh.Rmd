@@ -1,7 +1,7 @@
 ---
-title: 'MLM With Unique TA Sections'
+title: 'MLM With Non-Unique TA Sections'
 author: "Jackson Hughes"
-date: "6/28/2021"
+date: "7/12/2021"
 output: 
   html_document:
     keep_md: yes
@@ -56,28 +56,19 @@ master_unique_2 <- master_unique_1 %>%
 master_unique <- na.omit(master_unique_2)
 ```
 
-### Make `ta_sect` values unique across `course_fullid`
-
-#### I'm going to be trying the code that CFC showed us
-
-```{r}
-master_true <- master_unique %>% 
-  mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
-```
-
 # Regression
 
 ## Regression of `final_c` on `experiment1` with control variables (no MLM)
 
 ```{r}
-mod_1 <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+mod_1 <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
 summary(mod_1)
 ```
 
 ## MLM random intercepts model for TA section (centered data)
 
 ```{r}
-mod_2 <- lmer(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+mod_2 <- lmer(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
 summary(mod_2)
 ```
 
@@ -86,28 +77,28 @@ summary(mod_2)
 ### Interactions from `sex_id`
 
 ```{r}
-sex_id_mod <- lmer(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+sex_id_mod <- lmer(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
 summary(sex_id_mod)
 ```
 
 ### Interactions from `urm_id`
 
 ```{r}
-urm_id_mod <- lmer(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+urm_id_mod <- lmer(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
 summary(urm_id_mod)
 ```
 
 ### Interactions from `eop_id`
 
 ```{r}
-eop_id_mod <- lmer(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+eop_id_mod <- lmer(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
 summary(eop_id_mod)
 ```
 
 ### Interactions from `fgn_id`
 
 ```{r}
-fgn_id_mod <- lmer(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true)
+fgn_id_mod <- lmer(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
 summary(fgn_id_mod)
 ```
 
@@ -124,6 +115,3 @@ AIC(mod_1, mod_2)
 ```{r}
 AIC(sex_id_mod, urm_id_mod, eop_id_mod, fgn_id_mod)
 ```
-
-## Notes
-* I'd like to discuss regex some more... I had some trouble implementing the CFC code from the google doc into this data set.

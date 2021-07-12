@@ -63,29 +63,8 @@ master_unique <- na.omit(master_unique_2)
 
 
 ```r
-master_unique_3 <- master_unique %>% 
-  select(course_fullid)
-master_unique_4 <- master_unique_3 %>% 
-  mutate(ta_sect = str_extract(course_fullid, "\\d\\d\\d\\d")) "\\d{4}"
-#### This line ^^ is the one that is giving me trouble
-master_true <- master_unique_3 %>% 
+master_true <- master_unique %>% 
   mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
-```
-
-#### That isn't working... for now I'm just going to split the dataframe and use `paste0`.
-
-
-```r
-master_unique$ta_sect <- as.character(master_unique$ta_sect)
-
-master_unique_2016 <- subset(master_unique, course_fullid != "CHEM_142_A_2017_4" & course_fullid != "CHEM_142_B_2017_4")
-master_unique_2017 <- subset(master_unique, course_fullid != "CHEM_142_A_2016_4" & course_fullid != "CHEM_142_B_2016_4")
-
-master_unique_2016$ta_sect <- paste0(master_unique_2016$ta_sect, "_16")
-master_unique_2017$ta_sect <- paste0(master_unique_2017$ta_sect, "_17")
-
-master_true <- rbind(master_unique_2016, master_unique_2017)
-master_true$ta_sect <- as.factor(master_true$ta_sect)
 ```
 
 # Regression
