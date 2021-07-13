@@ -28,19 +28,14 @@ df <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2
 ### data wrangling 
 #### creating data frames with unique `ta_sect` 
 ```{r}
-# df2 <- df %>% select(course_fullid)
+df2 <- df %>% select(course_fullid)
 
-# df3 <- df2 %>% mutate(year = str_extract(course_fullid, "\\d\\d\\d\\d")) "\\d{4}"
+df3 <- df2 %>% mutate(year = str_extract(course_fullid, "\\d\\d\\d\\d")) 
 
-# df4 <- df3 %>% 
-  # mutate(year = ifelse(str_detect(course_fullid, "2016"), 
-                       # paste(year, "A", sep = "_"),
-                       # paste(year, "B", sep = "_")))
-
-# df5 <- df3 %>% 
-  # mutate(year2 = ifelse(str_detect(course_fullid, "2017"), 
-                       # paste(year, "A", sep = "_"),
-                       # paste(year, "B", sep = "_")))
+df4 <- df3 %>% 
+  mutate(year = ifelse(str_detect(course_fullid, "2016"), 
+                       paste(year, "16", sep = "_"),
+                       paste(year, "17", sep = "_")))
 ```
 #### NOTE: I am trying to add A and B after the year, but I can't seem to make it work 
 #### Now using my orginal method.Creating unique rows and remove the ones that are not necessary for this data model
@@ -81,7 +76,7 @@ mod1 <- lm(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topic
 summary(mod1)
 AIC(mod1)
 #include `sex_id` as an interacting variable
-mod2 <- lmer(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod2 <- lmer(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod2)
 AIC(mod2)
@@ -95,7 +90,7 @@ mod3 <- lm(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topic
 summary(mod3)
 AIC(mod3)
 #include `sex_id` as an interacting variable
-mod4 <- lmer(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod4 <- lmer(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod4)
 AIC(mod4)
@@ -109,7 +104,7 @@ mod5 <- lm(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topic
 summary(mod5)
 AIC(mod5)
 #include `fgn_id` as an interacting variable
-mod6 <- lmer(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod6 <- lmer(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod6)
 AIC(mod6)
@@ -123,7 +118,7 @@ mod7 <- lm(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topic
 summary(mod7)
 AIC(mod7)
 #include `urm_id` as an interacting variable
-mod8 <- lmer(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod8 <- lmer(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod8)
 AIC(mod8)
@@ -132,10 +127,35 @@ AIC(mod7, mod8)
 ```
 #### NOTE: The AIC differences are all greater than 2 when interacting with different demographics.  
 
+### Models without unique `ta_sect`
+```{r}
+df5_true <- rename(data_2s_exam_score_true)
 
+#First, test that the treatment impacts scores
+mod9 <- lm(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=df5_true)
+summary(mod9)
+AIC(mod9)
 
+#Include random effects (clustering)
+mod10 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect), 
+           data=df5_true)
+summary(mod10)
+AIC(mod10)
 
+```
+```{r}
+AIC(mod9,mod10)
+```
+#### Values with unique `ta_sect` are: 	
+df
+<dbl>
+AIC
+<dbl>
+mod1	7	63734.08		
+mod2	8	63561.45
 
+#### NOTE: When considering random effects with unique `ta_sect`, the AIC value decreases compared to the AIC value without unique `ta_sect`
 
 
 
