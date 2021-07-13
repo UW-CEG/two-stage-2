@@ -91,19 +91,14 @@ df <- readRDS("G:/Shared drives/CEG Two-Stage Exams Analysis/Ganling/two-stage-2
 #### creating data frames with unique `ta_sect` 
 
 ```r
-# df2 <- df %>% select(course_fullid)
+df2 <- df %>% select(course_fullid)
 
-# df3 <- df2 %>% mutate(year = str_extract(course_fullid, "\\d\\d\\d\\d")) "\\d{4}"
+df3 <- df2 %>% mutate(year = str_extract(course_fullid, "\\d\\d\\d\\d")) 
 
-# df4 <- df3 %>% 
-  # mutate(year = ifelse(str_detect(course_fullid, "2016"), 
-                       # paste(year, "A", sep = "_"),
-                       # paste(year, "B", sep = "_")))
-
-# df5 <- df3 %>% 
-  # mutate(year2 = ifelse(str_detect(course_fullid, "2017"), 
-                       # paste(year, "A", sep = "_"),
-                       # paste(year, "B", sep = "_")))
+df4 <- df3 %>% 
+  mutate(year = ifelse(str_detect(course_fullid, "2016"), 
+                       paste(year, "16", sep = "_"),
+                       paste(year, "17", sep = "_")))
 ```
 #### NOTE: I am trying to add A and B after the year, but I can't seem to make it work 
 #### Now using my orginal method.Creating unique rows and remove the ones that are not necessary for this data model
@@ -187,7 +182,7 @@ AIC(mod1)
 
 ```r
 #include `sex_id` as an interacting variable
-mod2 <- lmer(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod2 <- lmer(finalexam ~ experiment1*sex_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod2)
 ```
@@ -196,7 +191,7 @@ summary(mod2)
 ## Linear mixed model fit by REML ['lmerMod']
 ## Formula: 
 ## finalexam ~ experiment1 * sex_id + satmath + satverbal + mastered_topics_initial_kc +  
-##     high_sch_gpa + sex_id + (1 | ta_sect)
+##     high_sch_gpa + (1 | ta_sect)
 ##    Data: master_true
 ## 
 ## REML criterion at convergence: 63474.2
@@ -296,7 +291,7 @@ AIC(mod3)
 
 ```r
 #include `sex_id` as an interacting variable
-mod4 <- lmer(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod4 <- lmer(finalexam ~ experiment1*eop_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod4)
 ```
@@ -305,52 +300,41 @@ summary(mod4)
 ## Linear mixed model fit by REML ['lmerMod']
 ## Formula: 
 ## finalexam ~ experiment1 * eop_id + satmath + satverbal + mastered_topics_initial_kc +  
-##     high_sch_gpa + sex_id + (1 | ta_sect)
+##     high_sch_gpa + (1 | ta_sect)
 ##    Data: master_true
 ## 
-## REML criterion at convergence: 63470.4
+## REML criterion at convergence: 63537.4
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -4.5559 -0.6338  0.0937  0.7025  2.8998 
+## -4.4212 -0.6244  0.0975  0.7056  2.9636 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  ta_sect  (Intercept)  17.36    4.167  
-##  Residual             333.31   18.257  
+##  ta_sect  (Intercept)  18.08    4.253  
+##  Residual             336.20   18.336  
 ## Number of obs: 7321, groups:  ta_sect, 110
 ## 
 ## Fixed effects:
 ##                                     Estimate Std. Error t value
-## (Intercept)                       -1.469e+02  5.169e+00 -28.412
-## experiment1EXPERIMENTAL           -1.090e+00  9.619e-01  -1.133
-## eop_idEOP                          1.041e+00  8.547e-01   1.218
-## satmath                            1.388e-01  4.237e-03  32.758
-## satverbal                          3.826e-02  4.192e-03   9.128
-## mastered_topics_initial_kc         2.975e-01  1.435e-02  20.729
-## high_sch_gpa                       3.333e+01  1.271e+00  26.225
-## sex_idFemale                      -3.776e+00  4.610e-01  -8.190
-## experiment1EXPERIMENTAL:eop_idEOP  5.497e-01  1.075e+00   0.511
+## (Intercept)                       -1.457e+02  5.192e+00 -28.058
+## experiment1EXPERIMENTAL           -1.079e+00  9.774e-01  -1.104
+## eop_idEOP                          9.549e-01  8.585e-01   1.112
+## satmath                            1.470e-01  4.133e-03  35.574
+## satverbal                          3.322e-02  4.165e-03   7.976
+## mastered_topics_initial_kc         3.029e-01  1.440e-02  21.033
+## high_sch_gpa                       3.183e+01  1.263e+00  25.197
+## experiment1EXPERIMENTAL:eop_idEOP  5.879e-01  1.080e+00   0.544
 ## 
 ## Correlation of Fixed Effects:
 ##                 (Intr) ex1EXPERIMENTAL ep_EOP satmth stvrbl mst___ hgh_s_
-## ex1EXPERIMENTAL -0.094                                                   
-## eop_idEOP       -0.205  0.163                                            
-## satmath         -0.181  0.009           0.143                            
-## satverbal       -0.148  0.005           0.111 -0.569                     
-## mstrd_tpc__      0.035 -0.002          -0.043 -0.174 -0.027              
-## high_sch_gp     -0.854 -0.011           0.041 -0.074 -0.069 -0.021       
-## sex_idFemal      0.028  0.001          -0.012  0.238 -0.147  0.046 -0.144
-## e1EXPERIMENTAL:  0.007 -0.244          -0.736 -0.019 -0.017  0.024  0.037
-##                 sx_dFm
-## ex1EXPERIMENTAL       
-## eop_idEOP             
-## satmath               
-## satverbal             
-## mstrd_tpc__           
-## high_sch_gp           
-## sex_idFemal           
-## e1EXPERIMENTAL:  0.004
+## ex1EXPERIMENTAL -0.095                                                   
+## eop_idEOP       -0.205  0.162                                            
+## satmath         -0.193  0.009           0.150                            
+## satverbal       -0.145  0.006           0.111 -0.555                     
+## mstrd_tpc__      0.034 -0.002          -0.042 -0.191 -0.020              
+## high_sch_gp     -0.859 -0.011           0.039 -0.041 -0.092 -0.015       
+## e1EXPERIMENTAL:  0.007 -0.242          -0.736 -0.021 -0.017  0.023  0.037
 ```
 
 ```r
@@ -358,7 +342,7 @@ AIC(mod4)
 ```
 
 ```
-## [1] 63492.37
+## [1] 63557.41
 ```
 
 ```r
@@ -368,7 +352,7 @@ AIC(mod3, mod4)
 ```
 ##      df      AIC
 ## mod3  9 63732.78
-## mod4 11 63492.37
+## mod4 10 63557.41
 ```
 
 ```r
@@ -416,7 +400,7 @@ AIC(mod5)
 
 ```r
 #include `fgn_id` as an interacting variable
-mod6 <- lmer(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod6 <- lmer(finalexam ~ experiment1*fgn_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod6)
 ```
@@ -425,52 +409,41 @@ summary(mod6)
 ## Linear mixed model fit by REML ['lmerMod']
 ## Formula: 
 ## finalexam ~ experiment1 * fgn_id + satmath + satverbal + mastered_topics_initial_kc +  
-##     high_sch_gpa + sex_id + (1 | ta_sect)
+##     high_sch_gpa + (1 | ta_sect)
 ##    Data: master_true
 ## 
-## REML criterion at convergence: 63457.7
+## REML criterion at convergence: 63524.1
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -4.5913 -0.6208  0.0951  0.7011  2.9603 
+## -4.4572 -0.6310  0.0948  0.6958  3.0257 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  ta_sect  (Intercept)  17.02    4.125  
-##  Residual             332.78   18.242  
+##  ta_sect  (Intercept)  17.72    4.21   
+##  Residual             335.65   18.32   
 ## Number of obs: 7321, groups:  ta_sect, 110
 ## 
 ## Fixed effects:
 ##                                     Estimate Std. Error t value
-## (Intercept)                       -1.390e+02  5.139e+00 -27.054
-## experiment1EXPERIMENTAL           -2.338e-02  9.659e-01  -0.024
-## fgn_idFGN                          3.385e-01  7.540e-01   0.449
-## satmath                            1.354e-01  4.197e-03  32.253
-## satverbal                          3.365e-02  4.291e-03   7.841
-## mastered_topics_initial_kc         2.995e-01  1.433e-02  20.900
-## high_sch_gpa                       3.269e+01  1.265e+00  25.847
-## sex_idFemale                      -3.754e+00  4.606e-01  -8.150
-## experiment1EXPERIMENTAL:fgn_idFGN -3.334e+00  9.759e-01  -3.416
+## (Intercept)                       -1.380e+02  5.161e+00 -26.729
+## experiment1EXPERIMENTAL           -2.565e-03  9.811e-01  -0.003
+## fgn_idFGN                          3.298e-01  7.574e-01   0.435
+## satmath                            1.436e-01  4.090e-03  35.120
+## satverbal                          2.867e-02  4.266e-03   6.719
+## mastered_topics_initial_kc         3.048e-01  1.438e-02  21.198
+## high_sch_gpa                       3.121e+01  1.257e+00  24.826
+## experiment1EXPERIMENTAL:fgn_idFGN -3.351e+00  9.803e-01  -3.419
 ## 
 ## Correlation of Fixed Effects:
 ##                 (Intr) ex1EXPERIMENTAL fg_FGN satmth stvrbl mst___ hgh_s_
-## ex1EXPERIMENTAL -0.097                                                   
-## fgn_idFGN       -0.183  0.214                                            
-## satmath         -0.166  0.012           0.101                            
-## satverbal       -0.175  0.006           0.177 -0.551                     
-## mstrd_tpc__      0.032  0.002          -0.022 -0.172 -0.028              
-## high_sch_gp     -0.842 -0.013          -0.011 -0.089 -0.073 -0.019       
-## sex_idFemal      0.026  0.002          -0.002  0.242 -0.142  0.045 -0.144
-## e1EXPERIMENTAL: -0.025 -0.287          -0.694  0.000  0.016  0.003  0.049
-##                 sx_dFm
-## ex1EXPERIMENTAL       
-## fgn_idFGN             
-## satmath               
-## satverbal             
-## mstrd_tpc__           
-## high_sch_gp           
-## sex_idFemal           
-## e1EXPERIMENTAL: -0.002
+## ex1EXPERIMENTAL -0.098                                                   
+## fgn_idFGN       -0.183  0.212                                            
+## satmath         -0.177  0.012           0.105                            
+## satverbal       -0.173  0.006           0.178 -0.538                     
+## mstrd_tpc__      0.031  0.002          -0.022 -0.189 -0.021              
+## high_sch_gp     -0.847 -0.012          -0.012 -0.056 -0.095 -0.013       
+## e1EXPERIMENTAL: -0.025 -0.284          -0.695  0.001  0.015  0.003  0.049
 ```
 
 ```r
@@ -478,7 +451,7 @@ AIC(mod6)
 ```
 
 ```
-## [1] 63479.71
+## [1] 63544.11
 ```
 
 ```r
@@ -488,7 +461,7 @@ AIC(mod5, mod6)
 ```
 ##      df      AIC
 ## mod5  9 63713.53
-## mod6 11 63479.71
+## mod6 10 63544.11
 ```
 
 ```r
@@ -536,7 +509,7 @@ AIC(mod7)
 
 ```r
 #include `urm_id` as an interacting variable
-mod8 <- lmer(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + sex_id + (1|ta_sect),
+mod8 <- lmer(finalexam ~ experiment1*urm_id + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect),
            data=master_true)
 summary(mod8)
 ```
@@ -545,52 +518,41 @@ summary(mod8)
 ## Linear mixed model fit by REML ['lmerMod']
 ## Formula: 
 ## finalexam ~ experiment1 * urm_id + satmath + satverbal + mastered_topics_initial_kc +  
-##     high_sch_gpa + sex_id + (1 | ta_sect)
+##     high_sch_gpa + (1 | ta_sect)
 ##    Data: master_true
 ## 
-## REML criterion at convergence: 63468.2
+## REML criterion at convergence: 63532.9
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -4.5424 -0.6275  0.0950  0.7080  2.8890 
+## -4.4077 -0.6256  0.0950  0.7050  2.9569 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  ta_sect  (Intercept)  17.59    4.194  
-##  Residual             333.20   18.254  
+##  ta_sect  (Intercept)  18.32    4.28   
+##  Residual             335.98   18.33   
 ## Number of obs: 7321, groups:  ta_sect, 110
 ## 
 ## Fixed effects:
 ##                                     Estimate Std. Error t value
-## (Intercept)                       -1.463e+02  5.116e+00 -28.602
-## experiment1EXPERIMENTAL           -1.228e+00  9.528e-01  -1.289
-## urm_idURM                          9.025e-02  1.021e+00   0.088
-## satmath                            1.385e-01  4.241e-03  32.661
-## satverbal                          3.738e-02  4.152e-03   9.002
-## mastered_topics_initial_kc         2.971e-01  1.436e-02  20.699
-## high_sch_gpa                       3.343e+01  1.274e+00  26.246
-## sex_idFemale                      -3.713e+00  4.614e-01  -8.046
-## experiment1EXPERIMENTAL:urm_idURM  2.347e+00  1.327e+00   1.768
+## (Intercept)                       -1.458e+02  5.139e+00 -28.372
+## experiment1EXPERIMENTAL           -1.227e+00  9.684e-01  -1.267
+## urm_idURM                          2.828e-01  1.025e+00   0.276
+## satmath                            1.470e-01  4.125e-03  35.634
+## satverbal                          3.259e-02  4.127e-03   7.896
+## mastered_topics_initial_kc         3.021e-01  1.440e-02  20.972
+## high_sch_gpa                       3.203e+01  1.267e+00  25.276
+## experiment1EXPERIMENTAL:urm_idURM  2.449e+00  1.333e+00   1.837
 ## 
 ## Correlation of Fixed Effects:
 ##                 (Intr) ex1EXPERIMENTAL ur_URM satmth stvrbl mst___ hgh_s_
-## ex1EXPERIMENTAL -0.094                                                   
-## urm_idURM       -0.147  0.128                                            
-## satmath         -0.176  0.010           0.144                            
-## satverbal       -0.121  0.003           0.031 -0.591                     
-## mstrd_tpc__      0.038  0.003          -0.040 -0.177 -0.024              
-## high_sch_gp     -0.862 -0.011           0.029 -0.071 -0.077 -0.024       
-## sex_idFemal      0.013  0.000           0.024  0.249 -0.143  0.043 -0.137
-## e1EXPERIMENTAL: -0.040 -0.180          -0.732 -0.013  0.009  0.005  0.062
-##                 sx_dFm
-## ex1EXPERIMENTAL       
-## urm_idURM             
-## satmath               
-## satverbal             
-## mstrd_tpc__           
-## high_sch_gp           
-## sex_idFemal           
-## e1EXPERIMENTAL:  0.009
+## ex1EXPERIMENTAL -0.095                                                   
+## urm_idURM       -0.147  0.126                                            
+## satmath         -0.185  0.011           0.142                            
+## satverbal       -0.120  0.003           0.035 -0.579                     
+## mstrd_tpc__      0.037  0.003          -0.041 -0.194 -0.018              
+## high_sch_gp     -0.868 -0.011           0.033 -0.038 -0.099 -0.018       
+## e1EXPERIMENTAL: -0.040 -0.178          -0.733 -0.016  0.010  0.005  0.064
 ```
 
 ```r
@@ -598,7 +560,7 @@ AIC(mod8)
 ```
 
 ```
-## [1] 63490.15
+## [1] 63552.88
 ```
 
 ```r
@@ -608,14 +570,125 @@ AIC(mod7, mod8)
 ```
 ##      df      AIC
 ## mod7  9 63731.76
-## mod8 11 63490.15
+## mod8 10 63552.88
 ```
 #### NOTE: The AIC differences are all greater than 2 when interacting with different demographics.  
 
+### Models without unique `ta_sect`
 
+```r
+df5_true <- rename(data_2s_exam_score_true)
 
+#First, test that the treatment impacts scores
+mod9 <- lm(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa, 
+           data=df5_true)
+summary(mod9)
+```
 
+```
+## 
+## Call:
+## lm(formula = finalexam ~ experiment1 + satmath + satverbal + 
+##     mastered_topics_initial_kc + high_sch_gpa, data = df5_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -88.732 -12.006   2.003  12.879  54.983 
+## 
+## Coefficients:
+##                              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                -1.440e+02  4.937e+00 -29.176  < 2e-16 ***
+## experiment1EXPERIMENTAL    -9.347e-01  4.418e-01  -2.116   0.0344 *  
+## satmath                     1.478e-01  4.053e-03  36.463  < 2e-16 ***
+## satverbal                   3.253e-02  4.142e-03   7.853 4.64e-15 ***
+## mastered_topics_initial_kc  3.007e-01  1.434e-02  20.967  < 2e-16 ***
+## high_sch_gpa                3.151e+01  1.258e+00  25.049  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.79 on 7315 degrees of freedom
+## Multiple R-squared:  0.4228,	Adjusted R-squared:  0.4224 
+## F-statistic:  1072 on 5 and 7315 DF,  p-value: < 2.2e-16
+```
 
+```r
+AIC(mod9)
+```
+
+```
+## [1] 63734.08
+```
+
+```r
+#Include random effects (clustering)
+mod10 <- lmer(finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc + high_sch_gpa + (1|ta_sect), 
+           data=df5_true)
+summary(mod10)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: 
+## finalexam ~ experiment1 + satmath + satverbal + mastered_topics_initial_kc +  
+##     high_sch_gpa + (1 | ta_sect)
+##    Data: df5_true
+## 
+## REML criterion at convergence: 63598.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.2889 -0.6247  0.1003  0.6965  2.8416 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)  11.2     3.347  
+##  Residual             342.0    18.494  
+## Number of obs: 7321, groups:  ta_sect, 57
+## 
+## Fixed effects:
+##                              Estimate Std. Error t value
+## (Intercept)                -1.422e+02  4.948e+00 -28.737
+## experiment1EXPERIMENTAL    -1.073e+00  4.423e-01  -2.426
+## satmath                     1.463e-01  4.033e-03  36.274
+## satverbal                   3.382e-02  4.107e-03   8.235
+## mastered_topics_initial_kc  3.020e-01  1.434e-02  21.062
+## high_sch_gpa                3.107e+01  1.253e+00  24.803
+## 
+## Correlation of Fixed Effects:
+##             (Intr) e1EXPE satmth stvrbl mst___
+## e1EXPERIMEN -0.072                            
+## satmath     -0.147  0.032                     
+## satverbal   -0.111  0.007 -0.603              
+## mstrd_tpc__  0.022  0.001 -0.190 -0.013       
+## high_sch_gp -0.876  0.001 -0.059 -0.105 -0.008
+```
+
+```r
+AIC(mod10)
+```
+
+```
+## [1] 63614.71
+```
+
+```r
+AIC(mod9,mod10)
+```
+
+```
+##       df      AIC
+## mod9   7 63734.08
+## mod10  8 63614.71
+```
+#### Values with unique `ta_sect` are: 	
+df
+<dbl>
+AIC
+<dbl>
+mod1	7	63734.08		
+mod2	8	63561.45
+
+#### NOTE: When considering random effects with unique `ta_sect`, the AIC value decreases compared to the AIC value without unique `ta_sect`
 
 
 
