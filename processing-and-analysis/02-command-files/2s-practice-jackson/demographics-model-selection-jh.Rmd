@@ -1,0 +1,243 @@
+---
+title: 'Model Selection on Demographic Interactions'
+author: "Jackson Hughes"
+date: "7/19/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+```
+
+# Preliminary setup and data wrangling
+
+## Data import
+
+### Set working directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+### Copy data from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import master dataset
+
+```{r}
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling
+
+### Condense dataset to only include unique rows; omit NAs
+
+```{r}
+master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+master_unique_1 <- unique(master_extras_removed, incomparables = FALSE)
+master_unique_2 <- master_unique_1 %>% 
+  select(exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master_unique <- na.omit(master_unique_2)
+```
+
+### Make `ta_sect` values unique across `course_fullid`
+
+```{r}
+master_true <- master_unique %>% 
+  mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
+```
+
+# Model Selection!
+
+## Model selection on `sex_id` interactions
+
+### Fixed-effects only (`sex_id`)
+
+```{r}
+sex_mod1 <- lm(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+```
+
+### Random-intercepts model with `REML = TRUE` (`sex_id`)
+
+```{r}
+sex_mod2 <- lmer(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+```
+
+### AIC comparison of `sex_mod1` and `sex_mod2`
+
+```{r}
+AIC(sex_mod1, sex_mod2)
+```
+
+* The AIC *decreases* by 168.22 for `sex_mod2`.
+
+### Model with no `sex_id` interactions and `REML = FALSE`
+
+```{r}
+sex_mod3 <- lmer(final_c ~ experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = FALSE)
+```
+
+### AIC comparision of `sex_mod2` and `sex_mod3`
+
+```{r}
+AIC(sex_mod2, sex_mod3)
+```
+
+* The AIC *decreases* by 18.31 for `sex_mod3`. Therefore, the model without interactions from `sex_id` fits the best.
+
+### Final result: random effects model with no `sex_id` interactions and `REML = TRUE`
+
+```{r}
+sex_mod4 <- lmer(final_c ~ experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+summary(sex_mod4)
+```
+
+## Model selection on `urm_id` interactions
+
+### Fixed-effects only (`urm_id`)
+
+```{r}
+urm_mod1 <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+```
+
+### Random-intercepts model with `REML = TRUE` (`urm_id`)
+
+```{r}
+urm_mod2 <- lmer(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+```
+
+### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(urm_mod1, urm_mod2)
+```
+
+* The AIC *decreases* by 178.88 for `urm_mod2`.
+
+### Model with no `urm_id` interactions and `REML = FALSE`
+
+```{r}
+urm_mod3 <- lmer(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = FALSE)
+```
+
+### AIC comparison of `urm_mod2` and `urm_mod3`
+
+```{r}
+AIC(urm_mod2, urm_mod3)
+```
+
+* The AIC *decreases* by 16.29 for `urm_mod3`. Therefore, the model without interactions from `urm_id` fits the best.
+
+### Final result: random effects model with no `urm_id` interactions and `REML = TRUE`
+
+```{r}
+urm_mod4 <- lmer(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+summary(urm_mod4)
+```
+
+## Model selection on `eop_id` interactions
+
+### Fixed-effects only (`eop_id`)
+
+```{r}
+eop_mod1 <- lm(final_c ~ experiment1*eop_id + experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+```
+
+### Random-intercepts model with `REML = TRUE` (`eop_id`)
+
+```{r}
+eop_mod2 <- lmer(final_c ~ experiment1*eop_id + experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+```
+
+### AIC comparison of `eop_mod1` and `eop_mod2`
+
+```{r}
+AIC(eop_mod1, eop_mod2)
+```
+
+* The AIC *decreases* by 175.37 for `eop_mod2`.
+
+### Model with no `eop_id` interactions and `REML = FALSE`
+
+```{r}
+eop_mod3 <- lmer(final_c ~ experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = FALSE)
+```
+
+### AIC comparison of `eop_mod2` and `eop_mod3`
+
+```{r}
+AIC(eop_mod2, eop_mod3)
+```
+
+* The AIC *decreases* by 20.15 for `eop_mod3`. Therefore, the model without interactions from `eop_id` fits the best.
+
+### Final result: random effects model with no `eop_id` interactions and `REML = TRUE`
+
+```{r}
+eop_mod4 <- lmer(final_c ~ experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+summary(eop_mod4)
+```
+
+## Model selection on `fgn_id` interactions
+
+### Fixed-effects only (`fgn_id`)
+
+```{r}
+fgn_mod1 <- lm(final_c ~ experiment1*fgn_id + experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+```
+
+### Random-intercepts model with `REML = TRUE` (`fgn_id`)
+
+```{r}
+fgn_mod2 <- lmer(final_c ~ experiment1*fgn_id + experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+```
+
+### AIC comparison of `fgn_mod1` and `fgn_mod2`
+
+```{r}
+AIC(fgn_mod1, fgn_mod2)
+```
+
+* The AIC *decreases* by 169.42 for `fgn_mod2`.
+
+### Model with no `fgn_id` interactions and `REML = FALSE`
+
+```{r}
+fgn_mod3 <- lmer(final_c ~ experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = FALSE)
+```
+
+### AIC comparison of `fgn_mod2` and `fgn_mod3`
+
+```{r}
+AIC(fgn_mod2, fgn_mod3)
+```
+
+* The AIC *decreases* by 9.11 for `eop_mod3`. Therefore, the model without interactions from `eop_id` fits the best. 
+
+### Final result: random effects model with no `fgn_id` interactions and `REML = TRUE`
+
+```{r}
+fgn_mod4 <- lmer(final_c ~ experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+summary(fgn_mod4)
+```
+
+## Notes/Questions
+* For every demographic identifier, the model selection process has shown that the best-fitting model is the one that includes random effects, but *doesn't* include any interactions from the demographic IDs.
+* How are we able to significantly compare `dem_mod2` and `dem_mod3` when one uses REML and the other uses ML?
+* ^^ According to Zuur et al. 2009, "we must use REML estimators to compare these (nested) models," i.e., the models that include the `ta_sect` random effects.
