@@ -228,7 +228,7 @@ fgn_mod3 <- lmer(final_c ~ experiment1 + fgn_id + satm_c + satv_c + aleksikc_c +
 AIC(fgn_mod2, fgn_mod3)
 ```
 
-* The AIC *decreases* by 9.11 for `eop_mod3`. Therefore, the model without interactions from `eop_id` fits the best. 
+* The AIC *decreases* by 9.11 for `fgn_mod3`. Therefore, the model without interactions from `fgn_id` fits the best. 
 
 ### Final result: random effects model with no `fgn_id` interactions and `REML = TRUE`
 
