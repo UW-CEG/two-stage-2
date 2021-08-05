@@ -685,10 +685,274 @@ df
 <dbl>
 AIC
 <dbl>
-mod1	7	63734.08		
-mod2	8	63561.45
+mod1 (linear fit)	7	63734.08		
+mod2 (random effect)	63561.45
 
 #### NOTE: When considering random effects with unique `ta_sect`, the AIC value decreases compared to the AIC value without unique `ta_sect`
+
+## Model Secletion
+#### Finding the best fit model for `sex_id`
+
+```r
+# Making a model that has fixed effects only with `lm()`
+sex_mod1 <- lm(finalexam ~ experiment1 * sex_id + experiment1 +
+                 sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, 
+               data = master_true)
+
+# Add in random effects for `ta_sect`
+sex_mod2 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = TRUE)
+
+AIC(sex_mod1, sex_mod2)
+```
+
+```
+##          df      AIC
+## sex_mod1  9 63662.44
+## sex_mod2 10 63494.22
+```
+
+```r
+# create a model with REML turned off 
+sex_mod3 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = FALSE)
+
+# remove experiment1 * dem_id from the best model predicted 
+sex_mod3.a <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
+
+AIC(sex_mod3, sex_mod3.a)
+```
+
+```
+##            df      AIC
+## sex_mod3   10 63474.82
+## sex_mod3.a  9 63475.91
+```
+
+```r
+# remove `experiment1` because it has the lowest t value 
+
+
+#Refit model 3 with lmer and REML = TRUE 
+sex_mod4 <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                   satverbal + mastered_topics_initial_kc +  high_sch_gpa + 
+                   (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(sex_mod4)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: 
+## finalexam ~ experiment1 + sex_id + satmath + satverbal + mastered_topics_initial_kc +  
+##     high_sch_gpa + (1 | ta_sect)
+##    Data: master_true
+## 
+## REML criterion at convergence: 63478.9
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.5638 -0.6262  0.0977  0.7010  2.8624 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)  17.33    4.163  
+##  Residual             333.49   18.262  
+## Number of obs: 7321, groups:  ta_sect, 110
+## 
+## Fixed effects:
+##                              Estimate Std. Error t value
+## (Intercept)                -1.433e+02  4.940e+00 -29.006
+## experiment1EXPERIMENTAL    -9.145e-01  9.319e-01  -0.981
+## sex_idFemale               -3.762e+00  4.611e-01  -8.159
+## satmath                     1.369e-01  4.159e-03  32.920
+## satverbal                   3.686e-02  4.147e-03   8.887
+## mastered_topics_initial_kc  2.986e-01  1.434e-02  20.820
+## high_sch_gpa                3.301e+01  1.264e+00  26.112
+## 
+## Correlation of Fixed Effects:
+##             (Intr) e1EXPE sx_dFm satmth stvrbl mst___
+## e1EXPERIMEN -0.108                                   
+## sex_idFemal  0.026  0.002                            
+## satmath     -0.133  0.010  0.245                     
+## satverbal   -0.110  0.005 -0.146 -0.615              
+## mstrd_tpc__  0.025  0.003  0.045 -0.170 -0.021       
+## high_sch_gp -0.868  0.001 -0.144 -0.094 -0.085 -0.019
+```
+#### Finding the best fit model for `eop_id`
+
+```r
+# Making a model that has fixed effects only with `lm()`
+eop_mod1 <- lm(finalexam ~ experiment1 * eop_id + experiment1 + eop_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+eop_mod2 <- lmer(finalexam ~ experiment1 * eop_id + experiment1 + eop_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(eop_mod1, eop_mod2)
+```
+
+```
+##          df      AIC
+## eop_mod1  9 63732.78
+## eop_mod2 10 63557.41
+```
+
+```r
+# remove experiment1 * dem_id from the best model predicted 
+eop_mod3 <- lmer(finalexam ~ experiment1 + eop_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+
+AIC(eop_mod2, eop_mod3)
+```
+
+```
+##          df      AIC
+## eop_mod2 10 63557.41
+## eop_mod3  9 63537.26
+```
+
+```r
+#Refit model 3 with lmer and REML = FALSE
+eop_mod4 <- lmer(finalexam ~ experiment1 + eop_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(eop_mod3, eop_mod4)
+```
+
+```
+##          df      AIC
+## eop_mod3  9 63537.26
+## eop_mod4  9 63557.70
+```
+#### Finding the best fit model for `fgn_id`
+
+```r
+# Making a model that has fixed effects only with `lm()`
+fgn_mod1 <- lm(finalexam ~ experiment1 * fgn_id + experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+fgn_mod2 <- lmer(finalexam ~ experiment1 * fgn_id + experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(fgn_mod1, fgn_mod2)
+```
+
+```
+##          df      AIC
+## fgn_mod1  9 63713.53
+## fgn_mod2 10 63544.11
+```
+
+```r
+# remove experiment1 * dem_id from the best model predicted 
+fgn_mod3 <- lmer(finalexam ~ experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+
+AIC(fgn_mod2, fgn_mod3)
+```
+
+```
+##          df      AIC
+## fgn_mod2 10 63544.11
+## fgn_mod3  9 63535.00
+```
+
+```r
+#Refit model 3 with lmer and REML = FALSE
+fgn_mod4 <- lmer(finalexam ~ experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(fgn_mod3, fgn_mod4)
+```
+
+```
+##          df      AIC
+## fgn_mod3  9 63535.00
+## fgn_mod4  9 63555.58
+```
+#### Finding the best fit model for `urm_id`
+
+```r
+# Making a model that has fixed effects only with `lm()`
+urm_mod1 <- lm(finalexam ~ experiment1 * urm_id + experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+urm_mod2 <- lmer(finalexam ~ experiment1 * urm_id + experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(urm_mod1, urm_mod2)
+```
+
+```
+##          df      AIC
+## urm_mod1  9 63731.76
+## urm_mod2 10 63552.88
+```
+
+```r
+# remove experiment1 * dem_id from the best model predicted 
+urm_mod3 <- lmer(finalexam ~ experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+
+AIC(fgn_mod2, fgn_mod3)
+```
+
+```
+##          df      AIC
+## fgn_mod2 10 63544.11
+## fgn_mod3  9 63535.00
+```
+
+```r
+#Refit model 3 with lmer and REML = FALSE
+urm_mod4 <- lmer(finalexam ~ experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(urm_mod4)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: 
+## finalexam ~ experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  
+##     high_sch_gpa + (1 | ta_sect)
+##    Data: master_true
+## 
+## REML criterion at convergence: 63538.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.4178 -0.6303  0.1014  0.7110  2.9500 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)  18.05    4.249  
+##  Residual             336.15   18.334  
+## Number of obs: 7321, groups:  ta_sect, 110
+## 
+## Fixed effects:
+##                              Estimate Std. Error t value
+## (Intercept)                -1.454e+02  5.135e+00 -28.320
+## experiment1EXPERIMENTAL    -9.122e-01  9.475e-01  -0.963
+## urm_idURM                   1.662e+00  6.977e-01   2.382
+## satmath                     1.471e-01  4.125e-03  35.663
+## satverbal                   3.251e-02  4.128e-03   7.877
+## mastered_topics_initial_kc  3.020e-01  1.441e-02  20.960
+## high_sch_gpa                3.188e+01  1.265e+00  25.205
+## 
+## Correlation of Fixed Effects:
+##             (Intr) e1EXPE ur_URM satmth stvrbl mst___
+## e1EXPERIMEN -0.103                                   
+## urm_idURM   -0.259 -0.006                            
+## satmath     -0.186  0.008  0.192                     
+## satverbal   -0.120  0.005  0.062 -0.579              
+## mstrd_tpc__  0.037  0.004 -0.055 -0.194 -0.018       
+## high_sch_gp -0.868  0.000  0.118 -0.037 -0.100 -0.019
+```
+#### For each demographic identifier, the best fitting model is the one with random effects and without interactions (model 3). The AIC value decreases by adding random effects and removing interaction. 
+
+
+
+
+
+
 
 
 

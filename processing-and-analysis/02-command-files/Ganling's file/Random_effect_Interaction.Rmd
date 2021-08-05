@@ -161,22 +161,39 @@ mod2 (random effect)	63561.45
 #### Finding the best fit model for `sex_id`
 ```{r}
 # Making a model that has fixed effects only with `lm()`
-sex_mod1 <- lm(finalexam ~ experiment1 * sex_id + experiment1 + sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
+sex_mod1 <- lm(finalexam ~ experiment1 * sex_id + experiment1 +
+                 sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, 
+               data = master_true)
 
 # Add in random effects for `ta_sect`
-sex_mod2 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 + sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+sex_mod2 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = TRUE)
 
 AIC(sex_mod1, sex_mod2)
 
+# create a model with REML turned off 
+sex_mod3 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = FALSE)
+
 # remove experiment1 * dem_id from the best model predicted 
-sex_mod3 <- lmer(finalexam ~ experiment1 + sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+sex_mod3.a <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
 
-AIC(sex_mod2, sex_mod3)
+AIC(sex_mod3, sex_mod3.a)
 
-#Refit model 3 with lmer and REML = FALSE
-sex_mod4 <- lmer(finalexam ~ experiment1 + sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+# remove `experiment1` because it has the lowest t value 
 
-AIC(sex_mod3, sex_mod4)
+
+#Refit model 3 with lmer and REML = TRUE 
+sex_mod4 <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                   satverbal + mastered_topics_initial_kc +  high_sch_gpa + 
+                   (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(sex_mod4)
 
 ```
 #### Finding the best fit model for `eop_id`
@@ -227,7 +244,7 @@ AIC(fgn_mod3, fgn_mod4)
 urm_mod1 <- lm(finalexam ~ experiment1 * urm_id + experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
 
 # Add in random effects for `ta_sect`
-urm_mod2 <- lmer(finalexam ~ experiment1 * urm_id + experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+urm_mod2 <- lmer(finalexam ~ experiment1 * urm_id + experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
 
 AIC(urm_mod1, urm_mod2)
 
@@ -239,7 +256,7 @@ AIC(fgn_mod2, fgn_mod3)
 #Refit model 3 with lmer and REML = FALSE
 urm_mod4 <- lmer(finalexam ~ experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
 
-AIC(urm_mod3, urm_mod4)
+summary(urm_mod4)
 ```
 #### For each demographic identifier, the best fitting model is the one with random effects and without interactions (model 3). The AIC value decreases by adding random effects and removing interaction. 
 
