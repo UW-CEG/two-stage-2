@@ -42,11 +42,12 @@ df4 <- df3 %>%
 ```{r}
 data_2s_extras_removed = subset(df, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
 data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
-View(data_2s_unique)
+
 data_2s_exam_score <- data_2s_unique %>% 
-  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
-  
-data_2s_exam_score_true <- na.omit(data_2s_exam_score)
+  select(two_stage_id, exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
+
+data_2s_exam_score_true_2 <- unique(data_2s_exam_score)
+data_2s_exam_score_true <- na.omit(data_2s_exam_score_true_2)
 ```
 ### Make `ta_sect` unique across different data values
 #### First, we need to split the data from into year 16 and year 17 
@@ -196,6 +197,8 @@ sex_mod4 <- lmer(finalexam ~ experiment1 + sex_id + satmath +
 summary(sex_mod4)
 
 ```
+#### NOTE: The AIC value went up after adding in `ta_sect` random effects. Does this mean we no longer need to include the random effects?
+
 #### Finding the best fit model for `eop_id`
 ```{r}
 # Making a model that has fixed effects only with `lm()`
@@ -313,7 +316,7 @@ urm_mod4 <- lmer(finalexam ~ experiment1 + urm_id + satmath + satverbal + master
 
 summary(urm_mod4)
 ```
-#### For each demographic identifier, the best fitting model is the one with random effects and without interactions (model 3). The AIC value decreases by adding random effects and removing interaction. 
+#### The AIC values all went up after adding the random effect. Does it mean we no longer need to include the random effect? Also, what do we need to do for our next step then if we now do not have to consider random effect?
 
 
 
