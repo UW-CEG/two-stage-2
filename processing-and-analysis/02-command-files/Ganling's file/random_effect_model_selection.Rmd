@@ -145,6 +145,67 @@ summary(sex_mod3.f)
 * Again, the AIC value went up. `satm_c` should be kept
 * `sex_mod3.a` is the best fitting model  
 
+### Model selection on `eop_id`
+#### Eop model 1: fixed effect
+```{r}
+eop_mod1 <- lm(final_c ~ experiment1 * eop_id + 
+                 experiment1 + eop_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+summary(eop_mod1)
+```
+#### EOP model 2: random effect
+```{r}
+eop_mod2 <- lmer(final_c ~ experiment1 * eop_id + 
+                   experiment1 + eop_id +
+                   satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                   (1 | ta_sect),
+                 data = df_true, REML = TRUE)
+summary(eop_mod2)
+AIC(eop_mod1, eop_mod2)
+```
+* AIC value went up, random effect should not be removed
+* Interaction has the lowest t value, it should be removed next
+
+#### Eop model 3: remove `experiment1` and `eop_id` interaction and no radnom effect 
+```{r}
+eop_mod3 <- lm(final_c ~ experiment1 + eop_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod1, eop_mod3)
+summary(eop_mod3)
+```
+* The AIC value decreased with the new model, meaning the interaction should be removed
+
+#### eop model 3.a: remove `eop_id`
+```{r}
+eop_mod3.a <- lm(final_c ~ experiment1 + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3, eop_mod3.a)
+summary(eop_mod3.a)
+```
+* The AIC value decreased slightly, and the `eop_mod3.a` has the lower value. `eop_id` should be removed
+
+#### eop model 3.b: remove `experiemnt1`
+```{r}
+eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3.a, eop_mod3.b)
+summary(eop_mod3.b)
+```
+* The `eop_mod3.b` has a lower AIC value meaning `experiment1` should also be removed. 
+
+#### eop model 3.c: remove `satv_c`
+```{r}
+eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3.b, eop_mod3.c)
+summary(eop_mod3.c)
+```
+* The AIC value went up, `satv_c` should be kept. 
+* `eop_mod3.c` is the best fitting model
+
 
 
 

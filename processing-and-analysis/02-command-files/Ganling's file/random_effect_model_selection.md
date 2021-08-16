@@ -470,6 +470,287 @@ summary(sex_mod3.f)
 * Again, the AIC value went up. `satm_c` should be kept
 * `sex_mod3.a` is the best fitting model  
 
+### Model selection on `eop_id`
+#### Eop model 1: fixed effect
+
+```r
+eop_mod1 <- lm(final_c ~ experiment1 * eop_id + 
+                 experiment1 + eop_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+summary(eop_mod1)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 * eop_id + experiment1 + eop_id + 
+##     satm_c + satv_c + aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.144 -12.218   2.052  13.125  55.655 
+## 
+## Coefficients:
+##                                    Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                        0.154736   0.674516   0.229    0.819    
+## experiment1EXPERIMENTAL           -0.982452   0.935021  -1.051    0.294    
+## eop_idEOP                          1.248068   1.577810   0.791    0.429    
+## satm_c                             0.147652   0.007710  19.152  < 2e-16 ***
+## satv_c                             0.037367   0.007828   4.774 1.93e-06 ***
+## aleksikc_c                         0.317201   0.027395  11.579  < 2e-16 ***
+## hsgpa_c                           30.743824   2.360475  13.024  < 2e-16 ***
+## experiment1EXPERIMENTAL:eop_idEOP -0.091892   1.991752  -0.046    0.963    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.99 on 2126 degrees of freedom
+## Multiple R-squared:  0.4239,	Adjusted R-squared:  0.422 
+## F-statistic: 223.5 on 7 and 2126 DF,  p-value: < 2.2e-16
+```
+#### EOP model 2: random effect
+
+```r
+eop_mod2 <- lmer(final_c ~ experiment1 * eop_id + 
+                   experiment1 + eop_id +
+                   satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                   (1 | ta_sect),
+                 data = df_true, REML = TRUE)
+summary(eop_mod2)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: final_c ~ experiment1 * eop_id + experiment1 + eop_id + satm_c +  
+##     satv_c + aleksikc_c + hsgpa_c + (1 | ta_sect)
+##    Data: df_true
+## 
+## REML criterion at convergence: 18616.6
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.5923 -0.6180  0.1026  0.6874  2.9337 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)   7.165   2.677  
+##  Residual             353.516  18.802  
+## Number of obs: 2134, groups:  ta_sect, 110
+## 
+## Fixed effects:
+##                                    Estimate Std. Error t value
+## (Intercept)                        0.211877   0.779195   0.272
+## experiment1EXPERIMENTAL           -1.072257   1.077210  -0.995
+## eop_idEOP                          1.045116   1.577096   0.663
+## satm_c                             0.147195   0.007708  19.097
+## satv_c                             0.036918   0.007814   4.724
+## aleksikc_c                         0.318464   0.027444  11.604
+## hsgpa_c                           30.756407   2.359456  13.035
+## experiment1EXPERIMENTAL:eop_idEOP  0.277713   1.998735   0.139
+## 
+## Correlation of Fixed Effects:
+##                 (Intr) ex1EXPERIMENTAL ep_EOP satm_c satv_c alksk_ hsgp_c
+## ex1EXPERIMENTAL -0.711                                                   
+## eop_idEOP       -0.393  0.256                                            
+## satm_c          -0.007  0.004           0.172                            
+## satv_c          -0.086 -0.019           0.111 -0.546                     
+## aleksikc_c       0.024  0.007          -0.040 -0.192 -0.036              
+## hsgpa_c         -0.017 -0.024           0.041 -0.028 -0.113 -0.023       
+## e1EXPERIMENTAL:  0.289 -0.407          -0.724 -0.032 -0.015  0.018  0.036
+```
+
+```r
+AIC(eop_mod1, eop_mod2)
+```
+
+```
+##          df      AIC
+## eop_mod1  9 18629.78
+## eop_mod2 10 18636.63
+```
+* AIC value went up, random effect should not be removed
+* Interaction has the lowest t value, it should be removed next
+
+#### Eop model 3: remove `experiment1` and `eop_id` interaction and no radnom effect 
+
+```r
+eop_mod3 <- lm(final_c ~ experiment1 + eop_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod1, eop_mod3)
+```
+
+```
+##          df      AIC
+## eop_mod1  9 18629.78
+## eop_mod3  8 18627.79
+```
+
+```r
+summary(eop_mod3)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 + eop_id + satm_c + satv_c + 
+##     aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.134 -12.213   2.044  13.134  55.664 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)              0.165229   0.634870   0.260    0.795    
+## experiment1EXPERIMENTAL -1.002677   0.825700  -1.214    0.225    
+## eop_idEOP                1.195204   1.084434   1.102    0.271    
+## satm_c                   0.147640   0.007704  19.165  < 2e-16 ***
+## satv_c                   0.037361   0.007825   4.775 1.92e-06 ***
+## aleksikc_c               0.317219   0.027386  11.583  < 2e-16 ***
+## hsgpa_c                 30.747384   2.358660  13.036  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2127 degrees of freedom
+## Multiple R-squared:  0.4239,	Adjusted R-squared:  0.4223 
+## F-statistic: 260.9 on 6 and 2127 DF,  p-value: < 2.2e-16
+```
+* The AIC value decreased with the new model, meaning the interaction should be removed
+
+#### eop model 3.a: remove `eop_id`
+
+```r
+eop_mod3.a <- lm(final_c ~ experiment1 + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3, eop_mod3.a)
+```
+
+```
+##            df      AIC
+## eop_mod3    8 18627.79
+## eop_mod3.a  7 18627.01
+```
+
+```r
+summary(eop_mod3.a)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + 
+##     hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.284 -12.165   2.009  13.061  55.053 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)              0.393484   0.600172   0.656    0.512    
+## experiment1EXPERIMENTAL -0.936662   0.823567  -1.137    0.256    
+## satm_c                   0.145807   0.007522  19.384  < 2e-16 ***
+## satv_c                   0.036092   0.007740   4.663 3.31e-06 ***
+## aleksikc_c               0.318332   0.027369  11.631  < 2e-16 ***
+## hsgpa_c                 30.496329   2.347753  12.990  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2128 degrees of freedom
+## Multiple R-squared:  0.4236,	Adjusted R-squared:  0.4222 
+## F-statistic: 312.8 on 5 and 2128 DF,  p-value: < 2.2e-16
+```
+* The AIC value decreased slightly, and the `eop_mod3.a` has the lower value. `eop_id` should be removed
+
+#### eop model 3.b: remove `experiemnt1`
+
+```r
+eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3.a, eop_mod3.b)
+```
+
+```
+##            df      AIC
+## eop_mod3.a  7 18627.01
+## eop_mod3.b  6 18626.30
+```
+
+```r
+summary(eop_mod3.b)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+##     data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.727 -12.063   2.107  13.116  54.575 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) -0.099879   0.414793  -0.241     0.81    
+## satm_c       0.145876   0.007522  19.392  < 2e-16 ***
+## satv_c       0.035867   0.007738   4.635 3.78e-06 ***
+## aleksikc_c   0.318807   0.027367  11.649  < 2e-16 ***
+## hsgpa_c     30.478179   2.347861  12.981  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2129 degrees of freedom
+## Multiple R-squared:  0.4232,	Adjusted R-squared:  0.4222 
+## F-statistic: 390.6 on 4 and 2129 DF,  p-value: < 2.2e-16
+```
+* The `eop_mod3.b` has a lower AIC value meaning `experiment1` should also be removed. 
+
+#### eop model 3.c: remove `satv_c`
+
+```r
+eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(eop_mod3.b, eop_mod3.c)
+```
+
+```
+##            df      AIC
+## eop_mod3.b  6 18626.30
+## eop_mod3.c  5 18645.73
+```
+
+```r
+summary(eop_mod3.c)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ satm_c + aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -87.617 -12.297   2.092  13.674  52.278 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  0.100270   0.414518   0.242    0.809    
+## satm_c       0.166767   0.006052  27.558   <2e-16 ***
+## aleksikc_c   0.322489   0.027487  11.732   <2e-16 ***
+## hsgpa_c     31.869250   2.339770  13.621   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 19.08 on 2130 degrees of freedom
+## Multiple R-squared:  0.4174,	Adjusted R-squared:  0.4166 
+## F-statistic: 508.7 on 3 and 2130 DF,  p-value: < 2.2e-16
+```
+* The AIC value went up, `satv_c` should be kept. 
+* `eop_mod3.c` is the best fitting model
+
 
 
 
