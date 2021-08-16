@@ -1,0 +1,151 @@
+---
+title: "random_effect_model_selection"
+author: "Ganling"
+date: "8/15/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(fs) # file system operations functions
+library(readxl)
+library(janitor)
+library(knitr)
+library(lme4)
+```
+
+## Set working directories
+```{r}
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+```
+
+## Import data set
+### Copy data from `original-data` to `01-importable-data`
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+### Import master data set
+```{r}
+df <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling 
+### Creating unique rows and omit NA's
+```{r}
+df_removed <- subset(df, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+df_unique_1 <- df_removed %>% 
+select(two_stage_id, exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+df_unique_2 <- unique(df_unique_1)
+df_unique <- na.omit(df_unique_2)
+```
+### Make `ta_sect`  unique
+```{r}
+df_true <- df_unique %>% 
+  mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
+```
+## Model selection 
+### Model selection on `sex_id`
+#### Sex Model 1: fixed effect
+```{r}
+sex_mod1 <- lm(final_c ~ experiment1 * sex_id + 
+                 experiment1 + sex_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+summary(sex_mod1)
+```
+#### Sex model 2: random effect 
+```{r}
+sex_mod2 <- lmer(final_c ~ experiment1 * sex_id + 
+                   experiment1 + sex_id +
+                   satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                   (1 | ta_sect),
+                 data = df_true, REML = TRUE)
+summary(sex_mod2)
+
+AIC(sex_mod1, sex_mod2)
+```
+* Since the AIC value went up after adding random effect, we can ignore the random effect.  
+
+#### Sex model 3: no interaction or random effect
+```{r}
+sex_mod3 <- lm(final_c ~ experiment1 + sex_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod1, sex_mod3)
+summary(sex_mod3)
+```
+* The AIC value decreased for `sex_mod3`
+* The interaction between `experiemnt1` and `sex_id` should not be included
+
+#### Sex model 3.a: No `experiment1` 
+```{r}
+sex_mod3.a <- lm(final_c ~ sex_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod3, sex_mod3.a)
+summary(sex_mod3.a)
+```
+* The AIC value slightly decreased...
+* Since sex_mod3.a is slightly smaller, we keep this model
+
+#### Sex model 3.b: Remove `sex_id`
+```{r}
+sex_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod3.a, sex_mod3.b)
+summary(sex_mod3.b)
+```
+* Since the AIC value increased, `sex_id` should be kept in the model
+
+#### Sex model 3.c: Remove `satv_c`
+```{r}
+sex_mod3.c <- lm(final_c ~ sex_id + 
+                 satm_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod3.a, sex_mod3.c)
+summary(sex_mod3.c)
+```
+* The AIC value went up, so `satv_c` should be kept in our model 
+
+#### Sex model 3.d: Remove `aleksikc_c`
+```{r}
+sex_mod3.d <- lm(final_c ~ sex_id + 
+                 satm_c + satv_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod3.a, sex_mod3.d)
+summary(sex_mod3.d)
+```
+* The AIC value went up, `alekikc_c` is kept
+
+#### Sex Model 3.e: remove `hsgpa_c`
+```{r}
+sex_mod3.e <- lm(final_c ~ sex_id + 
+                 satm_c + satv_c + aleksikc_c , 
+               data = df_true)
+AIC(sex_mod3.a, sex_mod3.e)
+summary(sex_mod3.e)
+```
+* The AIC value went up, `hsgpa_c` is kept
+
+#### Sex Model 3.f: Remove `satm_c`
+```{r}
+sex_mod3.f <- lm(final_c ~ sex_id + 
+                 satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(sex_mod3.a, sex_mod3.f)
+summary(sex_mod3.f)
+```
+* Again, the AIC value went up. `satm_c` should be kept
+* `sex_mod3.a` is the best fitting model  
+
+
+
+
+
