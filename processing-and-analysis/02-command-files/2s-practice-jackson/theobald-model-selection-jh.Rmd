@@ -136,7 +136,7 @@ urm_mod2 <- lmer(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + 
 AIC(urm_mod1, urm_mod2)
 ```
 
-* The AIC *increases* for `urm_mod2` (ughhhh). So we will proceed with the model without random effects.
+* The AIC *increases* for `urm_mod2`. So we will proceed with the model without random effects.
 
 ### Model with no `urm_id` interactions or random effects
 
@@ -202,7 +202,7 @@ AIC(eop_mod1, eop_mod3)
 ```
 
 * The AIC *decreases* by 1.99 for `eop_mod3`
-* In this case it appears that the model could go either way, but I will go ahead and keep the `eop_id` interactions
+* In this case we should choose the simplest model, which is `eop_mod3`.
 
 ### Removal of parameters one by one
 
@@ -213,11 +213,12 @@ summary(eop_mod3)
 * Once again, `satv_c` has the lowest t-value, so we will try removing it from the model.
 
 ```{r}
-eop_mod3.a <- lm(final_c ~ experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3.a <- lm(final_c ~ experiment1 + eop_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
 AIC(eop_mod3, eop_mod3.a)
 ```
 
-* There is no difference WTF. Let's just keep `eop_mod3`, which includes `satv_c` as a parameter (summary is a few lines above ^)
+* The AIC *increases* for `eop_mod3.a`, so we should include `satv_c` as a parameter in our model.
+* Our final model is `eop_mod3`, which is summarized above.
 
 ## Model selection on `fgn_id` interactions
 
