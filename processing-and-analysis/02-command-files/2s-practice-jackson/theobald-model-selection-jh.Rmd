@@ -399,3 +399,4 @@ AIC(urm_mod3.b, urm_mod3.c)
 * The AIC *increases* for `urm_mod3.c`, so we should keep `urm_mod3.b` as our final model, which is summarized above.
 
 ## Notes
+* It actually appears that no interactions are retained for any of the models. This is because when I originally ran the third models for `sex_id` and `urm_id` last week, I accidentally omitted `hsgpa_c`. This drove up the AIC, which gave the illusion that getting rid of the demographic interactions created models that fit the data worse.
