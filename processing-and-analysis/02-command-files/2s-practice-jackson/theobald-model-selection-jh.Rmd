@@ -136,7 +136,7 @@ summary(sex_mod3.b)
 AIC(sex_mod3.a, sex_mod3.b)
 ```
 
-* The AIC *increases* for `sex_mod3.b`, so we should use `sex_mod3.a` as our final model (summarized above). This means that we are retaining the `sex_id` parameter in our model.
+* The AIC *increases* for `sex_mod3.b`, so we should use `sex_mod3.a` as our final model (summarized above). This means that we are retaining the `sex_id` parameter in our final model.
 
 ## Model selection on `eop_id` interactions
 
@@ -311,21 +311,40 @@ urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c + h
 AIC(urm_mod1, urm_mod3)
 ```
 
-* The AIC *increases* for `urm_mod3`, which indicates that we should retain the `urm_id` interactions in our model.
+* The AIC *decreases* by *less than 2* for `urm_mod3`, which indicates that we should retain the simplest model, which is `urm_mod3`. This indicates that we are not keeping interactions from `urm_id` in our model.
 
 ### Removal of parameters one by one
 
 ```{r}
-summary(urm_mod1)
+summary(urm_mod3)
 ```
 
-* `satv_c` has the lowest t-value, so we should try removing that parameter from the model first.
+* `urm_id` has the lowest t-value, so we'll try removing that parameter first.
 
 ```{r}
-urm_mod1.a <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
-AIC(urm_mod1, urm_mod1.a)
+urm_mod3.a <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(urm_mod3.a)
+AIC(urm_mod3, urm_mod3.a)
 ```
 
-* The AIC increases for `urm_mod1.a`, so we should retain the `urm_mod1` model (summary is a few lines above ^)
+* The AIC *decreases* by *less than 2* for `urm_mod3.a`, so we should retain the simplest model, which is `urm_mod3.a`.
+* Now let's try removing `experiment1` from the model.
+
+```{r}
+urm_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(urm_mod3.b)
+AIC(urm_mod3.a, urm_mod3.b)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod3.b`, so we should keep the simplest model, which is `urm_mod3.b`.
+* Now let's try removing `satv_c`.
+
+```{r}
+urm_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(urm_mod3.c)
+AIC(urm_mod3.b, urm_mod3.c)
+```
+
+* The AIC *increases* for `urm_mod3.c`, so we should keep `urm_mod3.b` as our final model, which is summarized above.
 
 ## Notes
