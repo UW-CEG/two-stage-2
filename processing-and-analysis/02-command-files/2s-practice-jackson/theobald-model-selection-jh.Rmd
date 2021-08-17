@@ -116,57 +116,6 @@ AIC(sex_mod1, sex_mod1.a)
 
 * The AIC *increases* for `sex_mod1.a`, so we should keep the original model `sex_mod1` (the summary for it is a few lines above ^)
 
-## Model selection on `urm_id` interactions
-
-### Fixed-effects only (`urm_id`)
-
-```{r}
-urm_mod1 <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
-```
-
-### Random-intercepts model with `REML = TRUE` (`urm_id`)
-
-```{r}
-urm_mod2 <- lmer(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
-```
-
-### AIC comparison of `urm_mod1` and `urm_mod2`
-
-```{r}
-AIC(urm_mod1, urm_mod2)
-```
-
-* The AIC *increases* for `urm_mod2`. So we will proceed with the model without random effects.
-
-### Model with no `urm_id` interactions or random effects
-
-```{r}
-urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c, data = master_true)
-```
-
-### AIC comparison of `urm_mod1` and `urm_mod3`
-
-```{r}
-AIC(urm_mod1, urm_mod3)
-```
-
-* The AIC *increases* for `urm_mod3`, which indicates that we should retain the `urm_id` interactions in our model.
-
-### Removal of parameters one by one
-
-```{r}
-summary(urm_mod1)
-```
-
-* `satv_c` has the lowest t-value, so we should try removing that parameter from the model first.
-
-```{r}
-urm_mod1.a <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
-AIC(urm_mod1, urm_mod1.a)
-```
-
-* The AIC increases for `urm_mod1.a`, so we should retain the `urm_mod1` model (summary is a few lines above ^)
-
 ## Model selection on `eop_id` interactions
 
 ### Fixed-effects only (`eop_id`)
@@ -305,5 +254,56 @@ AIC(fgn_mod3.b, fgn_mod3.c)
 ```
 
 * The AIC *increases* for `fgn_mod3.c`, so our final model will be `fgn_mod3.b`, which is summarized above.
+
+## Model selection on `urm_id` interactions
+
+### Fixed-effects only (`urm_id`)
+
+```{r}
+urm_mod1 <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+```
+
+### Random-intercepts model with `REML = TRUE` (`urm_id`)
+
+```{r}
+urm_mod2 <- lmer(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+```
+
+### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(urm_mod1, urm_mod2)
+```
+
+* The AIC *increases* for `urm_mod2`. So we will proceed with the model without random effects.
+
+### Model with no `urm_id` interactions or random effects
+
+```{r}
+urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c, data = master_true)
+```
+
+### AIC comparison of `urm_mod1` and `urm_mod3`
+
+```{r}
+AIC(urm_mod1, urm_mod3)
+```
+
+* The AIC *increases* for `urm_mod3`, which indicates that we should retain the `urm_id` interactions in our model.
+
+### Removal of parameters one by one
+
+```{r}
+summary(urm_mod1)
+```
+
+* `satv_c` has the lowest t-value, so we should try removing that parameter from the model first.
+
+```{r}
+urm_mod1.a <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
+AIC(urm_mod1, urm_mod1.a)
+```
+
+* The AIC increases for `urm_mod1.a`, so we should retain the `urm_mod1` model (summary is a few lines above ^)
 
 ## Notes
