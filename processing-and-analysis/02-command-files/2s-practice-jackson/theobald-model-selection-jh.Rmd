@@ -69,13 +69,22 @@ master_true <- master_unique %>%
 ### Fixed-effects only (`sex_id`)
 
 ```{r}
-sex_mod1 <- lm(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+sex_mod1 <- lm(final_c ~ experiment1*sex_id + 
+                         experiment1 + sex_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(sex_mod1)
 ```
 
 ### Random-intercepts model with `REML = TRUE` (`sex_id`)
 
 ```{r}
-sex_mod2 <- lmer(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+sex_mod2 <- lmer(final_c ~ experiment1*sex_id + 
+                           experiment1 + sex_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(sex_mod2)
 ```
 
 ### AIC comparison of `sex_mod1` and `sex_mod2`
@@ -84,13 +93,16 @@ sex_mod2 <- lmer(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + 
 AIC(sex_mod1, sex_mod2)
 ```
 
-* The AIC *increases* for `sex_mod2` ...
+* The AIC *increases* for `sex_mod2`
 * Therefore the random effects will not be included
 
 ### Model with no `sex_id` interactions or random effects
 
 ```{r}
-sex_mod3 <- lm(final_c ~ experiment1 + sex_id + satm_c + satv_c + aleksikc_c, data = master_true)
+sex_mod3 <- lm(final_c ~ experiment1 + sex_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(sex_mod3)
 ```
 
 ### AIC comparision of `sex_mod1` and `sex_mod3` to see if we should include `sex_id` interactions
@@ -99,22 +111,32 @@ sex_mod3 <- lm(final_c ~ experiment1 + sex_id + satm_c + satv_c + aleksikc_c, da
 AIC(sex_mod1, sex_mod3)
 ```
 
-* The AIC *increases* for `sex_mod3`, so we should proceed with `sex_mod1`, which includes `sex_id` interactions.
+* The AIC *decreases* by *less than 2* for `sex_mod3`, so we should proceed with `sex_mod3`, which is the simplest model.
 
 ### Removal of parameters one by one
 
 ```{r}
-summary(sex_mod1)
+summary(sex_mod3)
 ```
 
-* `satv_c` has the lowest t-value, so let's try removing it:
+* `experiment1` has the lowest t-value, so let's try removing that first:
 
 ```{r}
-sex_mod1.a <- lm(final_c ~ experiment1*sex_id + experiment1 + sex_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
-AIC(sex_mod1, sex_mod1.a)
+sex_mod3.a <- lm(final_c ~ sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(sex_mod3.a)
+AIC(sex_mod3, sex_mod3.a)
 ```
 
-* The AIC *increases* for `sex_mod1.a`, so we should keep the original model `sex_mod1` (the summary for it is a few lines above ^)
+* The AIC *decreases* by *less than 2* for `sex_mod3.a`, so we should keep the simplest model, which is `sex_mod3.a`.
+* Let's now try removing `sex_id`.
+
+```{r}
+sex_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(sex_mod3.b)
+AIC(sex_mod3.a, sex_mod3.b)
+```
+
+* The AIC *increases* for `sex_mod3.b`, so we should use `sex_mod3.a` as our final model (summarized above). This means that we are retaining the `sex_id` parameter in our model.
 
 ## Model selection on `eop_id` interactions
 
@@ -280,7 +302,7 @@ AIC(urm_mod1, urm_mod2)
 ### Model with no `urm_id` interactions or random effects
 
 ```{r}
-urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c, data = master_true)
+urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
 ```
 
 ### AIC comparison of `urm_mod1` and `urm_mod3`
