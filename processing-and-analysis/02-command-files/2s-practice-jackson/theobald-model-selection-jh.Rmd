@@ -278,16 +278,32 @@ AIC(fgn_mod1, fgn_mod3)
 summary(fgn_mod3)
 ```
 
-* `satv_c` again has the lowest t-value, so we will try removing it from the model.
+* `experiment1` has the lowest t-value, so let's remove that first.
 
 ```{r}
-fgn_mod1.a <- lm(final_c ~ experiment1*fgn_id + experiment1 + fgn_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
-AIC(fgn_mod1, fgn_mod1.a)
+fgn_mod3.a <- lm(final_c ~ fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(fgn_mod3.a)
+AIC(fgn_mod3, fgn_mod3.a)
 ```
 
-* The AIC *increases* for `fgn_mod1.a`, so we will retain `fgn_mod1` (summary is a few lines above ^)
+* The AIC *decreases* by *less than 2* for `fgn_mod3.a`, so we should retain the simplest model, which is `fgn_mod3.a`.
+* Let's now try removing `fgn_id`
+
+```{r}
+fgn_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(fgn_mod3.b)
+AIC(fgn_mod3.a, fgn_mod3.b)
+```
+
+* The AIC *increased* by *less than 2* for `fgn_mod3.b`, so we should retain the simplest model, which is `fgn_mod3.b`.
+* Let's now try removing `satv_c`.
+
+```{r}
+fgn_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(fgn_mod3.c)
+AIC(fgn_mod3.b, fgn_mod3.c)
+```
+
+* The AIC *increases* for `fgn_mod3.c`, so our final model will be `fgn_mod3.b`, which is summarized above.
 
 ## Notes
-* I changed the "condensing the dataset" code to create a data frame that I believe is now truly unique (`master_true` now only has 2134 rows as opposed to ~7000 like before)
-* ^ I did this by also including `two_stage_id` in the group of columns to run the `unique` function on. Every student has a unique 2 stage ID, so it must be important to run the `unique` function on this portion of the data as well.
-* Now with this "new" unique data, it appears that the model does not fit as well when random effects are included...
