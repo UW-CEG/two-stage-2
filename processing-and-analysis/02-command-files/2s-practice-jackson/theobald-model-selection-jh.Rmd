@@ -122,7 +122,9 @@ summary(sex_mod3)
 * `experiment1` has the lowest t-value, so let's try removing that first:
 
 ```{r}
-sex_mod3.a <- lm(final_c ~ sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+sex_mod3.a <- lm(final_c ~ sex_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(sex_mod3.a)
 AIC(sex_mod3, sex_mod3.a)
 ```
@@ -131,7 +133,8 @@ AIC(sex_mod3, sex_mod3.a)
 * Let's now try removing `sex_id`.
 
 ```{r}
-sex_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+sex_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(sex_mod3.b)
 AIC(sex_mod3.a, sex_mod3.b)
 ```
@@ -143,13 +146,22 @@ AIC(sex_mod3.a, sex_mod3.b)
 ### Fixed-effects only (`eop_id`)
 
 ```{r}
-eop_mod1 <- lm(final_c ~ experiment1*eop_id + experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod1 <- lm(final_c ~ experiment1*eop_id + 
+                         experiment1 + eop_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(eop_mod1)
 ```
 
 ### Random-intercepts model with `REML = TRUE` (`eop_id`)
 
 ```{r}
-eop_mod2 <- lmer(final_c ~ experiment1*eop_id + experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+eop_mod2 <- lmer(final_c ~ experiment1*eop_id + 
+                           experiment1 + eop_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(eop_mod2)
 ```
 
 ### AIC comparison of `eop_mod1` and `eop_mod2`
@@ -163,7 +175,10 @@ AIC(eop_mod1, eop_mod2)
 ### Model with no `eop_id` interactions or random effects
 
 ```{r}
-eop_mod3 <- lm(final_c ~ experiment1 + eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3 <- lm(final_c ~ experiment1 + eop_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(eop_mod3)
 ```
 
 ### AIC comparison of `eop_mod1` and `eop_mod3`
@@ -184,7 +199,9 @@ summary(eop_mod3)
 * `eop_id` has the lowest t-value, so let's try removing that first.
 
 ```{r}
-eop_mod3.a <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3.a <- lm(final_c ~ experiment1 + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(eop_mod3.a)
 AIC(eop_mod3, eop_mod3.a)
 ```
@@ -193,7 +210,8 @@ AIC(eop_mod3, eop_mod3.a)
 * The next lowest t-value is for `experiment1`, so let's try removing that.
 
 ```{r}
-eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(eop_mod3.a)
 AIC(eop_mod3.a, eop_mod3.b)
 ```
@@ -201,7 +219,8 @@ AIC(eop_mod3.a, eop_mod3.b)
 * Let's try removing `satv_c`.
 
 ```{r}
-eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(eop_mod3.a)
 AIC(eop_mod3.b, eop_mod3.c)
 ```
@@ -212,13 +231,22 @@ AIC(eop_mod3.b, eop_mod3.c)
 ### Fixed-effects only (`fgn_id`)
 
 ```{r}
-fgn_mod1 <- lm(final_c ~ experiment1*fgn_id + experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+fgn_mod1 <- lm(final_c ~ experiment1*fgn_id + 
+                         experiment1 + fgn_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(fgn_mod1)
 ```
 
 ### Random-intercepts model with `REML = TRUE` (`fgn_id`)
 
 ```{r}
-fgn_mod2 <- lmer(final_c ~ experiment1*fgn_id + experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+fgn_mod2 <- lmer(final_c ~ experiment1*fgn_id + 
+                           experiment1 + fgn_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(fgn_mod2)
 ```
 
 ### AIC comparison of `fgn_mod1` and `fgn_mod2`
@@ -232,7 +260,10 @@ AIC(fgn_mod1, fgn_mod2)
 ### Model with no `fgn_id` interactions or random effects
 
 ```{r}
-fgn_mod3 <- lm(final_c ~ experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+fgn_mod3 <- lm(final_c ~ experiment1 + fgn_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(fgn_mod3)
 ```
 
 ### AIC comparison of `fgn_mod2` and `fgn_mod3`
@@ -252,7 +283,9 @@ summary(fgn_mod3)
 * `experiment1` has the lowest t-value, so let's remove that first.
 
 ```{r}
-fgn_mod3.a <- lm(final_c ~ fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+fgn_mod3.a <- lm(final_c ~ fgn_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(fgn_mod3.a)
 AIC(fgn_mod3, fgn_mod3.a)
 ```
@@ -261,7 +294,8 @@ AIC(fgn_mod3, fgn_mod3.a)
 * Let's now try removing `fgn_id`
 
 ```{r}
-fgn_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+fgn_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(fgn_mod3.b)
 AIC(fgn_mod3.a, fgn_mod3.b)
 ```
@@ -270,7 +304,8 @@ AIC(fgn_mod3.a, fgn_mod3.b)
 * Let's now try removing `satv_c`.
 
 ```{r}
-fgn_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+fgn_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(fgn_mod3.c)
 AIC(fgn_mod3.b, fgn_mod3.c)
 ```
@@ -282,13 +317,22 @@ AIC(fgn_mod3.b, fgn_mod3.c)
 ### Fixed-effects only (`urm_id`)
 
 ```{r}
-urm_mod1 <- lm(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+urm_mod1 <- lm(final_c ~ experiment1*urm_id + 
+                         experiment1 + urm_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(urm_mod1)
 ```
 
 ### Random-intercepts model with `REML = TRUE` (`urm_id`)
 
 ```{r}
-urm_mod2 <- lmer(final_c ~ experiment1*urm_id + experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_true, REML = TRUE)
+urm_mod2 <- lmer(final_c ~ experiment1*urm_id + 
+                           experiment1 + urm_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(urm_mod2)
 ```
 
 ### AIC comparison of `urm_mod1` and `urm_mod2`
@@ -302,7 +346,10 @@ AIC(urm_mod1, urm_mod2)
 ### Model with no `urm_id` interactions or random effects
 
 ```{r}
-urm_mod3 <- lm(final_c ~ experiment1 + urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+urm_mod3 <- lm(final_c ~ experiment1 + urm_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(urm_mod3)
 ```
 
 ### AIC comparison of `urm_mod1` and `urm_mod3`
@@ -322,7 +369,9 @@ summary(urm_mod3)
 * `urm_id` has the lowest t-value, so we'll try removing that parameter first.
 
 ```{r}
-urm_mod3.a <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+urm_mod3.a <- lm(final_c ~ experiment1 + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(urm_mod3.a)
 AIC(urm_mod3, urm_mod3.a)
 ```
@@ -331,7 +380,8 @@ AIC(urm_mod3, urm_mod3.a)
 * Now let's try removing `experiment1` from the model.
 
 ```{r}
-urm_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+urm_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(urm_mod3.b)
 AIC(urm_mod3.a, urm_mod3.b)
 ```
@@ -340,7 +390,8 @@ AIC(urm_mod3.a, urm_mod3.b)
 * Now let's try removing `satv_c`.
 
 ```{r}
-urm_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+urm_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
 summary(urm_mod3.c)
 AIC(urm_mod3.b, urm_mod3.c)
 ```
