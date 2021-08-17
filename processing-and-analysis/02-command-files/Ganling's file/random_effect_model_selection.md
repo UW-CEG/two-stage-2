@@ -751,7 +751,357 @@ summary(eop_mod3.c)
 * The AIC value went up, `satv_c` should be kept. 
 * `eop_mod3.c` is the best fitting model
 
+### Model selection on `fgn_id`
+#### Fgn model 1: fixed effect
 
+```r
+fgn_mod1 <- lm(final_c ~ experiment1 * fgn_id + 
+                 experiment1 + fgn_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+summary(fgn_mod1)
+```
 
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 * fgn_id + experiment1 + fgn_id + 
+##     satm_c + satv_c + aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.868 -12.137   2.061  13.355  56.957 
+## 
+## Coefficients:
+##                                    Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                        0.357203   0.724784   0.493   0.6222    
+## experiment1EXPERIMENTAL            0.066875   0.975523   0.069   0.9454    
+## fgn_idFGN                          0.087061   1.364183   0.064   0.9491    
+## satm_c                             0.143803   0.007584  18.961  < 2e-16 ***
+## satv_c                             0.032165   0.008024   4.009 6.32e-05 ***
+## aleksikc_c                         0.319680   0.027349  11.689  < 2e-16 ***
+## hsgpa_c                           30.177375   2.348324  12.851  < 2e-16 ***
+## experiment1EXPERIMENTAL:fgn_idFGN -3.599994   1.821160  -1.977   0.0482 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.96 on 2126 degrees of freedom
+## Multiple R-squared:  0.4254,	Adjusted R-squared:  0.4235 
+## F-statistic: 224.9 on 7 and 2126 DF,  p-value: < 2.2e-16
+```
+#### Fgn model 2: Random effect
 
+```r
+fgn_mod2 <- lmer(final_c ~ experiment1 * fgn_id + 
+                   experiment1 + fgn_id +
+                   satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                   (1 | ta_sect),
+                 data = df_true, REML = TRUE)
+summary(fgn_mod2)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: final_c ~ experiment1 * fgn_id + experiment1 + fgn_id + satm_c +  
+##     satv_c + aleksikc_c + hsgpa_c + (1 | ta_sect)
+##    Data: df_true
+## 
+## REML criterion at convergence: 18612.2
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.6388 -0.6343  0.1108  0.6914  2.9997 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)   6.662   2.581  
+##  Residual             353.064  18.790  
+## Number of obs: 2134, groups:  ta_sect, 110
+## 
+## Fixed effects:
+##                                    Estimate Std. Error t value
+## (Intercept)                        0.396192   0.818222   0.484
+## experiment1EXPERIMENTAL           -0.018109   1.103785  -0.016
+## fgn_idFGN                          0.015903   1.367094   0.012
+## satm_c                             0.143502   0.007585  18.920
+## satv_c                             0.031948   0.008015   3.986
+## aleksikc_c                         0.320732   0.027395  11.708
+## hsgpa_c                           30.191401   2.347644  12.860
+## experiment1EXPERIMENTAL:fgn_idFGN -3.324413   1.820962  -1.826
+## 
+## Correlation of Fixed Effects:
+##                 (Intr) ex1EXPERIMENTAL fg_FGN satm_c satv_c alksk_ hsgp_c
+## ex1EXPERIMENTAL -0.720                                                   
+## fgn_idFGN       -0.500  0.332                                            
+## satm_c           0.013 -0.002           0.089                            
+## satv_c          -0.132 -0.019           0.186 -0.535                     
+## aleksikc_c       0.018  0.012          -0.019 -0.190 -0.036              
+## hsgpa_c          0.003 -0.025          -0.009 -0.044 -0.115 -0.021       
+## e1EXPERIMENTAL:  0.339 -0.475          -0.672  0.016  0.017  0.000  0.045
+```
+
+```r
+AIC(fgn_mod1,fgn_mod2)
+```
+
+```
+##          df     AIC
+## fgn_mod1  9 18624.2
+## fgn_mod2 10 18632.2
+```
+* AIC value went up, random effect should not be included 
+** If the `fgn_id` and `experiment1` have the lowest t values, what do we do next? Do we include the interaction still?
+
+### Model selection on `urm_id`
+#### Urm model 1: fixed effect 
+
+```r
+urm_mod1 <- lm(final_c ~ experiment1 * urm_id + 
+                 experiment1 + urm_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+summary(urm_mod1)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 * urm_id + experiment1 + urm_id + 
+##     satm_c + satv_c + aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.083 -12.222   2.064  13.146  55.564 
+## 
+## Coefficients:
+##                                    Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                        0.270531   0.639985   0.423    0.673    
+## experiment1EXPERIMENTAL           -1.061371   0.883669  -1.201    0.230    
+## urm_idURM                          1.088201   1.875071   0.580    0.562    
+## satm_c                             0.147589   0.007694  19.182  < 2e-16 ***
+## satv_c                             0.036569   0.007752   4.718 2.54e-06 ***
+## aleksikc_c                         0.316515   0.027419  11.544  < 2e-16 ***
+## hsgpa_c                           30.826756   2.365605  13.031  < 2e-16 ***
+## experiment1EXPERIMENTAL:urm_idURM  0.733726   2.459212   0.298    0.765    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.99 on 2126 degrees of freedom
+## Multiple R-squared:  0.424,	Adjusted R-squared:  0.4221 
+## F-statistic: 223.5 on 7 and 2126 DF,  p-value: < 2.2e-16
+```
+#### Urm model 2: random effect
+
+```r
+urm_mod2 <- lmer(final_c ~ experiment1 * urm_id + 
+                   experiment1 + urm_id +
+                   satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                   (1 | ta_sect),
+                 data = df_true, REML = TRUE)
+summary(urm_mod2)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: final_c ~ experiment1 * urm_id + experiment1 + urm_id + satm_c +  
+##     satv_c + aleksikc_c + hsgpa_c + (1 | ta_sect)
+##    Data: df_true
+## 
+## REML criterion at convergence: 18615.5
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.5850 -0.6235  0.1030  0.6866  2.9282 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  ta_sect  (Intercept)   7.306   2.703  
+##  Residual             353.350  18.798  
+## Number of obs: 2134, groups:  ta_sect, 110
+## 
+## Fixed effects:
+##                                    Estimate Std. Error t value
+## (Intercept)                        0.334426   0.751862   0.445
+## experiment1EXPERIMENTAL           -1.159838   1.035365  -1.120
+## urm_idURM                          0.691720   1.873335   0.369
+## satm_c                             0.147076   0.007690  19.126
+## satv_c                             0.036199   0.007741   4.676
+## aleksikc_c                         0.317822   0.027465  11.572
+## hsgpa_c                           30.864730   2.364551  13.053
+## experiment1EXPERIMENTAL:urm_idURM  1.441549   2.465417   0.585
+## 
+## Correlation of Fixed Effects:
+##                 (Intr) ex1EXPERIMENTAL ur_URM satm_c satv_c alksk_ hsgp_c
+## ex1EXPERIMENTAL -0.722                                                   
+## urm_idURM       -0.294  0.205                                            
+## satm_c           0.015  0.007           0.163                            
+## satv_c          -0.051 -0.024           0.022 -0.574                     
+## aleksikc_c       0.022  0.013          -0.045 -0.196 -0.033              
+## hsgpa_c         -0.009 -0.027           0.025 -0.028 -0.121 -0.026       
+## e1EXPERIMENTAL:  0.218 -0.308          -0.723 -0.028  0.018  0.005  0.065
+```
+
+```r
+AIC(urm_mod1, urm_mod2)
+```
+
+```
+##          df      AIC
+## urm_mod1  9 18629.57
+## urm_mod2 10 18635.45
+```
+* The AIC value went up, random effect should not be kept
+* Next, interaction has the lowest T value. It should be removed.
+
+#### Urm model 3: Remove random effects and interactions
+
+```r
+urm_mod3 <- lm(final_c ~ experiment1 + urm_id + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(urm_mod1, urm_mod3)
+```
+
+```
+##          df      AIC
+## urm_mod1  9 18629.57
+## urm_mod3  8 18627.66
+```
+
+```r
+summary(urm_mod3) 
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 + urm_id + satm_c + satv_c + 
+##     aleksikc_c + hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.125 -12.216   2.011  13.112  55.503 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)              0.221373   0.618280   0.358    0.720    
+## experiment1EXPERIMENTAL -0.966189   0.823896  -1.173    0.241    
+## urm_idURM                1.493858   1.290962   1.157    0.247    
+## satm_c                   0.147655   0.007689  19.203  < 2e-16 ***
+## satv_c                   0.036531   0.007749   4.714 2.58e-06 ***
+## aleksikc_c               0.316486   0.027413  11.545  < 2e-16 ***
+## hsgpa_c                 30.783457   2.360643  13.040  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2127 degrees of freedom
+## Multiple R-squared:  0.424,	Adjusted R-squared:  0.4223 
+## F-statistic: 260.9 on 6 and 2127 DF,  p-value: < 2.2e-16
+```
+* The AIC value went down, thus the interaction should be removed
+
+#### urm model 3.a: Remove `urm_id`
+
+```r
+urm_mod3.a <- lm(final_c ~ experiment1 + 
+                 satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(urm_mod3, urm_mod3.a)
+```
+
+```
+##            df      AIC
+## urm_mod3    8 18627.66
+## urm_mod3.a  7 18627.01
+```
+
+```r
+summary(urm_mod3.a)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + 
+##     hsgpa_c, data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.284 -12.165   2.009  13.061  55.053 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)              0.393484   0.600172   0.656    0.512    
+## experiment1EXPERIMENTAL -0.936662   0.823567  -1.137    0.256    
+## satm_c                   0.145807   0.007522  19.384  < 2e-16 ***
+## satv_c                   0.036092   0.007740   4.663 3.31e-06 ***
+## aleksikc_c               0.318332   0.027369  11.631  < 2e-16 ***
+## hsgpa_c                 30.496329   2.347753  12.990  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2128 degrees of freedom
+## Multiple R-squared:  0.4236,	Adjusted R-squared:  0.4222 
+## F-statistic: 312.8 on 5 and 2128 DF,  p-value: < 2.2e-16
+```
+* The AIC value still went down slightly so we will remove the `urm_id` from the model
+
+#### urm model 3.b: remove experiment1
+
+```r
+urm_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(urm_mod3.a, urm_mod3.b)
+```
+
+```
+##            df      AIC
+## urm_mod3.a  7 18627.01
+## urm_mod3.b  6 18626.30
+```
+
+```r
+summary(urm_mod3.b)
+```
+
+```
+## 
+## Call:
+## lm(formula = final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+##     data = df_true)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -89.727 -12.063   2.107  13.116  54.575 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) -0.099879   0.414793  -0.241     0.81    
+## satm_c       0.145876   0.007522  19.392  < 2e-16 ***
+## satv_c       0.035867   0.007738   4.635 3.78e-06 ***
+## aleksikc_c   0.318807   0.027367  11.649  < 2e-16 ***
+## hsgpa_c     30.478179   2.347861  12.981  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.98 on 2129 degrees of freedom
+## Multiple R-squared:  0.4232,	Adjusted R-squared:  0.4222 
+## F-statistic: 390.6 on 4 and 2129 DF,  p-value: < 2.2e-16
+```
+* The AIC value continued to go down, so the `experiment1` is also removed.
+
+#### Urm model 3.c: Remove `satv_c`
+
+```r
+urm_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+               data = df_true)
+AIC(urm_mod3.b, urm_mod3.c)
+```
+
+```
+##            df      AIC
+## urm_mod3.b  6 18626.30
+## urm_mod3.c  5 18645.73
+```
+* The AIC went up, meaning urm_mod3.b is the best model!
 
