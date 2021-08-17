@@ -210,15 +210,31 @@ AIC(eop_mod1, eop_mod3)
 summary(eop_mod3)
 ```
 
-* Once again, `satv_c` has the lowest t-value, so we will try removing it from the model.
+* `eop_id` has the lowest t-value, so let's try removing that first.
 
 ```{r}
-eop_mod3.a <- lm(final_c ~ experiment1 + eop_id + satm_c + aleksikc_c + hsgpa_c, data = master_true)
+eop_mod3.a <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(eop_mod3.a)
 AIC(eop_mod3, eop_mod3.a)
 ```
 
-* The AIC *increases* for `eop_mod3.a`, so we should include `satv_c` as a parameter in our model.
-* Our final model is `eop_mod3`, which is summarized above.
+* The AIC *decreases* for `eop_mod3.a` by *less than 2*, so we should retain the simplest model, which is `eop_mod3.a`.
+* The next lowest t-value is for `experiment1`, so let's try removing that.
+
+```{r}
+eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(eop_mod3.a)
+AIC(eop_mod3.a, eop_mod3.b)
+```
+* The AIC *decreases* by *less than 2* for `eop_mod3.b`, so we should retain the simplest model, which is `eop_mod3.b`.
+* Let's try removing `satv_c`.
+
+```{r}
+eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, data = master_true)
+summary(eop_mod3.a)
+AIC(eop_mod3.b, eop_mod3.c)
+```
+* The AIC *increases* for `eop_mod3.c`, so we will retain the model `eop_mod3.b` as our final model, which is summarized above.
 
 ## Model selection on `fgn_id` interactions
 
@@ -254,12 +270,12 @@ fgn_mod3 <- lm(final_c ~ experiment1 + fgn_id + satm_c + satv_c + aleksikc_c + h
 AIC(fgn_mod1, fgn_mod3)
 ```
 
-* The AIC *increases* for `fgn_mod3`, so we will retain the `fgn_id` interactions in our model.
+* The AIC *increases* for `fgn_mod3` by *less than 2*, so we will retain the least complex model, which is `fgn_mod3`.
 
 ### Removing parameters one by one
 
 ```{r}
-summary(fgn_mod1)
+summary(fgn_mod3)
 ```
 
 * `satv_c` again has the lowest t-value, so we will try removing it from the model.
