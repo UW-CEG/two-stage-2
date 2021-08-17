@@ -1,7 +1,7 @@
 ---
 title: 'Model Selection on Demographic Interactions'
 author: "Jackson Hughes"
-date: "7/19/2021"
+date: "8/16/2021"
 output: 
   html_document:
     keep_md: yes
@@ -49,8 +49,7 @@ master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
 ### Condense dataset to only include unique rows; omit NAs
 
 ```{r}
-master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
-master_unique_1 <- master_extras_removed %>% 
+master_unique_1 <- master %>% 
   select(two_stage_id, exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
 master_unique_2 <- unique(master_unique_1)
 master_unique <- na.omit(master_unique_2)
