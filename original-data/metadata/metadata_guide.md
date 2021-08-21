@@ -28,7 +28,28 @@
     - `urm_id` (factor, ref = `non_URM`): Indicator of student's under-represented minority status. These data were inferred from ethnicity and nationality data obtained from the UW Registrar's office. Students from caucasian and asian ethnicities and international students were not classified as under-represented minorities. (**CHECK THIS...AND WHAT WAS THE LIST OF ETHNICITIES THAT WERE INCLUDED AS URM?**) Values: "URM", "non-URM"
     - `eop_id` (factor, ref = `non_EOP`): Indicator of student's participation in the [Educational Opportunity Program (EOP)](https://depts.washington.edu/omadcs/eop/). This is used as an indicator of a student's socioeconomic status, since students from low-income backgrounds qualify for the program. These data were obtained as-is (**CHECK THIS**) from the UW Registrar's office. Values: "EOP", "non-EOP"
     - `fgn_id` (factor, ref = `non_FGN`): Indicator of student's first- or continuing-generation higher-education status. These data were inferred from information about parents' highest education level, which was obtained from the UW Registrar's office. (**CHECK ON EXACTLY HOW FGN STATUS WAS INFERRED FROM PARENTAL EDUCATION**) Values: "FGN", "non-FGN"
-    - 
+    - `hs_gpa` (numeric (or "dbl" in R)): Student's high school GPA. This is self-report data that we obtained from the UW registrar
+    - `hs_gpa_c` (numeric (or "dbl" in R)): Centered student `hs_gpa`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `hs_gpa_z` (numeric (or "dbl" in R)): Scaled student `hs_gpa`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `satm` (numeric (or "dbl" in R)): Student's SAT math score.
+    - `satm_c` (numeric (or "dbl" in R)): Centered student `satm`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `satm_z` (numeric (or "dbl" in R)): Scaled student `satm`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `satv` (numeric (or "dbl" in R)): Student's SAT verbal score.
+    - `satv_c` (numeric (or "dbl" in R)): Centered student `satv`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `satv_z` (numeric (or "dbl" in R)): Scaled student `satv`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_start`, `aleksikc_end` (character): Start and end dates for student's initial knowledge check (ikc) in ALEKS. Format: `MM/DD/YYYY`.
+    - `aleksikc_reason` (character): Reason the student received an initial knowledge check. Either they were originally enrolled in the course's ALEKS course (`Initial Knowledge Check`), or they switched sections and updated their ALEKS course themselves (`Class Changed`) or the instructor/UW Chem ALEKS admin updated it for them (`Student Moved`) **I AM ASSUMING THESE ARE THE MEANINGS OF THE REASONS...NEED TO CHECK WHETHER I HAVE THESE CORRECT!!!**
+    - `aleksikc_min` (numeric (or "dbl" in R)): Number of minutes student spent completing the ikc.
+    - `aleksikc_min_c` (numeric (or "dbl" in R)): Centered student `aleksikc_min`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `aleksikc_min_z` (numeric (or "dbl" in R)): Scaled student `aleksikc_min`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_score` (numeric (or "dbl" in R)): Number of topics student indictaed mastery of during ikc.
+    - `aleksikc_score_c` (numeric (or "dbl" in R)): Centered student `aleksikc_score`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `aleksikc_score_z` (numeric (or "dbl" in R)): Scaled student `aleksikc_score`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_total` (numeric (or "dbl" in R)): Total number of topics included in the ALEKS course, 189 in both years of study.
+    - `exam1predict`, `exam2predict`, `finalexampredict` (all numeric): Score that students predicted they would earn on the exam. This was asked as the last question on the exam, and was worth three points. (**NOTE**: The scores for this question are _not_ included in the `examX` and `final` scores.) The exact wording of the question changed over the years included in the study, but the intention was always that students would predict an integer score between 0% and 100%, even on the final exam, which was scored out of 150 points. (**2021-03-31: NEED TO CHECK HOW WE HANDLED NON-INTEGER DATA SUCH AS LETTERS, THE SPEED OF LIGHT, ETC. CHECK THE DUNNING-KRUGER WORK...**)
+    - **_I WILL ADD INFO ABOUT THE SURVEYS LATER..._**
+
+---
 
 ## master_2s_deidentified (DO NOT TOUCH).csv
 
@@ -108,6 +129,7 @@
     - `quizversion` (character): Version of the quiz that the stduent took. There were four versions delierved each each. Values: "A", "B", "C", "D"
     - `quiz_key` (character): Answer to `questionnum` on `quiznum`, version `quizversion`. Values: "A", "B", "C", "D", "E"
 
+---
 
 ## master_2s_deidentified (DEPRECATED) (DO NOT TOUCH).csv
 
