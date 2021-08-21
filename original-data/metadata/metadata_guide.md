@@ -1,6 +1,6 @@
 # Metadata Guide
 
-## `two_stage_master_wide_deid.rds`, `two_stage_master_wide_deid.csv`
+## `two_stage_master_wide_deid.rds`
 
 1. **Bibliographic citation for the original data file.** _NA_ This file was created from data obtained under _IRB#????????_ from the UW registrar and the instructor for the courses analyzed herein, and then collated by student number which was subsequently redacted.
 1. **Digital object identifier (DOI) for the data file.** _DOI TBD_
