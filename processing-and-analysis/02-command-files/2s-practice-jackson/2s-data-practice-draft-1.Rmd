@@ -1,6 +1,6 @@
 ---
-# title: "Two-Stage Data Practice"
-# author: "Jackson Hughes"
+title: "Two-Stage Data Practice"
+author: "Jackson Hughes"
 date: "4/11/2021"
 output: 
   html_document:
@@ -18,17 +18,29 @@ library(moderndive)
 ### Set working directories
 
 ```{r}
-proj_dir = here()
-importable_data_dir = here("processing-and-analysis", "importable-data")
-analysis_data_dir = here("processing-and-analysis", "analysis-data")
-metadata_dir = here("original-data", "metadata")
-original_data_dir = here("original-data", "/")
+proj_dir  <-  here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
 ```
+
+### Copy data set from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deidentified.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deidentified.rds")
+
+# CFC: If the file already exists in the target directory, the file will not be 
+# overwritten and this command will return `FALSE`.
+file.copy(copy_from, copy_to)
+```
+
 
 ### Import dataset
 
 ```{r}
-master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+# master <- read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
+master <- readRDS(paste0(original_data_dir, "master_2s_small_deidentified.rds"))
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
@@ -36,30 +48,160 @@ master = read_csv(paste0(original_data_dir, "master_2s_small_deidentified.csv"))
 * `course_fullid` and `ver`
 * `course_fullid` and demographic `eop_id`, `sex_id`, `fgn_id`, `urm_id` (all separate)
 
-### Remove duplicate rows of student data:
+### Remove duplicate rows of student data: 
+
+The master df contains per-exam-question data in a "long" format (as well as the 2017
+quiz data in a "wide" format). This means that there are 72 duplicates of each student's 
+exam score (there are 72 exam question records for each student). To create meaningful
+visualizations of the exam scores, we need to remove these excess records.
 
 ```{r}
-master_extras_removed = subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+# Anti-select those columns that are related to the question-level records.
+master_extras_removed <- subset(master, 
+                                select = -c(item_num, stud_ans, exam_key, corr, 
+                                            bloom_rating, complexity_rating_mean,
+                                            complexity_rating_median, item_code, stem))
 
-master_unique = unique(master_extras_removed, incomparables = FALSE)
+# An alternative method to the above 
+master_extras_removed_2 <- master %>% 
+   select(!c(item_num, stud_ans, exam_key, corr, 
+          bloom_rating, complexity_rating_mean,
+          complexity_rating_median, item_code, stem))
+
+# the dfs are identical
+all_equal(master_extras_removed, master_extras_removed_2)
+
+# Create a df from the remaining unique records
+master_unique <- unique(master_extras_removed, incomparables = FALSE)
 ```
 
+How many student records are in each course?
+
+```{r}
+# master_unique %>% 
+#   group_by(course_fullid) %>% 
+#   skim(exam1)
+# 
+# # This is not useful as written
+# summary(master_unique)
+
+master_unique <- master_unique %>% mutate(course_fullid = factor(course_fullid))
+
+master_unique %>% 
+  group_by(course_fullid) %>% 
+  tally()
+
+```
+
+These numbers seem way too high for these courses. What's going on?
+
+```{r}
+master_unique %>% 
+  group_by(course_fullid) %>% 
+  select(two_stage_id) %>% 
+  unique() %>% 
+  tally()
+```
+
+This looks much more reasonable. Let's take a look at the data set.
+
+```{r}
+master_unique %>% arrange(two_stage_id)
+```
+
+There are four duplicate rows for each `two_stage_id`. This is because the df still contains
+the `exam`, `ver`, `num_items`, `length_min`, and `min_per_ques` columns, which are specific
+to the Bloom's/complexity analysis (all of the other Bloom's related columns were removed
+above). 
+
+So, the presence of the `exam` column explains three of the repeated `two_stage_id` 
+values. The fourth is due to some mysterious NAs in the `num_items`, `length_min`, etc.,
+columns for `exam == FinalExam`. There appears to be two final exam rows per student, 
+one with data in these columns and one with NAs. This is surely some artifact of the 
+Frankenstein approach I've taken to preparing this dataset. **YET MORE REASON TO RECREATE
+MYSELF FROM SCRATCH!!!** 
+
+#### Create a new version of the unique records df
+
+```{r}
+master_extras_removed_3 <- master %>% 
+   select(!c(item_num, stud_ans, exam_key, corr, bloom_rating, 
+             complexity_rating_mean, complexity_rating_median, 
+             item_code, stem, exam, ver, num_items, length_min, min_per_ques))
+
+# Create a df from the remaining unique records
+master_unique_3 <- unique(master_extras_removed_3, incomparables = FALSE)
+```
+
+#### Check number of student records again
+
+```{r}
+master_unique_3 %>% 
+  group_by(course_fullid) %>% 
+  tally()
+
+master_unique_3 %>% 
+  group_by(course_fullid) %>% 
+  select(two_stage_id) %>% 
+  unique() %>% 
+  tally()
+
+master_unique_3 %>% 
+  select(two_stage_id) %>% 
+ # unique() %>% 
+  tally()
+```
+
+Ok...situation is better, there are still some duplicates.
+
+```{r}
+# master_unique_3 %>% group_by(course_fullid) %>% select(two_stage_id) %>% duplicated()
+
+master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)]
+
+master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)] %>% sort()
+
+master_unique_3 %>% 
+  #arrange(two_stage_id) %>% 
+  group_by(two_stage_id) %>% 
+  tally() %>% 
+  arrange(-n)
+```
+
+#### Considering the first two duplicates given above as examples:
+
+Student chem142_2s_1003 took the course in both A16 and A17, whereas chem142_2s_1060
+has a duplicate record within the A17 data set, due to a missing `ta_sect` value. 
+
+```{r}
+master_unique_3 %>% filter(two_stage_id == "chem142_2s_1003")
+master_unique_3 %>% filter(two_stage_id == "chem142_2s_1060")
+```
+
+There must be some automated way to pull out all of the duplicates. Maybe I could play 
+around with mapping?
+
+
 ### Faceted histograms of scores for exam 1, 2, and final by `course_fullid`:
+
 
 ```{r}
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID") +
   facet_wrap(~ course_fullid, nrow = 2)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID") +
   facet_wrap(~ course_fullid, nrow = 2)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID") +
   facet_wrap(~ course_fullid, nrow = 2)
 ```
 
@@ -68,15 +210,18 @@ ggplot(master_unique, aes(x = finalexam)) +
 ```{r}
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID")
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID")
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID")
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID")
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID")
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID")
 ```
 
 
@@ -85,17 +230,20 @@ ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
 ```{r}
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID and Test Version") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID and Test Version") +
   facet_wrap(~ course_fullid + ver, nrow = 3)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID and Test Version") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID and Test Version") +
   facet_wrap(~ course_fullid + ver, nrow = 3)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID and Test Version") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID and Test Version") +
   facet_wrap(~ course_fullid + ver, nrow = 3)
 ```
 
@@ -104,17 +252,20 @@ ggplot(master_unique, aes(x = finalexam)) +
 ```{r}
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID") +
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID") +
   facet_wrap(~ ver, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID") +
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID") +
   facet_wrap(~ ver, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID") +
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID") +
   facet_wrap(~ ver, nrow = 3)
 ```
 
@@ -124,62 +275,74 @@ ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
 ```{r}
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID and EOP ID") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ course_fullid + eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID and EOP ID") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ course_fullid + eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID and EOP ID") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ course_fullid + eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID and Sex") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID and Sex") +
   facet_wrap(~ course_fullid + sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID and Sex") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID and Sex") +
   facet_wrap(~ course_fullid + sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID and Sex") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID and Sex") +
   facet_wrap(~ course_fullid + sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID and FGN ID") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ course_fullid + fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID and FGN ID") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ course_fullid + fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID and FGN ID") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ course_fullid + fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam1)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 1 Score", y = "Number of Students", title = "Exam 1 Score Distributions by Course ID and URM ID") +
+  labs(x = "Exam 1 Score", y = "Number of Students", 
+       title = "Exam 1 Score Distributions by Course ID and URM ID") +
   facet_wrap(~ course_fullid + urm_id, nrow = 3)
 
 ggplot(master_unique, aes(x = exam2)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Exam 2 Score", y = "Number of Students", title = "Exam 2 Score Distributions by Course ID and URM ID") +
+  labs(x = "Exam 2 Score", y = "Number of Students", 
+       title = "Exam 2 Score Distributions by Course ID and URM ID") +
   facet_wrap(~ course_fullid + urm_id, nrow = 3)
 
 ggplot(master_unique, aes(x = finalexam)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Final Exam Score", y = "Number of Students", title = "Final Exam Score Distributions by Course ID and URM ID") +
+  labs(x = "Final Exam Score", y = "Number of Students", 
+       title = "Final Exam Score Distributions by Course ID and URM ID") +
   facet_wrap(~ course_fullid + urm_id, nrow = 3)
 ```
 
@@ -188,62 +351,74 @@ ggplot(master_unique, aes(x = finalexam)) +
 ```{r}
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID and EOP ID") +
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID and EOP ID") +
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID and EOP ID") +
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID and EOP ID") +
   facet_wrap(~ eop_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID and Sex") +
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID and Sex") +
   facet_wrap(~ sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID and Sex") +
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID and Sex") +
   facet_wrap(~ sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID and Sex") +
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID and Sex") +
   facet_wrap(~ sex_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID and FGN ID") +
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID and FGN ID") +
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID and FGN ID") +
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID and FGN ID") +
   facet_wrap(~ fgn_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam1)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 1 Score", title = "Exam 1 Score Distributions by Course ID and URM ID") +
+  labs(x = "Course ID", y = "Exam 1 Score", 
+       title = "Exam 1 Score Distributions by Course ID and URM ID") +
   facet_wrap(~ urm_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = exam2)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Exam 2 Score", title = "Exam 2 Score Distributions by Course ID and URM ID") +
+  labs(x = "Course ID", y = "Exam 2 Score", 
+       title = "Exam 2 Score Distributions by Course ID and URM ID") +
   facet_wrap(~ urm_id, nrow = 3)
 
 ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
   geom_boxplot() +
-  labs(x = "Course ID", y = "Final Exam Score", title = "Final Exam Score Distributions by Course ID and URM ID") +
+  labs(x = "Course ID", y = "Final Exam Score", 
+       title = "Final Exam Score Distributions by Course ID and URM ID") +
   facet_wrap(~ urm_id, nrow = 3)
 ```
 
@@ -254,9 +429,9 @@ ggplot(master_unique, aes(x = course_fullid, y = finalexam)) +
 ### Condense dataset to only include Autumn 2017 data:
 
 ```{r}
-fall_2017 = master %>% 
+fall_2017 <- master %>% 
   filter(course_fullid == "CHEM_142_A_2017_4" | course_fullid == "CHEM_142_B_2017_4")
-fall_2017 = na.omit(fall_2017)
+fall_2017 <- na.omit(fall_2017)
 ```
 
 ### Faceted histograms of `q1_ind` by `ver`:
@@ -264,7 +439,8 @@ fall_2017 = na.omit(fall_2017)
 ```{r}
 ggplot(fall_2017, aes(x = q1_ind)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Individual Quiz Score", y = "Number of Students", title = "Individual Quiz Score Distributions by Version") +
+  labs(x = "Individual Quiz Score", y = "Number of Students", 
+       title = "Individual Quiz Score Distributions by Version") +
   facet_wrap(~ ver, nrow = 2)
 ```
 
@@ -273,7 +449,8 @@ ggplot(fall_2017, aes(x = q1_ind)) +
 ```{r}
 ggplot(fall_2017, aes(x = ver, y = q1_ind)) +
   geom_boxplot() +
-  labs(x = "Version", y = "Individual Quiz Scores", title = "Boxplots of Individual Quiz Scores by Version")
+  labs(x = "Version", y = "Individual Quiz Scores", 
+       title = "Boxplots of Individual Quiz Scores by Version")
 ```
 
 ### Faceted Histograms of `q1_ind` by `eop_id`, `sex_id`, `fgn_id`, and `urm_id`: 
@@ -281,22 +458,26 @@ ggplot(fall_2017, aes(x = ver, y = q1_ind)) +
 ```{r}
 ggplot(fall_2017, aes(x = q1_ind)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Individual Quiz Score", y = "number of students", title = "Distributions of Individual Quiz Scores by EOP ID") +
+  labs(x = "Individual Quiz Score", y = "number of students", 
+       title = "Distributions of Individual Quiz Scores by EOP ID") +
   facet_wrap(~ eop_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_ind)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Individual Quiz Score", y = "number of students", title = "Distributions of Individual Quiz Scores by Sex") +
+  labs(x = "Individual Quiz Score", y = "number of students", 
+       title = "Distributions of Individual Quiz Scores by Sex") +
   facet_wrap(~ sex_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_ind)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Individual Quiz Score", y = "number of students", title = "Distributions of Individual Quiz Scores by FGN ID") +
+  labs(x = "Individual Quiz Score", y = "number of students", 
+       title = "Distributions of Individual Quiz Scores by FGN ID") +
   facet_wrap(~ fgn_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_ind)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Individual Quiz Score", y = "number of students", title = "Distributions of Individual Quiz Scores by URM ID") +
+  labs(x = "Individual Quiz Score", y = "number of students", 
+       title = "Distributions of Individual Quiz Scores by URM ID") +
   facet_wrap(~ urm_id, nrow = 1)
 ```
 
@@ -305,19 +486,23 @@ ggplot(fall_2017, aes(x = q1_ind)) +
 ```{r}
 ggplot(fall_2017, aes(x = eop_id, y = q1_ind)) +
   geom_boxplot() +
-  labs(x = "EOP ID", y = "Individual Quiz Scores", title = "Distributions of Individual Quiz Scores by EOP ID")
+  labs(x = "EOP ID", y = "Individual Quiz Scores", 
+       title = "Distributions of Individual Quiz Scores by EOP ID")
 
 ggplot(fall_2017, aes(x = sex_id, y = q1_ind)) +
   geom_boxplot() +
-  labs(x = "Sex", y = "Individual Quiz Scores", title = "Distributions of Individual Quiz Scores by Sex")
+  labs(x = "Sex", y = "Individual Quiz Scores", 
+       title = "Distributions of Individual Quiz Scores by Sex")
 
 ggplot(fall_2017, aes(x = fgn_id, y = q1_ind)) +
   geom_boxplot() +
-  labs(x = "FGN ID", y = "Individual Quiz Scores", title = "Distributions of Individual Quiz Scores by FGN ID")
+  labs(x = "FGN ID", y = "Individual Quiz Scores", 
+       title = "Distributions of Individual Quiz Scores by FGN ID")
 
 ggplot(fall_2017, aes(x = urm_id, y = q1_ind)) +
   geom_boxplot() +
-  labs(x = "URM ID", y = "Individual Quiz Scores", title = "Distributions of Individual Quiz Scores by URM ID")
+  labs(x = "URM ID", y = "Individual Quiz Scores", 
+       title = "Distributions of Individual Quiz Scores by URM ID")
 ```
 
 ## Relationship 3: Scores for each of the A17 group quiz scores (`q1_grp`) by:
@@ -329,7 +514,8 @@ ggplot(fall_2017, aes(x = urm_id, y = q1_ind)) +
 ```{r}
 ggplot(fall_2017, aes(x = q1_grp)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Group Quiz Score", y = "Number of Students", title = "Group Quiz Score Distributions by Version") +
+  labs(x = "Group Quiz Score", y = "Number of Students", 
+       title = "Group Quiz Score Distributions by Version") +
   facet_wrap(~ ver, nrow = 2)
 ```
 
@@ -338,7 +524,8 @@ ggplot(fall_2017, aes(x = q1_grp)) +
 ```{r}
 ggplot(fall_2017, aes(x = ver, y = q1_grp)) +
   geom_boxplot() +
-  labs(x = "Version", y = "Group Quiz Scores", title = "Boxplots of Group Quiz Scores by Version")
+  labs(x = "Version", y = "Group Quiz Scores", 
+       title = "Boxplots of Group Quiz Scores by Version")
 ```
 
 ### Faceted Histograms of `q1_grp` by `eop_id`, `sex_id`, `fgn_id`, and `urm_id`: 
@@ -346,22 +533,26 @@ ggplot(fall_2017, aes(x = ver, y = q1_grp)) +
 ```{r}
 ggplot(fall_2017, aes(x = q1_grp)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Group Quiz Score", y = "number of students", title = "Distributions of Group Quiz Scores by EOP ID") +
+  labs(x = "Group Quiz Score", y = "number of students",
+       title = "Distributions of Group Quiz Scores by EOP ID") +
   facet_wrap(~ eop_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_grp)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Group Quiz Score", y = "number of students", title = "Distributions of Group Quiz Scores by Sex") +
+  labs(x = "Group Quiz Score", y = "number of students", 
+       title = "Distributions of Group Quiz Scores by Sex") +
   facet_wrap(~ sex_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_grp)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Group Quiz Score", y = "number of students", title = "Distributions of Group Quiz Scores by FGN ID") +
+  labs(x = "Group Quiz Score", y = "number of students", 
+       title = "Distributions of Group Quiz Scores by FGN ID") +
   facet_wrap(~ fgn_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_grp)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Group Quiz Score", y = "number of students", title = "Distributions of Group Quiz Scores by URM ID") +
+  labs(x = "Group Quiz Score", y = "number of students", 
+       title = "Distributions of Group Quiz Scores by URM ID") +
   facet_wrap(~ urm_id, nrow = 1)
 ```
 
@@ -370,19 +561,23 @@ ggplot(fall_2017, aes(x = q1_grp)) +
 ```{r}
 ggplot(fall_2017, aes(x = eop_id, y = q1_grp)) +
   geom_boxplot() +
-  labs(x = "EOP ID", y = "Group Quiz Scores", title = "Distributions of Group Quiz Scores by EOP ID")
+  labs(x = "EOP ID", y = "Group Quiz Scores", 
+       title = "Distributions of Group Quiz Scores by EOP ID")
 
 ggplot(fall_2017, aes(x = sex_id, y = q1_grp)) +
   geom_boxplot() +
-  labs(x = "Sex", y = "Group Quiz Scores", title = "Distributions of Group Quiz Scores by Sex")
+  labs(x = "Sex", y = "Group Quiz Scores", 
+       title = "Distributions of Group Quiz Scores by Sex")
 
 ggplot(fall_2017, aes(x = fgn_id, y = q1_grp)) +
   geom_boxplot() +
-  labs(x = "FGN ID", y = "Group Quiz Scores", title = "Distributions of Group Quiz Scores by FGN ID")
+  labs(x = "FGN ID", y = "Group Quiz Scores", 
+       title = "Distributions of Group Quiz Scores by FGN ID")
 
 ggplot(fall_2017, aes(x = urm_id, y = q1_grp)) +
   geom_boxplot() +
-  labs(x = "URM ID", y = "Group Quiz Scores", title = "Distributions of Group Quiz Scores by URM ID")
+  labs(x = "URM ID", y = "Group Quiz Scores", 
+       title = "Distributions of Group Quiz Scores by URM ID")
 ```
 
 ## Relationship 4: Scores for each of the A17 total quiz scores (`q1_total`) by:
@@ -394,7 +589,8 @@ ggplot(fall_2017, aes(x = urm_id, y = q1_grp)) +
 ```{r}
 ggplot(fall_2017, aes(x = q1_total)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Total Quiz Score", y = "Number of Students", title = "Total Quiz Score Distributions by Version") +
+  labs(x = "Total Quiz Score", y = "Number of Students", 
+       title = "Total Quiz Score Distributions by Version") +
   facet_wrap(~ ver, nrow = 2)
 ```
 
@@ -403,7 +599,8 @@ ggplot(fall_2017, aes(x = q1_total)) +
 ```{r}
 ggplot(fall_2017, aes(x = ver, y = q1_total)) +
   geom_boxplot() +
-  labs(x = "Version", y = "Total Quiz Scores", title = "Boxplots of Total Quiz Scores by Version")
+  labs(x = "Version", y = "Total Quiz Scores", 
+       title = "Boxplots of Total Quiz Scores by Version")
 ```
 
 ### Faceted Histograms of `q1_total` by `eop_id`, `sex_id`, `fgn_id`, and `urm_id`: 
@@ -411,22 +608,26 @@ ggplot(fall_2017, aes(x = ver, y = q1_total)) +
 ```{r}
 ggplot(fall_2017, aes(x = q1_total)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Total Quiz Score", y = "number of students", title = "Distributions of Total Quiz Scores by EOP ID") +
+  labs(x = "Total Quiz Score", y = "number of students", 
+       title = "Distributions of Total Quiz Scores by EOP ID") +
   facet_wrap(~ eop_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_total)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Total Quiz Score", y = "number of students", title = "Distributions of Total Quiz Scores by Sex") +
+  labs(x = "Total Quiz Score", y = "number of students", 
+       title = "Distributions of Total Quiz Scores by Sex") +
   facet_wrap(~ sex_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_total)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Total Quiz Score", y = "number of students", title = "Distributions of Total Quiz Scores by FGN ID") +
+  labs(x = "Total Quiz Score", y = "number of students", 
+       title = "Distributions of Total Quiz Scores by FGN ID") +
   facet_wrap(~ fgn_id, nrow = 1)
 
 ggplot(fall_2017, aes(x = q1_total)) +
   geom_histogram(binwidth = 5, color = "white") +
-  labs(x = "Total Quiz Score", y = "number of students", title = "Distributions of Total Quiz Scores by URM ID") +
+  labs(x = "Total Quiz Score", y = "number of students", 
+       title = "Distributions of Total Quiz Scores by URM ID") +
   facet_wrap(~ urm_id, nrow = 1)
 ```
 
@@ -435,107 +636,137 @@ ggplot(fall_2017, aes(x = q1_total)) +
 ```{r}
 ggplot(fall_2017, aes(x = eop_id, y = q1_total)) +
   geom_boxplot() +
-  labs(x = "EOP ID", y = "Total Quiz Scores", title = "Distributions of Total Quiz Scores by EOP ID")
+  labs(x = "EOP ID", y = "Total Quiz Scores", 
+       title = "Distributions of Total Quiz Scores by EOP ID")
 
 ggplot(fall_2017, aes(x = sex_id, y = q1_total)) +
   geom_boxplot() +
-  labs(x = "Sex", y = "Total Quiz Scores", title = "Distributions of Total Quiz Scores by Sex")
+  labs(x = "Sex", y = "Total Quiz Scores", 
+       title = "Distributions of Total Quiz Scores by Sex")
 
 ggplot(fall_2017, aes(x = fgn_id, y = q1_total)) +
   geom_boxplot() +
-  labs(x = "FGN ID", y = "Total Quiz Scores", title = "Distributions of Total Quiz Scores by FGN ID")
+  labs(x = "FGN ID", y = "Total Quiz Scores", 
+       title = "Distributions of Total Quiz Scores by FGN ID")
 
 ggplot(fall_2017, aes(x = urm_id, y = q1_total)) +
   geom_boxplot() +
-  labs(x = "URM ID", y = "Total Quiz Scores", title = "Distributions of Total Quiz Scores by URM ID")
+  labs(x = "URM ID", y = "Total Quiz Scores", 
+       title = "Distributions of Total Quiz Scores by URM ID")
 ```
 
 ## Summary Statistics:
 
 ### Exam Scores by `course_fullid`:
 ```{r}
-fall_2016_A = filter(master_unique, course_fullid == "CHEM_142_A_2016_4")
-fall_2016_B = filter(master_unique, course_fullid == "CHEM_142_B_2016_4")
-fall_2017_A = filter(master_unique, course_fullid == "CHEM_142_A_2017_4")
-fall_2017_B = filter(master_unique, course_fullid == "CHEM_142_B_2017_4")
+fall_2016_A <- filter(master_unique, course_fullid == "CHEM_142_A_2016_4")
+fall_2016_B <- filter(master_unique, course_fullid == "CHEM_142_B_2016_4")
+fall_2017_A <- filter(master_unique, course_fullid == "CHEM_142_A_2017_4")
+fall_2017_B <- filter(master_unique, course_fullid == "CHEM_142_B_2017_4")
 
-summary_exam1_fall_2016_A = fall_2016_A %>% 
-  summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
+summary_exam1_fall_2016_A <- fall_2016_A %>% 
+  summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), 
+            max = max(exam1))
 summary_exam1_fall_2016_A
-summary_exam2_fall_2016_A = fall_2016_A %>% 
-  summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
+
+summary_exam2_fall_2016_A <- fall_2016_A %>% 
+  summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), 
+            max = max(exam2))
 summary_exam2_fall_2016_A
-summary_final_fall_2016_A = fall_2016_A %>% 
-  summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
+
+summary_final_fall_2016_A <- fall_2016_A %>% 
+  summarize(mean = mean(finalexam), std_dev = sd(finalexam), 
+            min = min(finalexam), max = max(finalexam))
 summary_final_fall_2016_A
 
-summary_exam1_fall_2016_B = fall_2016_B %>% 
-  summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
+summary_exam1_fall_2016_B <- fall_2016_B %>% 
+  summarize(mean = mean(exam1), std_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_B
-summary_exam2_fall_2016_B = fall_2016_B %>% 
-  summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
+
+summary_exam2_fall_2016_B <- fall_2016_B %>% 
+  summarize(mean = mean(exam2), std_dev = sd(exam2), 
+            min = min(exam2), max = max(exam2))
 summary_exam2_fall_2016_B
-summary_final_fall_2016_B = fall_2016_B %>% 
-  summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
+
+summary_final_fall_2016_B <- fall_2016_B %>% 
+  summarize(mean = mean(finalexam), std_dev = sd(finalexam), 
+            min = min(finalexam), max = max(finalexam))
 summary_final_fall_2016_B
 
-summary_exam1_fall_2017_A = fall_2017_A %>% 
-  summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
+summary_exam1_fall_2017_A <- fall_2017_A %>% 
+  summarize(mean = mean(exam1), std_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2017_A
-summary_exam2_fall_2017_A = fall_2017_A %>% 
-  summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
+
+summary_exam2_fall_2017_A <- fall_2017_A %>% 
+  summarize(mean = mean(exam2), std_dev = sd(exam2), 
+            min = min(exam2), max = max(exam2))
 summary_exam2_fall_2017_A
-summary_final_fall_2017_A = fall_2017_A %>% 
-  summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
+
+summary_final_fall_2017_A <- fall_2017_A %>% 
+  summarize(mean = mean(finalexam), std_dev = sd(finalexam), 
+            min = min(finalexam), max = max(finalexam))
 summary_final_fall_2017_A
 
-summary_exam1_fall_2017_B = fall_2017_B %>% 
-  summarize(mean = mean(exam1), std_dev = sd(exam1), min = min(exam1), max = max(exam1))
+summary_exam1_fall_2017_B <- fall_2017_B %>% 
+  summarize(mean = mean(exam1), std_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2017_B
-summary_exam2_fall_2017_B = fall_2017_B %>% 
-  summarize(mean = mean(exam2), std_dev = sd(exam2), min = min(exam2), max = max(exam2))
+
+summary_exam2_fall_2017_B <- fall_2017_B %>% 
+  summarize(mean = mean(exam2), std_dev = sd(exam2), 
+            min = min(exam2), max = max(exam2))
 summary_exam2_fall_2017_B
-summary_final_fall_2017_B = fall_2017_B %>% 
-  summarize(mean = mean(finalexam), std_dev = sd(finalexam), min = min(finalexam), max = max(finalexam))
+
+summary_final_fall_2017_B <- fall_2017_B %>% 
+  summarize(mean = mean(finalexam), std_dev = sd(finalexam), 
+            min = min(finalexam), max = max(finalexam))
 summary_final_fall_2017_B
 ```
 
 ### Exam Scores by `course_fullid` and `eop_id`:
 ```{r}
-summary_exam1_fall_2016_A_eop = fall_2016_A %>%
+summary_exam1_fall_2016_A_eop <- fall_2016_A %>%
   filter(eop_id == "EOP") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_eop
 
-summary_exam1_fall_2016_A_non_eop = fall_2016_A %>%
+summary_exam1_fall_2016_A_non_eop <- fall_2016_A %>%
   filter(eop_id == "non-EOP") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_non_eop
 ```
 
 ### Exam Scores by `course_fullid` and `sex_id`:
 ```{r}
-summary_exam1_fall_2016_A_male = fall_2016_A %>%
+summary_exam1_fall_2016_A_male <- fall_2016_A %>%
   filter(sex_id == "Male") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_male
 
-summary_exam1_fall_2016_A_female = fall_2016_A %>%
+summary_exam1_fall_2016_A_female <- fall_2016_A %>%
   filter(eop_id == "Female") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_female
 ```
 
 ### Exam Scores by `course_fullid` and `fgn_id`:
 ```{r}
-summary_exam1_fall_2016_A_fgn = fall_2016_A %>%
+summary_exam1_fall_2016_A_fgn <- fall_2016_A %>%
   filter(fgn_id == "FGN") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_fgn
 
 summary_exam1_fall_2016_A_non_fgn = fall_2016_A %>%
   filter(fgn_id == "non-FGN") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_non_fgn
 ```
 
@@ -543,12 +774,14 @@ summary_exam1_fall_2016_A_non_fgn
 ```{r}
 summary_exam1_fall_2016_A_urm = fall_2016_A %>%
   filter(urm_id == "URM") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_urm
 
-summary_exam1_fall_2016_A_non_urm = fall_2016_A %>%
+summary_exam1_fall_2016_A_non_urm <- fall_2016_A %>%
   filter(urm_id == "non-URM") %>% 
-  summarize(mean = mean(exam1), st_dev = sd(exam1), min = min(exam1), max = max(exam1))
+  summarize(mean = mean(exam1), st_dev = sd(exam1), 
+            min = min(exam1), max = max(exam1))
 summary_exam1_fall_2016_A_non_urm
 ```
 
