@@ -42,11 +42,12 @@ df4 <- df3 %>%
 ```{r}
 data_2s_extras_removed = subset(df, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
 data_2s_unique = unique(data_2s_extras_removed, incomparables = FALSE)
-View(data_2s_unique)
+
 data_2s_exam_score <- data_2s_unique %>% 
-  select(exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
-  
-data_2s_exam_score_true <- na.omit(data_2s_exam_score)
+  select(two_stage_id, exam1, exam2, finalexam, course_fullid, ver, sex_id, urm_id, eop_id, fgn_id, experiment1, ta_sect, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc)
+
+data_2s_exam_score_true_2 <- unique(data_2s_exam_score)
+data_2s_exam_score_true <- na.omit(data_2s_exam_score_true_2)
 ```
 ### Make `ta_sect` unique across different data values
 #### First, we need to split the data from into year 16 and year 17 
@@ -152,10 +153,176 @@ df
 <dbl>
 AIC
 <dbl>
-mod1	7	63734.08		
-mod2	8	63561.45
+mod1 (linear fit)	7	63734.08		
+mod2 (random effect)	63561.45
 
 #### NOTE: When considering random effects with unique `ta_sect`, the AIC value decreases compared to the AIC value without unique `ta_sect`
+
+## Model Secletion
+#### Finding the best fit model for `sex_id`
+```{r}
+# Making a model that has fixed effects only with `lm()`
+sex_mod1 <- lm(finalexam ~ experiment1 * sex_id + experiment1 +
+                 sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa, 
+               data = master_true)
+
+# Add in random effects for `ta_sect`
+sex_mod2 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = TRUE)
+
+AIC(sex_mod1, sex_mod2)
+
+# create a model with REML turned off 
+sex_mod3 <- lmer(finalexam ~ experiment1 * sex_id + experiment1 +
+                   sex_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = FALSE)
+
+# remove experiment1 * dem_id from the best model predicted 
+sex_mod3.a <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
+
+AIC(sex_mod3, sex_mod3.a)
+
+# remove `experiment1` because it has the lowest t value 
+
+
+#Refit model 3 with lmer and REML = TRUE 
+sex_mod4 <- lmer(finalexam ~ experiment1 + sex_id + satmath + 
+                   satverbal + mastered_topics_initial_kc +  high_sch_gpa + 
+                   (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(sex_mod4)
+
+```
+#### NOTE: The AIC value went up after adding in `ta_sect` random effects. Does this mean we no longer need to include the random effects?
+
+#### Finding the best fit model for `eop_id`
+```{r}
+# Making a model that has fixed effects only with `lm()`
+eop_mod1 <- lm(finalexam ~ experiment1 * eop_id + experiment1 + eop_id
+               + satmath + satverbal + mastered_topics_initial_kc +
+                 high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+eop_mod2 <- lmer(finalexam ~ experiment1 * eop_id + experiment1 +
+                   eop_id + satmath + satverbal + mastered_topics_initial_kc +  
+                   high_sch_gpa + 
+                   (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(eop_mod1, eop_mod2)
+
+# Turn off REML 
+eop_mod3 <- lmer(finalexam ~ experiment1 * eop_id + experiment1 +
+                   eop_id + satmath + satverbal + mastered_topics_initial_kc +
+                   high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+
+# remove experiment1 * dem_id from the best model predicted 
+eop_mod3.a <- lmer(finalexam ~ experiment1 + eop_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +  
+                     high_sch_gpa + (1 | ta_sect), data = master_true, REML = FALSE)
+
+AIC(eop_mod3, eop_mod3.a)
+
+#Refit model 3 with lmer and REML = FALSE
+eop_mod4 <- lmer(finalexam ~ experiment1 + eop_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(eop_mod4)
+
+```
+#### Finding the best fit model for `fgn_id`
+```{r}
+# Making a model that has fixed effects only with `lm()`
+fgn_mod1 <- lm(finalexam ~ experiment1 * fgn_id + experiment1 
+               + fgn_id + satmath + satverbal + mastered_topics_initial_kc 
+               +  high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+fgn_mod2 <- lmer(finalexam ~ experiment1 * fgn_id + experiment1 + 
+                   fgn_id + satmath + satverbal + 
+                   mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = TRUE)
+
+AIC(fgn_mod1, fgn_mod2)
+
+# turn off REML
+fgn_mod3 <- lmer(finalexam ~ experiment1 * fgn_id + experiment1 + 
+                   fgn_id + satmath + satverbal + 
+                   mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect),
+                 data = master_true, REML = FALSE)
+
+# remove experiment1 * dem_id from the best model predicted 
+fgn_mod3.a <- lmer(finalexam ~ experiment1 + fgn_id + satmath + 
+                   satverbal + mastered_topics_initial_kc + 
+                   high_sch_gpa + (1 | ta_sect), data = master_true, 
+                 REML = FALSE)
+
+AIC(fgn_mod3, fgn_mod3.a)
+
+#Refit model 3 with lmer and REML = FALSE
+fgn_mod4 <- lmer(finalexam ~ experiment1 + fgn_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(fgn_mod4)
+
+```
+#### Finding the best fit model for `urm_id`
+```{r}
+# Making a model that has fixed effects only with `lm()`
+urm_mod1 <- lm(finalexam ~ experiment1 * urm_id + experiment1 + 
+                 urm_id + satmath + satverbal + 
+                 mastered_topics_initial_kc +  high_sch_gpa, data = master_true)
+
+# Add in random effects for `ta_sect`
+urm_mod2 <- lmer(finalexam ~ experiment1 * urm_id + experiment1 + 
+                   urm_id + satmath + satverbal + mastered_topics_initial_kc +
+                   high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+AIC(urm_mod1, urm_mod2)
+
+#turn off REML
+urm_mod3 <- lmer(finalexam ~ experiment1 * urm_id + experiment1 + 
+                   urm_id + satmath + satverbal + mastered_topics_initial_kc +
+                   high_sch_gpa + (1 | ta_sect), 
+                 data = master_true, REML = TRUE)
+
+# remove experiment1 * dem_id from the best model predicted 
+urm_mod3.a <- lmer(finalexam ~ experiment1 + urm_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
+
+AIC(urm_mod3, urm_mod3.a)
+
+#Because the AIC decreased by 2, we now can remove experiment1
+urm_mod3.b <- lmer(finalexam ~ urm_id + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
+
+AIC(urm_mod3.a, urm_mod3.b)
+
+#Because it only decreased by 1, experiment 1 is retained. Next try to remove `urm_id`
+urm_mod3.c <- lmer(finalexam ~ experiment1 + satmath + 
+                     satverbal + mastered_topics_initial_kc +
+                     high_sch_gpa + (1 | ta_sect), 
+                   data = master_true, REML = FALSE)
+AIC(urm_mod3.a, urm_mod3.c)
+# AIC value went up, meaning the best model should be urm_mod3.a
+
+#Refit model 3 with lmer and REML = TRUE
+urm_mod4 <- lmer(finalexam ~ experiment1 + urm_id + satmath + satverbal + mastered_topics_initial_kc +  high_sch_gpa + (1 | ta_sect), data = master_true, REML = TRUE)
+
+summary(urm_mod4)
+```
+#### The AIC values all went up after adding the random effect. Does it mean we no longer need to include the random effect? Also, what do we need to do for our next step then if we now do not have to consider random effect?
+
+
+
+
+
+
 
 
 
