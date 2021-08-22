@@ -1,5 +1,56 @@
 # Metadata Guide
 
+## `two_stage_master_wide_deid.rds`
+
+1. **Bibliographic citation for the original data file.** _NA_ This file was created from data obtained under _IRB#????????_ from the UW registrar and the instructor for the courses analyzed herein, and then collated by student number which was subsequently redacted.
+1. **Digital object identifier (DOI) for the data file.** _DOI TBD_
+1. **The date on which the author first downloaded, or obtained in some other way, the original data files.** _NEED TO ADD THIS_
+1. **A written explanation of how an interested reader can obtain a copy of the original data file.** _Archive location TBD_
+1. **Whatever additional information an independent researcher would need to understand and use the data in the original data file.** The particular information required can vary a great deal depending on the nature of the original data file in question, and deciding what additional information to provide therefore requires thoughtful consideration and judgment.In many cases, the relevant information is similar to what is found in a codebook or users' guide for a dataset: variable names and definitions, coding schemes and units of measurement, and details of the sampling method and weight variables.In some cases, it is also necessary to include information about the file structure (e.g., the delimiters used to separate variables, or, in rectangular files without delimiters, the columns in which the variables are stored).Any other unique or idiosyncratic aspects of the data that an independent user of the data would need to understand should be explained as well.
+    - `two_stage_id` (factor): Randomly generated id number for students included in the two-stage quiz analysis. Format: "chem\_142\_2s\_\<RANDOM NUMBER\>"
+    - `sis_id` (character): "Student information systems ID". An identification number used by the Canvas Learning Management System that is unique to the student. I retained it in this dataset as a back up to the `two_stage_id`.
+    - `class.x`, `class.y` (both character): Designation of student's year in school, represented verbally (x) and numerically (y) 
+    - `qtr` (character): Academic quarter represented in the format `20(16|17)_4`. The `4` represents the Autumn quarter in calendar year `20(16|17)`, or the fourth quarter occuring in a calendar year (as opposed to the academic year, in which the Autumn quarter is first). This quarter designation is used by the UW registrar's office.
+    - `course_fullid` (factor): Unique course identifier, of the structure `CHEM_142_(A|B)_20(16|17)_4`
+    - `ta_sect` (factor): Code for TA-lead subsection of a course, containing up to 24 students. Has the format: `20(16|17)_XX`, where `XX` represents the TA section and has the possible values `AA` to `AZ`, and `BA` to `BZ`. (Exception: 2016 has no `BF`)
+    - `exp` (factor, ref = `CONTROL`): Indicates whether this student's data is part of the `EXPERIMENTAL` group (in Aut 2017) or the `CONTROL` group (in Aut 2016).
+    - `examX_ver`, `final_ver` (character): Version of exam X (where X = 1 or 2) or the final exam. Possible values: A or B (in CHEM 142 A); C or D (in CHEM 142 B)
+    - `examX`, `final` (numeric (or "dbl" in R)): Student score on exam X (where X = 1 or 2) or the final exam. Exams 1 and 2 contained 20 multiple choice questions, and the Final exam contained 35 (although only 34 were content-based...see explanation in sub-bullets below). Scores are represented as percentages out of 100 points. The midterm exams 1 and 2 were actually scored out of 100 points in general, whereas the final exams were score out of 150 points in general. Exceptions:
+        -  Aut 2016 Exam 2: There was a question with two correct answers on Exam 2; this question was removed from this analysis so the total number of scored items on Exam 2 included here is 19.
+        -  Aut 2016 Final Exam: There was an unsolvable question on the final exam in two of the versions (the correct answer was mistakenly not provided among the options), whereas the other two versions had a solvable instance of the question. I removed this question from all four versions of this final exam.
+        -  Aut 2016 and Aut 2017 Final Exams: The first quesiton in each fothese exams was a poll of the student's favorite 142 topic. Everyone got full credit if they answered it, no matter what they chose. Since this question was nto content-based, I removed it from all final exams. As a reuslt, the Aut 2017 final had 34 quesitons, and the Aut 2016 final had 33 (sicne another question was removed as described in the preceding bullet point).
+    - `examX_c`, `final_c` (numeric (or "dbl" in R)): Centered student score on exam X (where X = 1 or 2) or the final exam. Mean score over in a study year for the exam in question was subtracted from each individual score. 
+    - `examX_z`, `final_z` (numeric (or "dbl" in R)): Scaled student score on exam X (where X = 1 or 2) or the final exam. Mean score over in a study year for the exam in question was subtracted from each individual score, and the result is divided by the standard deviation in a study year.
+    - `examX_num_items`, `final_num_items` (integer): Number of items on exam X (where X = 1 or 2) or the final exam _that are included in this study_. As described in the " `examX`, `final` " bullet point above, select items had to be removed from Aut 2016 Exam 2, and from Aut 2016 and Aut 2017 Final exams for the purposes of this analysis.
+    - `course_gpa` (character): Student's grade in their section of CHEM 142, on the 4.0-scale that UW employs.
+    - `birthdate` (character): Student's birthdate, in the format `MM/DD/YYYY`.
+    - `sex_id` (factor, ref = `Male`): Indicator of student's self-reported binary gender identity. These data were obtained as-is (**CHECK THIS**) from the UW Registrar's office. Values: "Female", "Male"
+    - `urm_id` (factor, ref = `non_URM`): Indicator of student's under-represented minority status. These data were inferred from ethnicity and nationality data obtained from the UW Registrar's office. Students from caucasian and asian ethnicities and international students were not classified as under-represented minorities. (**CHECK THIS...AND WHAT WAS THE LIST OF ETHNICITIES THAT WERE INCLUDED AS URM?**) Values: "URM", "non-URM"
+    - `eop_id` (factor, ref = `non_EOP`): Indicator of student's participation in the [Educational Opportunity Program (EOP)](https://depts.washington.edu/omadcs/eop/). This is used as an indicator of a student's socioeconomic status, since students from low-income backgrounds qualify for the program. These data were obtained as-is (**CHECK THIS**) from the UW Registrar's office. Values: "EOP", "non-EOP"
+    - `fgn_id` (factor, ref = `non_FGN`): Indicator of student's first- or continuing-generation higher-education status. These data were inferred from information about parents' highest education level, which was obtained from the UW Registrar's office. (**CHECK ON EXACTLY HOW FGN STATUS WAS INFERRED FROM PARENTAL EDUCATION**) Values: "FGN", "non-FGN"
+    - `hs_gpa` (numeric (or "dbl" in R)): Student's high school GPA. This is self-report data that we obtained from the UW registrar
+    - `hs_gpa_c` (numeric (or "dbl" in R)): Centered student `hs_gpa`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `hs_gpa_z` (numeric (or "dbl" in R)): Scaled student `hs_gpa`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `satm` (numeric (or "dbl" in R)): Student's SAT math score.
+    - `satm_c` (numeric (or "dbl" in R)): Centered student `satm`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `satm_z` (numeric (or "dbl" in R)): Scaled student `satm`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `satv` (numeric (or "dbl" in R)): Student's SAT verbal score.
+    - `satv_c` (numeric (or "dbl" in R)): Centered student `satv`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `satv_z` (numeric (or "dbl" in R)): Scaled student `satv`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_start`, `aleksikc_end` (character): Start and end dates for student's initial knowledge check (ikc) in ALEKS. Format: `MM/DD/YYYY`.
+    - `aleksikc_reason` (character): Reason the student received an initial knowledge check. Either they were originally enrolled in the course's ALEKS course (`Initial Knowledge Check`), or they switched sections and updated their ALEKS course themselves (`Class Changed`) or the instructor/UW Chem ALEKS admin updated it for them (`Student Moved`) **I AM ASSUMING THESE ARE THE MEANINGS OF THE REASONS...NEED TO CHECK WHETHER I HAVE THESE CORRECT!!!**
+    - `aleksikc_min` (numeric (or "dbl" in R)): Number of minutes student spent completing the ikc.
+    - `aleksikc_min_c` (numeric (or "dbl" in R)): Centered student `aleksikc_min`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `aleksikc_min_z` (numeric (or "dbl" in R)): Scaled student `aleksikc_min`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_score` (numeric (or "dbl" in R)): Number of topics student indictaed mastery of during ikc.
+    - `aleksikc_score_c` (numeric (or "dbl" in R)): Centered student `aleksikc_score`. Mean score over in a study year for the exam in question was subtracted from each individual score.
+    - `aleksikc_score_z` (numeric (or "dbl" in R)): Scaled student `aleksikc_score`. Mean score over in a study year for the exam in question was subtracted from each individual score,  and the result is divided by the standard deviation in a study year.
+    - `aleksikc_total` (numeric (or "dbl" in R)): Total number of topics included in the ALEKS course, 189 in both years of study.
+    - `exam1predict`, `exam2predict`, `finalexampredict` (all numeric): Score that students predicted they would earn on the exam. This was asked as the last question on the exam, and was worth three points. (**NOTE**: The scores for this question are _not_ included in the `examX` and `final` scores.) The exact wording of the question changed over the years included in the study, but the intention was always that students would predict an integer score between 0% and 100%, even on the final exam, which was scored out of 150 points. (**2021-03-31: NEED TO CHECK HOW WE HANDLED NON-INTEGER DATA SUCH AS LETTERS, THE SPEED OF LIGHT, ETC. CHECK THE DUNNING-KRUGER WORK...**)
+    - **_I WILL ADD INFO ABOUT THE SURVEYS LATER..._**
+
+---
+
 ## master_2s_deidentified (DO NOT TOUCH).csv
 
 1. **Bibliographic citation for the original data file.** _NA_ This file was created from data obtained under _IRB#????????_ from the UW registrar and the instructor for the courses analyzed herein, and then collated by student number which was subsequently redacted.
@@ -78,6 +129,7 @@
     - `quizversion` (character): Version of the quiz that the stduent took. There were four versions delierved each each. Values: "A", "B", "C", "D"
     - `quiz_key` (character): Answer to `questionnum` on `quiznum`, version `quizversion`. Values: "A", "B", "C", "D", "E"
 
+---
 
 ## master_2s_deidentified (DEPRECATED) (DO NOT TOUCH).csv
 

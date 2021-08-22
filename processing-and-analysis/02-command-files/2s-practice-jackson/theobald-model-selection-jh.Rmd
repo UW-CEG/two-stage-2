@@ -1,0 +1,402 @@
+---
+title: 'Model Selection on Demographic Interactions'
+author: "Jackson Hughes"
+date: "8/16/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+```
+
+# Preliminary setup and data wrangling
+
+## Data import
+
+### Set working directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+### Copy data from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import master dataset
+
+```{r}
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling
+
+### Condense dataset to only include unique rows; omit NAs
+
+```{r}
+master_unique_1 <- master %>% 
+  select(two_stage_id, exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master_unique_2 <- unique(master_unique_1)
+master_unique <- na.omit(master_unique_2)
+```
+
+### Make `ta_sect` values unique across `course_fullid`
+
+```{r}
+master_true <- master_unique %>% 
+  mutate(ta_sect = ifelse(str_detect(course_fullid, "2016"), paste(ta_sect, "16", sep = "_"), paste(ta_sect, "17", sep = "_")))
+```
+
+# Model Selection (based on consultation with Elli Theobald)
+
+## Model selection on `sex_id` interactions
+
+### Fixed-effects only (`sex_id`)
+
+```{r}
+sex_mod1 <- lm(final_c ~ experiment1*sex_id + 
+                         experiment1 + sex_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(sex_mod1)
+```
+
+### Random-intercepts model with `REML = TRUE` (`sex_id`)
+
+```{r}
+sex_mod2 <- lmer(final_c ~ experiment1*sex_id + 
+                           experiment1 + sex_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(sex_mod2)
+```
+
+### AIC comparison of `sex_mod1` and `sex_mod2`
+
+```{r}
+AIC(sex_mod1, sex_mod2)
+```
+
+* The AIC *increases* for `sex_mod2`
+* Therefore the random effects will not be included
+
+### Model with no `sex_id` interactions or random effects
+
+```{r}
+sex_mod3 <- lm(final_c ~ experiment1 + sex_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(sex_mod3)
+```
+
+### AIC comparision of `sex_mod1` and `sex_mod3` to see if we should include `sex_id` interactions
+
+```{r}
+AIC(sex_mod1, sex_mod3)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod3`, so we should proceed with `sex_mod3`, which is the simplest model.
+
+### Removal of parameters one by one
+
+```{r}
+summary(sex_mod3)
+```
+
+* `experiment1` has the lowest t-value, so let's try removing that first:
+
+```{r}
+sex_mod3.a <- lm(final_c ~ sex_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(sex_mod3.a)
+AIC(sex_mod3, sex_mod3.a)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod3.a`, so we should keep the simplest model, which is `sex_mod3.a`.
+* Let's now try removing `sex_id`.
+
+```{r}
+sex_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(sex_mod3.b)
+AIC(sex_mod3.a, sex_mod3.b)
+```
+
+* The AIC *increases* for `sex_mod3.b`, so we should use `sex_mod3.a` as our final model (summarized above). This means that we are retaining the `sex_id` parameter in our final model.
+
+## Model selection on `eop_id` interactions
+
+### Fixed-effects only (`eop_id`)
+
+```{r}
+eop_mod1 <- lm(final_c ~ experiment1*eop_id + 
+                         experiment1 + eop_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(eop_mod1)
+```
+
+### Random-intercepts model with `REML = TRUE` (`eop_id`)
+
+```{r}
+eop_mod2 <- lmer(final_c ~ experiment1*eop_id + 
+                           experiment1 + eop_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(eop_mod2)
+```
+
+### AIC comparison of `eop_mod1` and `eop_mod2`
+
+```{r}
+AIC(eop_mod1, eop_mod2)
+```
+
+* The AIC *increases* for `eop_mod2`, so we should not include random effects in our model.
+
+### Model with no `eop_id` interactions or random effects
+
+```{r}
+eop_mod3 <- lm(final_c ~ experiment1 + eop_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(eop_mod3)
+```
+
+### AIC comparison of `eop_mod1` and `eop_mod3`
+
+```{r}
+AIC(eop_mod1, eop_mod3)
+```
+
+* The AIC *decreases* by 1.99 for `eop_mod3`
+* In this case we should choose the simplest model, which is `eop_mod3`.
+
+### Removal of parameters one by one
+
+```{r}
+summary(eop_mod3)
+```
+
+* `eop_id` has the lowest t-value, so let's try removing that first.
+
+```{r}
+eop_mod3.a <- lm(final_c ~ experiment1 + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(eop_mod3.a)
+AIC(eop_mod3, eop_mod3.a)
+```
+
+* The AIC *decreases* for `eop_mod3.a` by *less than 2*, so we should retain the simplest model, which is `eop_mod3.a`.
+* The next lowest t-value is for `experiment1`, so let's try removing that.
+
+```{r}
+eop_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(eop_mod3.a)
+AIC(eop_mod3.a, eop_mod3.b)
+```
+* The AIC *decreases* by *less than 2* for `eop_mod3.b`, so we should retain the simplest model, which is `eop_mod3.b`.
+* Let's try removing `satv_c`.
+
+```{r}
+eop_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(eop_mod3.a)
+AIC(eop_mod3.b, eop_mod3.c)
+```
+* The AIC *increases* for `eop_mod3.c`, so we will retain the model `eop_mod3.b` as our final model, which is summarized above.
+
+## Model selection on `fgn_id` interactions
+
+### Fixed-effects only (`fgn_id`)
+
+```{r}
+fgn_mod1 <- lm(final_c ~ experiment1*fgn_id + 
+                         experiment1 + fgn_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(fgn_mod1)
+```
+
+### Random-intercepts model with `REML = TRUE` (`fgn_id`)
+
+```{r}
+fgn_mod2 <- lmer(final_c ~ experiment1*fgn_id + 
+                           experiment1 + fgn_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(fgn_mod2)
+```
+
+### AIC comparison of `fgn_mod1` and `fgn_mod2`
+
+```{r}
+AIC(fgn_mod1, fgn_mod2)
+```
+
+* The AIC *increases* for `fgn_mod2`. Therefore we will not include random effects in our model.
+
+### Model with no `fgn_id` interactions or random effects
+
+```{r}
+fgn_mod3 <- lm(final_c ~ experiment1 + fgn_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(fgn_mod3)
+```
+
+### AIC comparison of `fgn_mod2` and `fgn_mod3`
+
+```{r}
+AIC(fgn_mod1, fgn_mod3)
+```
+
+* The AIC *increases* for `fgn_mod3` by *less than 2*, so we will retain the least complex model, which is `fgn_mod3`.
+
+### Removing parameters one by one
+
+```{r}
+summary(fgn_mod3)
+```
+
+* `experiment1` has the lowest t-value, so let's remove that first.
+
+```{r}
+fgn_mod3.a <- lm(final_c ~ fgn_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(fgn_mod3.a)
+AIC(fgn_mod3, fgn_mod3.a)
+```
+
+* The AIC *decreases* by *less than 2* for `fgn_mod3.a`, so we should retain the simplest model, which is `fgn_mod3.a`.
+* Let's now try removing `fgn_id`
+
+```{r}
+fgn_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(fgn_mod3.b)
+AIC(fgn_mod3.a, fgn_mod3.b)
+```
+
+* The AIC *increased* by *less than 2* for `fgn_mod3.b`, so we should retain the simplest model, which is `fgn_mod3.b`.
+* Let's now try removing `satv_c`.
+
+```{r}
+fgn_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(fgn_mod3.c)
+AIC(fgn_mod3.b, fgn_mod3.c)
+```
+
+* The AIC *increases* for `fgn_mod3.c`, so our final model will be `fgn_mod3.b`, which is summarized above.
+
+## Model selection on `urm_id` interactions
+
+### Fixed-effects only (`urm_id`)
+
+```{r}
+urm_mod1 <- lm(final_c ~ experiment1*urm_id + 
+                         experiment1 + urm_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(urm_mod1)
+```
+
+### Random-intercepts model with `REML = TRUE` (`urm_id`)
+
+```{r}
+urm_mod2 <- lmer(final_c ~ experiment1*urm_id + 
+                           experiment1 + urm_id + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c + 
+                           (1|ta_sect), 
+                           data = master_true, REML = TRUE)
+summary(urm_mod2)
+```
+
+### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(urm_mod1, urm_mod2)
+```
+
+* The AIC *increases* for `urm_mod2`. So we will proceed with the model without random effects.
+
+### Model with no `urm_id` interactions or random effects
+
+```{r}
+urm_mod3 <- lm(final_c ~ experiment1 + urm_id + 
+                         satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                         data = master_true)
+summary(urm_mod3)
+```
+
+### AIC comparison of `urm_mod1` and `urm_mod3`
+
+```{r}
+AIC(urm_mod1, urm_mod3)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod3`, which indicates that we should retain the simplest model, which is `urm_mod3`. This indicates that we are not keeping interactions from `urm_id` in our model.
+
+### Removal of parameters one by one
+
+```{r}
+summary(urm_mod3)
+```
+
+* `urm_id` has the lowest t-value, so we'll try removing that parameter first.
+
+```{r}
+urm_mod3.a <- lm(final_c ~ experiment1 + 
+                           satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(urm_mod3.a)
+AIC(urm_mod3, urm_mod3.a)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod3.a`, so we should retain the simplest model, which is `urm_mod3.a`.
+* Now let's try removing `experiment1` from the model.
+
+```{r}
+urm_mod3.b <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(urm_mod3.b)
+AIC(urm_mod3.a, urm_mod3.b)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod3.b`, so we should keep the simplest model, which is `urm_mod3.b`.
+* Now let's try removing `satv_c`.
+
+```{r}
+urm_mod3.c <- lm(final_c ~ satm_c + aleksikc_c + hsgpa_c, 
+                           data = master_true)
+summary(urm_mod3.c)
+AIC(urm_mod3.b, urm_mod3.c)
+```
+
+* The AIC *increases* for `urm_mod3.c`, so we should keep `urm_mod3.b` as our final model, which is summarized above.
+
+## Notes
+* It actually appears that no interactions are retained for any of the models. This is because when I originally ran the third models for `sex_id` and `urm_id` last week, I accidentally omitted `hsgpa_c`. This drove up the AIC, which gave the illusion that getting rid of the demographic interactions created models that fit the data worse.

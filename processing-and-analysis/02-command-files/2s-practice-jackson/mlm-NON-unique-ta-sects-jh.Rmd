@@ -1,0 +1,117 @@
+---
+title: 'MLM With Non-Unique TA Sections'
+author: "Jackson Hughes"
+date: "7/12/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+```
+
+# Preliminary setup and data wrangling
+
+## Data import
+
+### Set working directories
+
+```{r}
+proj_dir <- here()
+original_data_dir <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+```
+
+### Copy data from `original-data` to `01-importable-data`
+
+```{r}
+copy_from <- paste0(original_data_dir, "master_2s_small_deid_scaled.rds")
+copy_to <- paste0(importable_data_dir, "master_2s_small_deid_scaled.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import master dataset
+
+```{r}
+master <- readRDS(paste0(importable_data_dir, "master_2s_small_deid_scaled.rds"))
+```
+
+## Data wrangling
+
+### Condense dataset to only include unique rows; omit NAs
+
+```{r}
+master_extras_removed <- subset(master, select = -c(item_num, stud_ans, exam_key, corr, bloom_rating, complexity_rating_mean, complexity_rating_median, item_code, stem))
+master_unique_1 <- unique(master_extras_removed, incomparables = FALSE)
+master_unique_2 <- master_unique_1 %>% 
+  select(exam1, exam2, finalexam, course_fullid, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master_unique <- na.omit(master_unique_2)
+```
+
+# Regression
+
+## Regression of `final_c` on `experiment1` with control variables (no MLM)
+
+```{r}
+mod_1 <- lm(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c, data = master_unique)
+summary(mod_1)
+```
+
+## MLM random intercepts model for TA section (centered data)
+
+```{r}
+mod_2 <- lmer(final_c ~ experiment1 + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(mod_2)
+```
+
+## Random effects models including demographic interactions
+
+### Interactions from `sex_id`
+
+```{r}
+sex_id_mod <- lmer(final_c ~ experiment1*sex_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(sex_id_mod)
+```
+
+### Interactions from `urm_id`
+
+```{r}
+urm_id_mod <- lmer(final_c ~ experiment1*urm_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(urm_id_mod)
+```
+
+### Interactions from `eop_id`
+
+```{r}
+eop_id_mod <- lmer(final_c ~ experiment1*eop_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(eop_id_mod)
+```
+
+### Interactions from `fgn_id`
+
+```{r}
+fgn_id_mod <- lmer(final_c ~ experiment1*fgn_id + satm_c + satv_c + aleksikc_c + hsgpa_c + (1|ta_sect), data = master_unique)
+summary(fgn_id_mod)
+```
+
+## Model Selection Using AIC
+
+#### Standard regression model vs. random intercepts model (no demographic interactions)
+
+```{r}
+AIC(mod_1, mod_2)
+```
+
+#### AIC comparison of all of the demographic interactions random effects models
+
+```{r}
+AIC(sex_id_mod, urm_id_mod, eop_id_mod, fgn_id_mod)
+```
