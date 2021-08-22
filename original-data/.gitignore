@@ -9,3 +9,5 @@ master_2s_small_deidentified (DO NOT TOUCH).csv
 master_2s_small_deidentified (DO NOT TOUCH).rds
 master_2s_small_deid_scaled.csv
 master_2s_small_deid_scaled.rds
+two_stage_master_wide_deid.csv
+two_stage_master_wide_deid.rds
