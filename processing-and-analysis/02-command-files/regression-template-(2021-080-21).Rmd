@@ -1,0 +1,73 @@
+---
+# title: "Regression Template"
+# author: "Colleen Craig"
+# date: "8/21/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+# Regression Template
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor) # Tools for exploring and cleaning data
+```
+
+## Set Up
+
+### Designate working directories and copy file
+
+```{r}
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+```
+
+Copy the `two-stage-master-wide.rds` file from `original-data-dir` 
+to `importable-data-dir` using `file.copy`
+
+```{r}
+file.copy()
+```
+
+### Load `two-stage-master-wide`
+
+```{r}
+read_rds()
+```
+
+### Explore the contents of the dtaframe
+
+You won't need all the columns contained here for the current analysis, so 
+just select the ones you need. (Consult the [metadata guide](https://github.com/UW-CEG/two-stage-2/blob/master/original-data/metadata/metadata_guide.md) to learn about the
+column data.) The df should already contain only unique student records, so you
+shouldn't need to remove any duplicates. 
+
+```{r}
+
+```
+
+
+## Run the model selection procedure using the _CENTERED_ data for all numerical values. 
+
+Follow the guide shown [here](https://docs.google.com/document/d/1XRv2093XdzpSqRVzrrusUUVNMunE6scFvDH-kqAPnPU/edit#). 
+
+Start with the following master model:
+
+`final_c ~ exp * dem_id +` 
+          `exp + dem_id +` 
+          `satm_c + satv_c + aleksikc_c + hsgpa_c`
+
+### Model selection for `sex_id`
+
+### Model selection for `urm_id`
+
+### Model selection for `eop_id`
+
+### Model selection for `fgn_id`
