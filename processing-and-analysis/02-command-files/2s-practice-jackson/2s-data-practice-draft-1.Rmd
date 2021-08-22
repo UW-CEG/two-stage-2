@@ -155,11 +155,17 @@ master_unique_3 %>%
 Ok...situation is better, there are still some duplicates.
 
 ```{r}
-master_unique_3 %>% group_by(course_fullid) %>% select(two_stage_id) %>% duplicated()
+# master_unique_3 %>% group_by(course_fullid) %>% select(two_stage_id) %>% duplicated()
 
 master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)]
 
 master_unique_3$two_stage_id[duplicated(master_unique_3$two_stage_id)] %>% sort()
+
+master_unique_3 %>% 
+  #arrange(two_stage_id) %>% 
+  group_by(two_stage_id) %>% 
+  tally() %>% 
+  arrange(-n)
 ```
 
 #### Considering the first two duplicates given above as examples:
