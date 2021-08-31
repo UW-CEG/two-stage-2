@@ -242,3 +242,212 @@ AIC(urm_mod1.c, urm_mod1.d)
 
 * The AIC *increases* by *more than 2* for `urm_mod1.d`, so we will retain the `satv_c` parameter in our model.
 * Our final model is `urm_mod1.c`, which is summarized above.
+
+## Model selection for `eop_id`
+
+### 1. Fixed-effects only model (EOP)
+
+```{r}
+eop_mod1 <- lm(final_c ~ exp * eop_id +
+                         exp + eop_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(eop_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (EOP)
+
+```{r}
+eop_mod2 <- lmer(final_c ~ exp * eop_id +
+                           exp + eop_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                           (1 | ta_sect),
+                           data = master, REML = TRUE)
+summary(eop_mod2)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(eop_mod1, eop_mod2)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod2`, so we will not retain random effects from `ta_sect` in our model.
+
+
+### 3. Fixed-effects only model with *no* demographic interactions (EOP)
+
+```{r}
+eop_mod1.a <- lm(final_c ~ exp + eop_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(eop_mod1.a)
+```
+
+#### AIC comparison of `eop_mod1` and `eop_mod1.a`
+
+```{r}
+AIC(eop_mod1, eop_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `eop_mod1.a`, which is the simplest model, so we will not include interactions from `eop_id` in our model.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `exp` because it has the lowest t-value
+
+```{r}
+eop_mod1.b <- lmer(final_c ~ eop_id +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(eop_mod1.b)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.b`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.b`, so we will keep `exp` as a parameter in our model.
+
+* Now let's try removing `eop_id` from our model
+
+```{r}
+eop_mod1.c <- lmer(final_c ~ exp +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(eop_mod1.c)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.c`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.c`, so we will retain `eop_id` as a parameter in our model.
+
+* Now let's try removing `satv_c` from our model
+
+```{r}
+eop_mod1.d <- lm(final_c ~ exp + eop_id +
+                           satm_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(eop_mod1.d)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.d`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.d`, so we will retain `satv_c` as a parameter in our model.
+* Our final model is `eop_mod1.a`, which is summarized above.
+
+## Model selection for `fgn_id`
+
+### 1. Fixed-effects only model (fgn)
+
+```{r}
+fgn_mod1 <- lm(final_c ~ exp * fgn_id +
+                         exp + fgn_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(fgn_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (FGN)
+
+```{r}
+fgn_mod2 <- lmer(final_c ~ exp * fgn_id +
+                           exp + fgn_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                           (1 | ta_sect),
+                           data = master, REML = TRUE)
+summary(fgn_mod2)
+```
+
+#### AIC comparison of `fgn_mod1` and `fgn_mod2`
+
+```{r}
+AIC(fgn_mod1, fgn_mod2)
+```
+
+* The AIC *increases* by more than 2 for `fgn_mod2`, so random effects are not retained in the model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (FGN)
+
+```{r}
+fgn_mod1.a <- lm(final_c ~ exp + fgn_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(fgn_mod1.a)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod1.a`
+
+```{r}
+AIC(fgn_mod1, fgn_mod1.a)
+```
+
+* The AIC *increases* by *less than 2* for `fgn_mod1.a`, so we will move forward with the simplest model, which is `fgn_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `exp` because it has the lowest t-value
+
+```{r}
+fgn_mod1.b <- lmer(final_c ~ fgn_id +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.b)
+```
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.b`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.b`, so we will retain `exp` as a parameter in our model.
+
+* Now let's try removing `fgn_id` from our model
+
+```{r}
+fgn_mod1.c <- lmer(final_c ~ exp +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.c)
+```
+
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.c`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.c`, so we will retain `fgn_id` as a parameter in our model.
+
+* Now let's try removing `satv_c` from our model
+
+```{r}
+fgn_mod1.d <- lmer(final_c ~ exp + fgn_id +
+                             satm_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.d)
+```
+
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.d`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.d`, so we will retain `satv_c` as a parameter in our model.
+* Our final model is `fgn_mod1.a`, which is summarized above.
