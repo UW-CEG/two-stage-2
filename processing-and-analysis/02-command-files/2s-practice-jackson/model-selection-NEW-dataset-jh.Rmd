@@ -152,3 +152,93 @@ urm_mod1 <- lm(final_c ~ exp * urm_id +
                          data = master)
 summary(urm_mod1)
 ```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (URM)
+
+```{r}
+urm_mod2 <- lmer(final_c ~ exp * urm_id +
+                         exp + urm_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                         (1 | ta_sect),
+                         data = master, REML = TRUE)
+summary(urm_mod2)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(urm_mod1, urm_mod2)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod2`, so we will not include random effects from `ta_sect` in our model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (URM)
+
+```{r}
+urm_mod1.a <- lm(final_c ~ exp + urm_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.a)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod1.a`
+
+```{r}
+AIC(urm_mod1, urm_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod1.a`, so we will retain this model because it is the simplest.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `urm_id` because it has the lowest t-value
+
+```{r}
+urm_mod1.b <- lm(final_c ~ exp +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.b)
+```
+
+#### AIC comparison of `urm_mod1.a` and `urm_mod1.b`
+
+```{r}
+AIC(urm_mod1.a, urm_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod1.b`, so we will retain `urm_id` in our model.
+
+* Now let's try removing `exp` from our model:
+
+```{r}
+urm_mod1.c <- lm(final_c ~ urm_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.c)
+```
+
+#### AIC comparison of `urm_mod1.a` and `urm_mod1.c`
+
+```{r}
+AIC(urm_mod1.a, urm_mod1.c)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod1.c`, which is the simplest model, so we will remove the `exp` parameter from our model.
+
+* Now let's try removing `satv_c`
+
+```{r}
+urm_mod1.d <- lm(final_c ~ urm_id +
+                           satm_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.d)
+```
+
+#### AIC comparison of `urm_mod1.c` and `urm_mod1.d`
+
+```{r}
+AIC(urm_mod1.c, urm_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod1.d`, so we will retain the `satv_c` parameter in our model.
+* Our final model is `urm_mod1.c`, which is summarized above.
