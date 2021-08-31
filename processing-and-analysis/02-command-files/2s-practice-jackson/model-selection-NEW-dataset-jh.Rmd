@@ -73,8 +73,8 @@ summary(sex_mod1)
 
 ```{r}
 sex_mod2 <- lmer(final_c ~ exp * sex_id +
-                         exp + sex_id +
-                         satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                           exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
                          (1 | ta_sect),
                          data = master, REML = TRUE)
 summary(sex_mod2)
@@ -86,7 +86,7 @@ summary(sex_mod2)
 AIC(sex_mod1, sex_mod2)
 ```
 
-* The AIC *decreases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
+* The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
 
 ### 3. Fixed-effects only model with *no* demographic interactions (sex)
 
@@ -451,3 +451,6 @@ AIC(fgn_mod1.a, fgn_mod1.d)
 
 * The AIC *increases* by *more than 2* for `fgn_mod1.d`, so we will retain `satv_c` as a parameter in our model.
 * Our final model is `fgn_mod1.a`, which is summarized above.
+
+## Notes
+* I ended up stopping the one-by-one removal of parameters after `satv_c` based on the intuition that the other parameters had t-values much greater than that of `satv_c`.
