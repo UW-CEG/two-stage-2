@@ -1,5 +1,5 @@
 ---
-title: "Model_Analysis(New_Data)"
+title: "Model_Analysis_New_Data"
 author: "Ganling"
 date: "8/30/2021"
 output: 
@@ -33,7 +33,13 @@ file.copy(copy_from, copy_to)
 ```r
 df <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
 ```
+## Regression Analysis
+### Select columns
 
+```r
+df_1 <- df %>%
+  select(two_stage_id, class.x, class.y, qtr, course_fullid, ta_sect, exp, exam1_c, exam2_c, final_c, sex_id, urm_id, eop_id, fgn_id)
+```
 
 
 
