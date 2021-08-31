@@ -15,6 +15,7 @@ library(skimr)
 library(knitr)
 library(moderndive)
 library(janitor)
+library(lme4)
 ```
 
 ## Set up
@@ -50,7 +51,104 @@ master_original_2 <- master_original_1 %>%
 ### Select relevant columns
 
 ```{r}
-master <- master_original %>% 
-  select(course_fullid, exam1, exam2, finalexam, ta_sect, ver, sex_id, urm_id, eop_id, fgn_id, satverbal, satmath, high_sch_gpa, mastered_topics_initial_kc, experiment1, satm_c, satv_c, aleksikc_c, hsgpa_c, final_c, satm_z, satv_z, aleksikc_z, hsgpa_z, final_z)
+master <- master_original_2 %>% 
+  select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm_c, satv_c, aleksikc_c, hs_gpa_c, final_c, satm_z, satv_z, aleksikc_z, hs_gpa_z, final_z)
 ```
 
+# Model Selection
+
+## Model selection for `sex_id`
+
+### 1. Fixed-effects only model (sex)
+
+```{r}
+sex_mod1 <- lm(final_c ~ exp * sex_id +
+                         exp + sex_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(sex_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (sex)
+
+```{r}
+sex_mod2 <- lmer(final_c ~ exp * sex_id +
+                         exp + sex_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                         (1 | ta_sect),
+                         data = master, REML = TRUE)
+summary(sex_mod2)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod2`
+
+```{r}
+AIC(sex_mod1, sex_mod2)
+```
+
+* The AIC *decreases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (sex)
+
+```{r}
+sex_mod1.a <- lm(final_c ~ exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod1.a`
+
+```{r}
+AIC(sex_mod1, sex_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.a`, so we will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+### 4. Removal of parameters one by one
+
+* We will start with removing `exp`, which has the lowest t-value
+
+```{r}
+sex_mod1.b <- lm(final_c ~ sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.b)
+```
+
+#### AIC comparison of `sex_mod1.a` and `sex_mod1.b`
+
+```{r}
+AIC(sex_mod1.a, sex_mod1.b)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.b`, so we will retain this model since it is the simplest. 
+
+* Now we will try removing `sex_id`
+
+```{r}
+sex_mod1.c <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.c)
+```
+
+#### AIC comparison of `sex_mod1.b` and `sex_mod1.c`
+
+```{r}
+AIC(sex_mod1.b, sex_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model.
+* Our final model is `sex_mod1.b`, which is summarized above.
+
+## Model selection for `urm_id`
+
+### 1. Fixed-effects only model (URM)
+
+```{r}
+urm_mod1 <- lm(final_c ~ exp * urm_id +
+                         exp + urm_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(urm_mod1)
+```
