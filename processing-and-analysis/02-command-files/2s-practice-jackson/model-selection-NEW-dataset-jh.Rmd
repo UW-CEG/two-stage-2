@@ -1,0 +1,456 @@
+---
+title: 'Model Selection with the New Dataset'
+author: "Jackson Hughes"
+date: "8/30/2021"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor)
+library(lme4)
+```
+
+## Set up
+
+### Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import dataset
+
+```{r}
+master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+### Change value of NAs in `exp` column to `EXPERIMENT`
+
+```{r}
+master_original_2 <- master_original_1 %>% 
+  mutate(exp = replace_na(exp, "EXPERIMENT"))
+```
+
+
+### Select relevant columns
+
+```{r}
+master <- master_original_2 %>% 
+  select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm_c, satv_c, aleksikc_c, hs_gpa_c, final_c, satm_z, satv_z, aleksikc_z, hs_gpa_z, final_z)
+```
+
+# Model Selection
+
+## Model selection for `sex_id`
+
+### 1. Fixed-effects only model (sex)
+
+```{r}
+sex_mod1 <- lm(final_c ~ exp * sex_id +
+                         exp + sex_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(sex_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (sex)
+
+```{r}
+sex_mod2 <- lmer(final_c ~ exp * sex_id +
+                           exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                         (1 | ta_sect),
+                         data = master, REML = TRUE)
+summary(sex_mod2)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod2`
+
+```{r}
+AIC(sex_mod1, sex_mod2)
+```
+
+* The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (sex)
+
+```{r}
+sex_mod1.a <- lm(final_c ~ exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod1.a`
+
+```{r}
+AIC(sex_mod1, sex_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.a`, so we will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+### 4. Removal of parameters one by one
+
+* We will start with removing `exp`, which has the lowest t-value
+
+```{r}
+sex_mod1.b <- lm(final_c ~ sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.b)
+```
+
+#### AIC comparison of `sex_mod1.a` and `sex_mod1.b`
+
+```{r}
+AIC(sex_mod1.a, sex_mod1.b)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.b`, so we will retain this model since it is the simplest. 
+
+* Now we will try removing `sex_id`
+
+```{r}
+sex_mod1.c <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.c)
+```
+
+#### AIC comparison of `sex_mod1.b` and `sex_mod1.c`
+
+```{r}
+AIC(sex_mod1.b, sex_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model.
+* Our final model is `sex_mod1.b`, which is summarized above.
+
+## Model selection for `urm_id`
+
+### 1. Fixed-effects only model (URM)
+
+```{r}
+urm_mod1 <- lm(final_c ~ exp * urm_id +
+                         exp + urm_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(urm_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (URM)
+
+```{r}
+urm_mod2 <- lmer(final_c ~ exp * urm_id +
+                         exp + urm_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                         (1 | ta_sect),
+                         data = master, REML = TRUE)
+summary(urm_mod2)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(urm_mod1, urm_mod2)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod2`, so we will not include random effects from `ta_sect` in our model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (URM)
+
+```{r}
+urm_mod1.a <- lm(final_c ~ exp + urm_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.a)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod1.a`
+
+```{r}
+AIC(urm_mod1, urm_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod1.a`, so we will retain this model because it is the simplest.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `urm_id` because it has the lowest t-value
+
+```{r}
+urm_mod1.b <- lm(final_c ~ exp +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.b)
+```
+
+#### AIC comparison of `urm_mod1.a` and `urm_mod1.b`
+
+```{r}
+AIC(urm_mod1.a, urm_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod1.b`, so we will retain `urm_id` in our model.
+
+* Now let's try removing `exp` from our model:
+
+```{r}
+urm_mod1.c <- lm(final_c ~ urm_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.c)
+```
+
+#### AIC comparison of `urm_mod1.a` and `urm_mod1.c`
+
+```{r}
+AIC(urm_mod1.a, urm_mod1.c)
+```
+
+* The AIC *decreases* by *less than 2* for `urm_mod1.c`, which is the simplest model, so we will remove the `exp` parameter from our model.
+
+* Now let's try removing `satv_c`
+
+```{r}
+urm_mod1.d <- lm(final_c ~ urm_id +
+                           satm_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.d)
+```
+
+#### AIC comparison of `urm_mod1.c` and `urm_mod1.d`
+
+```{r}
+AIC(urm_mod1.c, urm_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `urm_mod1.d`, so we will retain the `satv_c` parameter in our model.
+* Our final model is `urm_mod1.c`, which is summarized above.
+
+## Model selection for `eop_id`
+
+### 1. Fixed-effects only model (EOP)
+
+```{r}
+eop_mod1 <- lm(final_c ~ exp * eop_id +
+                         exp + eop_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(eop_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (EOP)
+
+```{r}
+eop_mod2 <- lmer(final_c ~ exp * eop_id +
+                           exp + eop_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                           (1 | ta_sect),
+                           data = master, REML = TRUE)
+summary(eop_mod2)
+```
+
+#### AIC comparison of `urm_mod1` and `urm_mod2`
+
+```{r}
+AIC(eop_mod1, eop_mod2)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod2`, so we will not retain random effects from `ta_sect` in our model.
+
+
+### 3. Fixed-effects only model with *no* demographic interactions (EOP)
+
+```{r}
+eop_mod1.a <- lm(final_c ~ exp + eop_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(eop_mod1.a)
+```
+
+#### AIC comparison of `eop_mod1` and `eop_mod1.a`
+
+```{r}
+AIC(eop_mod1, eop_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `eop_mod1.a`, which is the simplest model, so we will not include interactions from `eop_id` in our model.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `exp` because it has the lowest t-value
+
+```{r}
+eop_mod1.b <- lmer(final_c ~ eop_id +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(eop_mod1.b)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.b`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.b`, so we will keep `exp` as a parameter in our model.
+
+* Now let's try removing `eop_id` from our model
+
+```{r}
+eop_mod1.c <- lmer(final_c ~ exp +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(eop_mod1.c)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.c`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.c`, so we will retain `eop_id` as a parameter in our model.
+
+* Now let's try removing `satv_c` from our model
+
+```{r}
+eop_mod1.d <- lm(final_c ~ exp + eop_id +
+                           satm_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(eop_mod1.d)
+```
+
+#### AIC comparison of `eop_mod1.a` and `eop_mod1.d`
+
+```{r}
+AIC(eop_mod1.a, eop_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `eop_mod1.d`, so we will retain `satv_c` as a parameter in our model.
+* Our final model is `eop_mod1.a`, which is summarized above.
+
+## Model selection for `fgn_id`
+
+### 1. Fixed-effects only model (fgn)
+
+```{r}
+fgn_mod1 <- lm(final_c ~ exp * fgn_id +
+                         exp + fgn_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(fgn_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (FGN)
+
+```{r}
+fgn_mod2 <- lmer(final_c ~ exp * fgn_id +
+                           exp + fgn_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                           (1 | ta_sect),
+                           data = master, REML = TRUE)
+summary(fgn_mod2)
+```
+
+#### AIC comparison of `fgn_mod1` and `fgn_mod2`
+
+```{r}
+AIC(fgn_mod1, fgn_mod2)
+```
+
+* The AIC *increases* by more than 2 for `fgn_mod2`, so random effects are not retained in the model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (FGN)
+
+```{r}
+fgn_mod1.a <- lm(final_c ~ exp + fgn_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(fgn_mod1.a)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod1.a`
+
+```{r}
+AIC(fgn_mod1, fgn_mod1.a)
+```
+
+* The AIC *increases* by *less than 2* for `fgn_mod1.a`, so we will move forward with the simplest model, which is `fgn_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+### 4. Removal of parameters one by one
+
+* Start by removing `exp` because it has the lowest t-value
+
+```{r}
+fgn_mod1.b <- lmer(final_c ~ fgn_id +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.b)
+```
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.b`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.b)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.b`, so we will retain `exp` as a parameter in our model.
+
+* Now let's try removing `fgn_id` from our model
+
+```{r}
+fgn_mod1.c <- lmer(final_c ~ exp +
+                             satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.c)
+```
+
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.c`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.c`, so we will retain `fgn_id` as a parameter in our model.
+
+* Now let's try removing `satv_c` from our model
+
+```{r}
+fgn_mod1.d <- lmer(final_c ~ exp + fgn_id +
+                             satm_c + aleksikc_c + hs_gpa_c +
+                             (1 | ta_sect),
+                             data = master, REML = TRUE)
+summary(fgn_mod1.d)
+```
+
+#### AIC comparison of `fgn_mod1.a` and `fgn_mod1.d`
+
+```{r}
+AIC(fgn_mod1.a, fgn_mod1.d)
+```
+
+* The AIC *increases* by *more than 2* for `fgn_mod1.d`, so we will retain `satv_c` as a parameter in our model.
+* Our final model is `fgn_mod1.a`, which is summarized above.
+
+## Notes
+* I ended up stopping the one-by-one removal of parameters after `satv_c` based on the intuition that the other parameters had t-values much greater than that of `satv_c`.
