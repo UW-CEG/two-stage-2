@@ -1,0 +1,83 @@
+---
+title: "Playing with `effects` package"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(effects)
+```
+
+# Cowles and Davis's Data on Volunteering
+## Description
+The Cowles data frame has 1421 rows and 4 columns. These data come from a study of the personality determinants of volunteering for psychological research.
+
+## Format
+This data frame contains the following columns:
+
+* **neuroticism**: scale from Eysenck personality inventory
+* **extraversion**: scale from Eysenck personality inventory
+* **sex**: a factor with levels: female; male
+* **volunteer**: volunteering, a factor with levels: no; yes
+
+## Source
+Cowles, M. and C. Davis (1987) The subject matter of psychology: Volunteers. 
+_British Journal of Social Psychology_ 26, 97–102.
+
+```{r}
+mod.cowles <- glm(volunteer ~ sex + neuroticism*extraversion,
+                  data = Cowles, family = binomial)
+
+eff.cowles <- allEffects(mod.cowles, 
+                         xlevels = list(extraversion = seq(0, 24, 6)),
+                         fixed.predictors = list(given.values = c(sexmale = 0.5)))
+
+eff.cowles_2 <- allEffects(mod.cowles, 
+                         xlevels = list(extraversion = seq(0, 24, 6)),
+                         fixed.predictors = list(given.values = c(sexmale = 1.0)))
+```
+
+```{r}
+summary(mod.cowles)
+summary.eff(eff.cowles)
+```
+
+
+```{r}
+
+eff.cowles
+eff.cowles_2
+as.data.frame(eff.cowles[[1]])
+as.data.frame(eff.cowles[[2]])
+as.data.frame(eff.cowles_2[[1]])
+as.data.frame(eff.cowles_2[[2]])
+```
+
+```{r}
+# the following are equivalent:
+eff.ne <- effect("neuroticism*extraversion", mod.cowles)
+Eff.ne <- Effect(c("neuroticism", "extraversion"), mod.cowles)
+all.equal(eff.ne$fit, Eff.ne$fit)
+
+plot(eff.cowles, 'sex', axes=list(y=list(lab="Prob(Volunteer)")))
+
+plot(eff.cowles, 'neuroticism:extraversion',
+     axes=list(y=list(lab="Prob(Volunteer)",
+        ticks=list(at=c(.1,.25,.5,.75,.9)))))
+
+plot(Effect(c("neuroticism", "extraversion"), mod.cowles,
+            se=list(type="Scheffe"),
+            xlevels=list(extraversion=seq(0, 24, 6)),
+            fixed.predictors=list(given.values=c(sexmale=0.5))),
+     axes=list(y=list(lab="Prob(Volunteer)",
+        ticks=list(at=c(.1,.25,.5,.75,.9)))))
+
+plot(eff.cowles, 'neuroticism:extraversion', lines=list(multiline=TRUE),
+     axes=list(y=list(lab="Prob(Volunteer)")))
+
+plot(effect('sex:neuroticism:extraversion', mod.cowles,
+            xlevels=list(extraversion=seq(0, 24, 6))),
+     lines=list(multiline=TRUE))
+
+```
+
