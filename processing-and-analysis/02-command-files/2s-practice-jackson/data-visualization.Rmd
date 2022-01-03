@@ -1,0 +1,173 @@
+---
+title: 'Two Stage Data Visualization'
+author: "Jackson Hughes"
+date: "1/3/2022"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor)
+library(lme4)
+```
+
+## Set up
+
+### Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import dataset
+
+```{r}
+master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+### Change value of NAs in `exp` column to `EXPERIMENT`
+
+```{r}
+master_original_2 <- master_original_1 %>% 
+  mutate(exp = replace_na(exp, "EXPERIMENT"))
+```
+
+
+### Select relevant columns
+
+```{r}
+master <- master_original_2 %>% 
+  select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm, satv, aleksikc_score, hs_gpa, final)
+```
+
+## Data Visualization
+
+### Box Blots
+
+#### Final exam score vs. `sex_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = sex_id, y = final)) +
+  geom_boxplot()
+```
+
+#### Final exam score vs. `urm_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = urm_id, y = final)) +
+  geom_boxplot()
+```
+
+#### Final exam score vs. `eop_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = eop_id, y = final)) +
+  geom_boxplot()
+```
+
+#### Final exam score vs. `fgn_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = fgn_id, y = final)) +
+  geom_boxplot()
+```
+
+#### `satm` vs. `sex_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = sex_id, y = satm)) +
+  geom_boxplot()
+```
+
+#### `satm` vs. `urm_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = urm_id, y = satm)) +
+  geom_boxplot()
+```
+
+#### `satm` vs. `eop_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = eop_id, y = satm)) +
+  geom_boxplot()
+```
+
+#### `satm` vs. `fgn_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = fgn_id, y = satm)) +
+  geom_boxplot()
+```
+
+#### `aleksikc_score` vs. `sex_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = sex_id, y = aleksikc_score)) +
+  geom_boxplot()
+```
+
+#### `aleksikc_score` vs. `urm_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = urm_id, y = aleksikc_score)) +
+  geom_boxplot()
+```
+
+#### `aleksikc_score` vs. `eop_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = eop_id, y = aleksikc_score)) +
+  geom_boxplot()
+```
+
+#### `aleksikc_score` vs. `fgn_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = fgn_id, y = aleksikc_score)) +
+  geom_boxplot()
+```
+
+#### `hs_gpa` vs. `sex_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = sex_id, y = hs_gpa)) +
+  geom_boxplot()
+```
+
+#### `hs_gpa` vs. `urm_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = urm_id, y = hs_gpa)) +
+  geom_boxplot()
+```
+
+#### `hs_gpa` vs. `eop_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = eop_id, y = hs_gpa)) +
+  geom_boxplot()
+```
+
+#### `hs_gpa` vs. `fgn_id`
+
+```{r}
+ggplot(data = master, mapping = aes(x = fgn_id, y = hs_gpa)) +
+  geom_boxplot()
+```
+
