@@ -313,3 +313,37 @@ ggplot() +
   geom_point(data = master_non_fgn, aes(x = hs_gpa, y = final), color = "black") +
   geom_smooth(data = master_non_fgn, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
 ```
+
+### Boxplots
+
+#### `sex_id` distribution between control and experimental years
+
+```{r}
+ggplot(data = master, aes(x = sex_id)) +
+  geom_bar() +
+  facet_wrap(~ exp)
+```
+
+#### `urm_id` distribution between control and experimental years
+
+```{r}
+ggplot(data = master, aes(x = urm_id)) +
+  geom_bar() +
+  facet_wrap(~ exp)
+```
+
+#### `eop_id` distribution between control and experimental years
+
+```{r}
+ggplot(data = master, aes(x = eop_id)) +
+  geom_bar() +
+  facet_wrap(~ exp)
+```
+
+#### `fgn_id` distribution between control and experimental years
+
+```{r}
+ggplot(data = master, aes(x = fgn_id)) +
+  geom_bar() +
+  facet_wrap(~ exp)
+```
