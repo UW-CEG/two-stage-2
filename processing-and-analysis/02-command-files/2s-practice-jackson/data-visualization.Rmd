@@ -171,3 +171,85 @@ ggplot(data = master, mapping = aes(x = fgn_id, y = hs_gpa)) +
   geom_boxplot()
 ```
 
+### Scatterplots
+
+#### Create subsets of original data for each demographic ID
+
+```{r}
+master_male <- master %>% 
+  filter(sex_id == "Male")
+master_female <- master %>% 
+  filter(sex_id == "Female")
+master_urm <- master %>% 
+  filter(urm_id == "URM")
+master_non_urm <- master %>% 
+  filter(urm_id == "non-URM")
+master_eop <- master %>% 
+  filter(eop_id == "EOP")
+master_non_eop <- master %>% 
+  filter(eop_id == "non-EOP")
+master_fgn <- master %>% 
+  filter(fgn_id == "FGN")
+master_non_fgn <- master %>% 
+  filter(fgn_id == "non-FGN")
+```
+
+#### Final exam score vs. `satm` (grouped by `sex_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_male, aes(x = satm, y = final), color = "blue") +
+  geom_smooth(data = master_male, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "blue") +
+  geom_point(data = master_female, aes(x = satm, y = final), color = "red") +
+  geom_smooth(data = master_female, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red")
+```
+
+#### Final exam score vs. `aleksikc_score` (grouped by `sex_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_male, aes(x = aleksikc_score, y = final), color = "blue") +
+  geom_smooth(data = master_male, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "blue") +
+  geom_point(data = master_female, aes(x = aleksikc_score, y = final), color = "red") +
+  geom_smooth(data = master_female, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red")
+```
+
+#### Final exam score vs. `hs_gpa` (grouped by `sex_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_male, aes(x = hs_gpa, y = final), color = "blue") +
+  geom_smooth(data = master_male, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "blue") +
+  geom_point(data = master_female, aes(x = hs_gpa, y = final), color = "red") +
+  geom_smooth(data = master_female, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red")
+```
+
+#### Final exam score vs. `satm` (grouped by `urm_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_urm, aes(x = satm, y = final), color = "red") +
+  geom_smooth(data = master_urm, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_urm, aes(x = satm, y = final), color = "black") +
+  geom_smooth(data = master_non_urm, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `aleksikc_score` (grouped by `urm_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_urm, aes(x = aleksikc_score, y = final), color = "red") +
+  geom_smooth(data = master_urm, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_urm, aes(x = aleksikc_score, y = final), color = "black") +
+  geom_smooth(data = master_non_urm, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `hs_gpa` (grouped by `urm_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_urm, aes(x = hs_gpa, y = final), color = "red") +
+  geom_smooth(data = master_urm, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_urm, aes(x = hs_gpa, y = final), color = "black") +
+  geom_smooth(data = master_non_urm, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
