@@ -253,3 +253,63 @@ ggplot() +
   geom_point(data = master_non_urm, aes(x = hs_gpa, y = final), color = "black") +
   geom_smooth(data = master_non_urm, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
 ```
+
+#### Final exam score vs. `satm` (grouped by `eop_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_eop, aes(x = satm, y = final), color = "red") +
+  geom_smooth(data = master_eop, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_eop, aes(x = satm, y = final), color = "black") +
+  geom_smooth(data = master_non_eop, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `aleksikc_score` (grouped by `eop_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_eop, aes(x = aleksikc_score, y = final), color = "red") +
+  geom_smooth(data = master_eop, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_eop, aes(x = aleksikc_score, y = final), color = "black") +
+  geom_smooth(data = master_non_eop, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `hs_gpa` (grouped by `eop_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_eop, aes(x = hs_gpa, y = final), color = "red") +
+  geom_smooth(data = master_eop, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_eop, aes(x = hs_gpa, y = final), color = "black") +
+  geom_smooth(data = master_non_eop, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `satm` (grouped by `fgn_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_fgn, aes(x = satm, y = final), color = "red") +
+  geom_smooth(data = master_fgn, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_fgn, aes(x = satm, y = final), color = "black") +
+  geom_smooth(data = master_non_fgn, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `aleksikc_score` (grouped by `fgn_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_fgn, aes(x = aleksikc_score, y = final), color = "red") +
+  geom_smooth(data = master_fgn, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_fgn, aes(x = aleksikc_score, y = final), color = "black") +
+  geom_smooth(data = master_non_fgn, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
+
+#### Final exam score vs. `hs_gpa` (grouped by `fgn_id`)
+
+```{r}
+ggplot() +
+  geom_point(data = master_fgn, aes(x = hs_gpa, y = final), color = "red") +
+  geom_smooth(data = master_fgn, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
+  geom_point(data = master_non_fgn, aes(x = hs_gpa, y = final), color = "black") +
+  geom_smooth(data = master_non_fgn, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+```
