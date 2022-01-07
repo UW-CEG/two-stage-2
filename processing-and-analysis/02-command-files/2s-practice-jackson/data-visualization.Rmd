@@ -297,6 +297,15 @@ master %>%
   geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
+#### Final exam score vs. `satm` (grouped by `exp`)
+
+```{r}
+master %>% 
+  ggplot(aes(x = satm, y = final, group = exp, color = exp)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
+```
+
 ### Boxplots
 
 #### `sex_id` distribution between control and experimental years

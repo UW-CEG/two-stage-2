@@ -300,372 +300,271 @@ ggplot(data = master, mapping = aes(x = fgn_id, y = hs_gpa)) +
 
 ### Scatterplots
 
-#### Create subsets of original data for each demographic ID
-
-
-```r
-master_male <- master %>% 
-  filter(sex_id == "Male")
-master_female <- master %>% 
-  filter(sex_id == "Female")
-master_urm <- master %>% 
-  filter(urm_id == "URM")
-master_non_urm <- master %>% 
-  filter(urm_id == "non-URM")
-master_eop <- master %>% 
-  filter(eop_id == "EOP")
-master_non_eop <- master %>% 
-  filter(eop_id == "non-EOP")
-master_fgn <- master %>% 
-  filter(fgn_id == "FGN")
-master_non_fgn <- master %>% 
-  filter(fgn_id == "non-FGN")
-```
-
 #### Final exam score vs. `satm` (grouped by `sex_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_male, aes(x = satm, y = final), color = "blue") +
-  geom_smooth(data = master_male, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "blue") +
-  geom_point(data = master_female, aes(x = satm, y = final), color = "red") +
-  geom_smooth(data = master_female, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red")
+master %>% 
+  ggplot(aes(x = satm, y = final, group = sex_id, color = sex_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 45 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 51 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 45 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 51 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 #### Final exam score vs. `aleksikc_score` (grouped by `sex_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_male, aes(x = aleksikc_score, y = final), color = "blue") +
-  geom_smooth(data = master_male, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "blue") +
-  geom_point(data = master_female, aes(x = aleksikc_score, y = final), color = "red") +
-  geom_smooth(data = master_female, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red")
+master %>% 
+  ggplot(aes(x = aleksikc_score, y = final, group = sex_id, color = sex_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 31 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 30 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 31 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 30 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 #### Final exam score vs. `hs_gpa` (grouped by `sex_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_male, aes(x = hs_gpa, y = final), color = "blue") +
-  geom_smooth(data = master_male, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "blue") +
-  geom_point(data = master_female, aes(x = hs_gpa, y = final), color = "red") +
-  geom_smooth(data = master_female, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red")
+master %>% 
+  ggplot(aes(x = hs_gpa, y = final, group = sex_id, color = sex_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 44 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 47 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 44 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 47 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 #### Final exam score vs. `satm` (grouped by `urm_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_urm, aes(x = satm, y = final), color = "red") +
-  geom_smooth(data = master_urm, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_urm, aes(x = satm, y = final), color = "black") +
-  geom_smooth(data = master_non_urm, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = satm, y = final, group = urm_id, color = urm_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 12 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 48 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 12 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 48 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 #### Final exam score vs. `aleksikc_score` (grouped by `urm_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_urm, aes(x = aleksikc_score, y = final), color = "red") +
-  geom_smooth(data = master_urm, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_urm, aes(x = aleksikc_score, y = final), color = "black") +
-  geom_smooth(data = master_non_urm, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = aleksikc_score, y = final, group = urm_id, color = urm_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 13 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 42 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 13 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 42 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
 
 #### Final exam score vs. `hs_gpa` (grouped by `urm_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_urm, aes(x = hs_gpa, y = final), color = "red") +
-  geom_smooth(data = master_urm, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_urm, aes(x = hs_gpa, y = final), color = "black") +
-  geom_smooth(data = master_non_urm, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = hs_gpa, y = final, group = urm_id, color = urm_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 17 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 69 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 17 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 69 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
 
 #### Final exam score vs. `satm` (grouped by `eop_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_eop, aes(x = satm, y = final), color = "red") +
-  geom_smooth(data = master_eop, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_eop, aes(x = satm, y = final), color = "black") +
-  geom_smooth(data = master_non_eop, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = satm, y = final, group = eop_id, color = eop_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 19 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 77 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 19 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 77 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
 
 #### Final exam score vs. `aleksikc_score` (grouped by `eop_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_eop, aes(x = aleksikc_score, y = final), color = "red") +
-  geom_smooth(data = master_eop, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_eop, aes(x = aleksikc_score, y = final), color = "black") +
-  geom_smooth(data = master_non_eop, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = aleksikc_score, y = final, group = eop_id, color = eop_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 24 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 37 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 24 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 37 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
 #### Final exam score vs. `hs_gpa` (grouped by `eop_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_eop, aes(x = hs_gpa, y = final), color = "red") +
-  geom_smooth(data = master_eop, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_eop, aes(x = hs_gpa, y = final), color = "black") +
-  geom_smooth(data = master_non_eop, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = hs_gpa, y = final, group = eop_id, color = eop_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 22 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 69 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 22 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 69 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
 
 #### Final exam score vs. `satm` (grouped by `fgn_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_fgn, aes(x = satm, y = final), color = "red") +
-  geom_smooth(data = master_fgn, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_fgn, aes(x = satm, y = final), color = "black") +
-  geom_smooth(data = master_non_fgn, aes(x = satm, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = satm, y = final, group = fgn_id, color = fgn_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 41 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 52 rows containing non-finite values (stat_smooth).
+## Warning: Removed 96 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 41 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 52 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
 #### Final exam score vs. `aleksikc_score` (grouped by `fgn_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_fgn, aes(x = aleksikc_score, y = final), color = "red") +
-  geom_smooth(data = master_fgn, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_fgn, aes(x = aleksikc_score, y = final), color = "black") +
-  geom_smooth(data = master_non_fgn, aes(x = aleksikc_score, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = aleksikc_score, y = final, group = fgn_id, color = fgn_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 31 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 30 rows containing non-finite values (stat_smooth).
+## Warning: Removed 61 rows containing missing values (geom_point).
 ```
 
-```
-## Warning: Removed 31 rows containing missing values (geom_point).
-```
-
-```
-## Warning: Removed 30 rows containing missing values (geom_point).
-```
-
-![](data-visualization_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+![](data-visualization_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
 
 #### Final exam score vs. `hs_gpa` (grouped by `fgn_id`)
 
 
 ```r
-ggplot() +
-  geom_point(data = master_fgn, aes(x = hs_gpa, y = final), color = "red") +
-  geom_smooth(data = master_fgn, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "red") +
-  geom_point(data = master_non_fgn, aes(x = hs_gpa, y = final), color = "black") +
-  geom_smooth(data = master_non_fgn, aes(x = hs_gpa, y = final), method = 'lm', formula = y ~ x, color = "black")
+master %>% 
+  ggplot(aes(x = hs_gpa, y = final, group = fgn_id, color = fgn_id)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
 ```
 
 ```
-## Warning: Removed 40 rows containing non-finite values (stat_smooth).
+## Warning: Removed 91 rows containing non-finite values (stat_smooth).
 ```
 
 ```
-## Warning: Removed 44 rows containing non-finite values (stat_smooth).
+## Warning in qt((1 - level)/2, df): NaNs produced
 ```
 
 ```
-## Warning: Removed 40 rows containing missing values (geom_point).
+## Warning: Removed 91 rows containing missing values (geom_point).
 ```
 
 ```
-## Warning: Removed 44 rows containing missing values (geom_point).
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning -
+## Inf
+```
+
+![](data-visualization_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+
+#### Final exam score vs. `satm` (grouped by `exp`)
+
+
+```r
+master %>% 
+  ggplot(aes(x = satm, y = final, group = exp, color = exp)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = y ~ x)
+```
+
+```
+## Warning: Removed 96 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 96 rows containing missing values (geom_point).
 ```
 
 ![](data-visualization_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
