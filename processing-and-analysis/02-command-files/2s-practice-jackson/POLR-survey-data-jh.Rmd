@@ -44,8 +44,34 @@ master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_
 ### Change value of NAs in `exp` column to `EXPERIMENT`
 
 ```{r}
-master_original_2 <- master_original_1 %>% 
+master <- master_original_1 %>% 
   mutate(exp = replace_na(exp, "EXPERIMENT"))
 ```
 
 ## POLR on Survey Data
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`)
+
+```{r}
+master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+
+model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+                                    exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                                    exp + sex_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_1)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
+
+```{r}
+model_2 <- polr(perts_q1msfixed2 ~ exp*urm_id*perts_q1msfixed1 +
+                                    exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
+                                    exp + urm_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_2)
