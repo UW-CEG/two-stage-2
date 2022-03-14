@@ -127,6 +127,8 @@ model_5 <- polr(perts_q1msfixed2 ~ exp*sex_id +
 
 summary(model_5)
 ```
+##### As the value of `exp` changes, the log odds of (males?) answering one or more higher levels on the Likert scale decreases by 0.111639
+##### When we get rid of the other survey question as an interaction, the "L, Q, C, ^4 ^5" indicator in the regression output disappears
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`; compared within control year)
 
@@ -138,6 +140,7 @@ model_6 <- polr(perts_q1msfixed2 ~ sex_id*perts_q1msfixed1 +
 
 summary(model_6)
 ```
+##### The log odds of females answering one or more higher levels on the Likert scale for the end of quarter survey vs. men decreases by 0.1677219?
 
 ## `urm_id`:
 
