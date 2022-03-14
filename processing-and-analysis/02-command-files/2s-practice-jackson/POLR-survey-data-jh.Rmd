@@ -48,7 +48,7 @@ master <- master_original_1 %>%
   mutate(exp = replace_na(exp, "EXPERIMENT"))
 ```
 
-## POLR on Survey Data
+## POLR on Survey Data Part I: Relatively more complex interactions
 
 #### Ensure that survey data is ordered
 
@@ -104,4 +104,109 @@ model_4 <- polr(perts_q1msfixed2 ~ exp*fgn_id*perts_q1msfixed1 +
                                     data = master)
 
 summary(model_4)
+```
+
+## POLR on Survey Data Part II: Relatively simpler interactions
+
+#### Create a dataset that only contains data from the control year
+
+```{r}
+master_control <- master %>% 
+  filter(exp == "CONTROL")
+```
+
+## `sex_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`sex_id`; compared across years)
+
+```{r}
+model_5 <- polr(perts_q1msfixed2 ~ exp*sex_id +
+                                    exp + sex_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_5)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`; compared within control year)
+
+```{r}
+model_6 <- polr(perts_q1msfixed2 ~ sex_id*perts_q1msfixed1 +
+                                    sex_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_6)
+```
+
+## `urm_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`urm_id`; compared across years)
+
+```{r}
+model_7 <- polr(perts_q1msfixed2 ~ exp*urm_id +
+                                    exp + urm_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_7)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`; compared within control year)
+
+```{r}
+model_8 <- polr(perts_q1msfixed2 ~ urm_id*perts_q1msfixed1 +
+                                    urm_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_8)
+```
+
+## `eop_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`eop_id`; compared across years)
+
+```{r}
+model_9 <- polr(perts_q1msfixed2 ~ exp*eop_id +
+                                    exp + eop_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_9)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`eop_id`; compared within control year)
+
+```{r}
+model_10 <- polr(perts_q1msfixed2 ~ eop_id*perts_q1msfixed1 +
+                                    eop_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_10)
+```
+
+## `fgn_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`fgn_id`; compared across years)
+
+```{r}
+model_11 <- polr(perts_q1msfixed2 ~ exp*fgn_id +
+                                    exp + fgn_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_11)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`; compared within control year)
+
+```{r}
+model_12 <- polr(perts_q1msfixed2 ~ fgn_id*perts_q1msfixed1 +
+                                    fgn_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_12)
 ```
