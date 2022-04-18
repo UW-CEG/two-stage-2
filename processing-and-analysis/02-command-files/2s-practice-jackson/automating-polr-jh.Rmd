@@ -1,0 +1,81 @@
+---
+title: "Automated Regression Output"
+author: "Jackson Hughes"
+date: "3/13/2022"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+library(MASS)
+library(effects)
+library(nnet)
+library(Hmisc)
+```
+
+## Set up
+
+### Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import dataset
+
+```{r}
+master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+### Change value of NAs in `exp` column to `EXPERIMENT`
+
+```{r}
+master <- master_original_1 %>% 
+  mutate(exp = replace_na(exp, "EXPERIMENT"))
+```
+
+#### Ensure that survey data is ordered
+
+```{r}
+master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q2msfixed1 <- ordered(master$perts_q2msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q3msfixed1 <- ordered(master$perts_q3msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q2msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q3msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+```
+
+## Automation
+
+#### Create response list
+
+```{r}
+x1 <- c("perts_q1msfixed2", "perts_q2msfixed2", "perts_q3msfixed2")
+x2 <- c("perts_q1msfixed1", "perts_q2msfixed1", "perts_q3msfixed1")
+resp_list <- data.frame(x1, x2)
+```
+
+#### Create loop
+
+```{r}
+for (i in 1:nrow(resp_list)) {
+  formula_ <- paste0(resp_list[[1]][[i]], " ~ exp*sex_id*", resp_list[[2]][[i]], " + exp*sex_id + exp*", resp_list[[2]][[i]], " + sex_id*", resp_list[[2]][[i]], " + exp + sex_id + ", resp_list[[2]][[i]], " + satm + satv + hs_gpa + aleksikc_score")
+  mod_name <- paste0("model_", i)
+  assign(mod_name, polr(formula_, data = master))
+}
+```
+
