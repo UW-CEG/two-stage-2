@@ -1,0 +1,188 @@
+---
+title: "Two-Stage Report"
+author: "Jackson Hughes"
+date: "5/11/2022"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+Do two-stage exams help alleviate historic demographic-based achievement gaps in introductory chemistry courses at UW? A statistical analysis of classroom performance using R programming.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor)
+library(lme4)
+
+# All preliminary set up/data wrangling is stored here.
+proj_dir <- here()
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+
+master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+
+master_original_2 <- master_original_1 %>% 
+  mutate(exp = replace_na(exp, "EXPERIMENT"))
+
+master <- master_original_2 %>% 
+  select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm_c, satv_c, aleksikc_c, hs_gpa_c, final_c, satm_z, satv_z, aleksikc_z, hs_gpa_z, final_z)
+```
+
+## Introduction
+
+In undergraduate science courses, the implementation of collaborative testing has been an increasingly popular way to facilitate student learning. Two-stage exams are a form of collaborative learning where students first take an exam on their own, and then spread out into groups to take the same, or a very similar exam. Students typically receive credit for a mixture of both the individual and group portions of the exam, with the individual portion weighted more heavily. Student performance has been shown to generally increase on the group portion of the exam as compared to the individual portion [Gilley and Clarkston 2014], indicating evidence for immediate learning between the two stages of the exam. On the other hand, two-stage exams have recently been shown not to affect long-term retention of course information for students in a medical radiation technology class [Bentley et al. 2021]. Similarly, students who participated in two-stage exams in an introductory computer science class presented short-term gains by outperforming individually assessed students on quizzes shortly after exams, but this effect was lost on a long-term scale due to no difference in performance during a final exam [Cao and Porter 2017]. Evidently, two-stage exams can facilitate immediate, short-term learning for students, but evidence for this type of collaborative testing to augment student learning on a long-term basis is inconclusive.
+
+At the University of Washington, two-stage exams were implemented as quizzes in an introductory chemistry course (CHEM 142) in Autumn 2017 to investigate if historical demographic-based achievement gaps in introductory chemistry can be alleviated by collaborative testing. These two-stage quizzes were taken by students during weekly TA-led quiz sections.
+
+The demographic identifiers collected from teh UW Registrar students were binary sex ID, under-represented minority status, first generation status, and Education Opportunity Program status. Student performance on the final exam for this course was compared with a control CHEM 142 class in which two-stage exams were not implemented. Within R, linear models were generated to analyze how final exam scores change between the experimental and control years for four different demographic groups, further controlling for student performance indicators like high school GPA, SAT scores, and homework scores.
+
+Here, the experimental design and data presentation for the investigation of the effect of two-stage quizzes on demographic-based achievement gaps in introductory chemistry courses at UW is presented.
+
+## Methods
+
+All statistical analyses were conducted within the R programming environment. We collected student performance and demographic data from a control group consisting of Autumn 2016 CHEM 142 students who did not take two-stage quizzes, and from an experimental group of Autumn 2017 CHEM 142 students who participated in two-stage exams. Data from both cohorts of students were merged to a master dataset where a categorical variable titled `exp` was assigned to each student as `CONTROL` or `EXPERIMENT`. Demographic data for binary sex, under-represented minority status, first-generation status, and Education Opportunity Program status were contained within categorical variables titled `sex_id`, `urm_id`, `fgn_id`, and `eop_id`, respectively. A variety of numerical student performance indicators were included in the dataset to be used as control variables: SAT math and SAT verbal scores as `satm` and `satv`, ALEKS initial knowledge check score as `aleks_ikc`, and unweighted high school GPA as `hs_gpa`. 
+
+We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [CITATION], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value, then we retained the less complex model as more representative of the data. [More specifics about AIC should be included here?]
+
+Here, an annotated example of model selection for the models associated with `sex_id` by comparison of AIC values is shown.
+
+### Model selection for `sex_id`
+
+### 1. Fixed-effects only model (sex)
+
+```{r}
+sex_mod1 <- lm(final_c ~ exp * sex_id +
+                         exp + sex_id +
+                         satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                         data = master)
+summary(sex_mod1)
+```
+
+### 2. Random intercepts model with `ta_sect`; REML = TRUE (sex)
+
+```{r}
+sex_mod2 <- lmer(final_c ~ exp * sex_id +
+                           exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c +
+                         (1 | ta_sect),
+                         data = master, REML = TRUE)
+summary(sex_mod2)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod2`
+
+```{r}
+AIC(sex_mod1, sex_mod2)
+```
+
+* The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
+
+### 3. Fixed-effects only model with *no* demographic interactions (sex)
+
+```{r}
+sex_mod1.a <- lm(final_c ~ exp + sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1)
+```
+
+#### AIC comparison of `sex_mod1` and `sex_mod1.a`
+
+```{r}
+AIC(sex_mod1, sex_mod1.a)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.a`, so we will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+### 4. Removal of parameters one by one
+
+* We will start with removing `exp`, which has the lowest t-value
+
+```{r}
+sex_mod1.b <- lm(final_c ~ sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.b)
+```
+
+#### AIC comparison of `sex_mod1.a` and `sex_mod1.b`
+
+```{r}
+AIC(sex_mod1.a, sex_mod1.b)
+```
+
+* The AIC *decreases* by *less than 2* for `sex_mod1.b`, so we will retain this model since it is the simplest. 
+
+* Now we will try removing `sex_id`
+
+```{r}
+sex_mod1.c <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.c)
+```
+
+#### AIC comparison of `sex_mod1.b` and `sex_mod1.c`
+
+```{r}
+AIC(sex_mod1.b, sex_mod1.c)
+```
+
+* The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model.
+* Our final model is `sex_mod1.b`, which is summarized above.
+
+## Results
+
+The best-fitting regression models for student performance on the final exams between the control and experimental years for each demographic ID are provided along with their interpretations.
+
+```{r}
+# `sex_id`
+sex_mod1.b <- lm(final_c ~ sex_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(sex_mod1.b)
+```
+
+(interpretation here)
+
+```{r}
+# `urm_id`
+urm_mod1.c <- lm(final_c ~ urm_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(urm_mod1.c)
+```
+
+(interpretation here)
+
+```{r}
+# `eop_id`
+eop_mod1.a <- lm(final_c ~ exp + eop_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(eop_mod1.a)
+```
+
+(interpretation here)
+
+```{r}
+# `fgn_id`
+fgn_mod1.a <- lm(final_c ~ exp + fgn_id +
+                           satm_c + satv_c + aleksikc_c + hs_gpa_c,
+                           data = master)
+summary(fgn_mod1.a)
+```
+
+(interpretation here)
+
+There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term. These findings reflect those of the studies discussed earlier in the introduction—two-stage exams did not facilitate student learning and retention on a long-term scale.
