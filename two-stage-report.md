@@ -7,7 +7,7 @@ output:
     keep_md: yes
 ---
 
-Do two-stage exams help alleviate historic demographic-based achievement gaps in introductory chemistry courses at UW? A statistical analysis of classroom performance using R programming.
+Do two-stage exams help alleviate historic demographic-based achievement gaps in introductory chemistry courses at UW? A statistical analysis of classroom performance using R.
 
 
 
@@ -24,6 +24,72 @@ Here, the experimental design and data presentation for the investigation of the
 ## Methods
 
 All statistical analyses were conducted within the R programming environment. We collected student performance and demographic data from a control group consisting of Autumn 2016 CHEM 142 students who did not take two-stage quizzes, and from an experimental group of Autumn 2017 CHEM 142 students who participated in two-stage exams. Data from both cohorts of students were merged to a master dataset where a categorical variable titled `exp` was assigned to each student as `CONTROL` or `EXPERIMENT`. Demographic data for binary sex, under-represented minority status, first-generation status, and Education Opportunity Program status were contained within categorical variables titled `sex_id`, `urm_id`, `fgn_id`, and `eop_id`, respectively. A variety of numerical student performance indicators were included in the dataset to be used as control variables: SAT math and SAT verbal scores as `satm` and `satv`, ALEKS initial knowledge check score as `aleks_ikc`, and unweighted high school GPA as `hs_gpa`. 
+
+The following plots display the number of students of each demographic group participating in the control and experimental years of the study:
+
+
+```r
+# Sex ID
+master %>% 
+  ggplot(aes(x = sex_id)) +
+  geom_bar() +
+  facet_wrap(~ exp) +
+  geom_text(data = . %>% 
+              count(sex_id, exp),
+              aes(y = n, label = n),
+              nudge_y = 25)
+```
+
+![](two-stage-report_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+53.9% of students in the control year were female, as were 54.5% of students in the experimental year.
+
+
+```r
+# URM ID
+master %>% 
+  ggplot(aes(x = urm_id)) +
+  geom_bar() +
+  facet_wrap(~ exp) +
+  geom_text(data = . %>% 
+              count(urm_id, exp),
+              aes(y = n, label = n),
+              nudge_y = 25)
+```
+
+![](two-stage-report_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+11.2% of students in the control year were self-identified as URM. Another 9.2% of students did not disclose their URM status in the control year. In the experimental year, 12.7% of students self-identified as URM, and another 11.8% did not disclose their URM status.
+
+
+```r
+# EOP ID
+master %>% 
+  ggplot(aes(x = eop_id)) +
+  geom_bar() +
+  facet_wrap(~ exp) +
+  geom_text(data = . %>% 
+              count(eop_id, exp),
+              aes(y = n, label = n),
+              nudge_y = 25)
+```
+
+![](two-stage-report_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+17.9% of students in the control year were EOP, and 22.6% of students in the experimental year were EOP.
+
+
+```r
+# FGN ID
+master %>% 
+  ggplot(aes(x = fgn_id)) +
+  geom_bar() +
+  facet_wrap(~ exp) +
+  geom_text(data = . %>% 
+              count(fgn_id, exp),
+              aes(y = n, label = n),
+              nudge_y = 25)
+```
+
+![](two-stage-report_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+30.0% of students in the control year were first-generation, as were 26.2% of students in the experimental year.
 
 We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [CITATION], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value, then we retained the less complex model as more representative of the data. [More specifics about AIC should be included here?]
 
@@ -300,6 +366,8 @@ AIC(sex_mod1.b, sex_mod1.c)
 
 ## Results
 
+What is the impact of two-stage quizzes on historic demographic-based achievement gaps in introductory chemistry?
+
 The best-fitting regression models for student performance on the final exams between the control and experimental years for each demographic ID are provided along with their interpretations.
 
 
@@ -338,7 +406,7 @@ summary(sex_mod1.b)
 ## F-statistic: 303.2 on 5 and 2031 DF,  p-value: < 2.2e-16
 ```
 
-(interpretation here)
+We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study. 
 
 
 ```r
@@ -376,7 +444,7 @@ summary(urm_mod1.c)
 ## F-statistic: 267.3 on 5 and 1839 DF,  p-value: < 2.2e-16
 ```
 
-(interpretation here)
+Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students.
 
 
 ```r
@@ -415,7 +483,7 @@ summary(eop_mod1.a)
 ## F-statistic: 248.2 on 6 and 2030 DF,  p-value: < 2.2e-16
 ```
 
-(interpretation here)
+This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we can not accept this trend as being statistically significant.
 
 
 ```r
@@ -454,6 +522,8 @@ summary(fgn_mod1.a)
 ## F-statistic:   250 on 6 and 2028 DF,  p-value: < 2.2e-16
 ```
 
-(interpretation here)
+Again, we retained `exp` as a parameter in the `fgn_id` model. The coefficient associated with FGN ID has a value of -1.378524. The interpretation of this coefficient is as follows: on average, there was a final exam score *decrease* of 1.378524 for FGN students between the control year and the experimental year. The t-value for this coefficient is small, and the significance code associated with `fgn_id` performance coefficient is not statistically significant. Thus, it follows that there is no significant change in final exam scores for first-generation students between the control and experimental years of the study.
+
+## Discussion
 
 There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term. These findings reflect those of the studies discussed earlier in the introduction—two-stage exams did not facilitate student learning and retention on a long-term scale.
