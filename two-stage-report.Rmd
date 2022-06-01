@@ -35,6 +35,10 @@ master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_
 master_original_2 <- master_original_1 %>% 
   mutate(exp = replace_na(exp, "EXPERIMENT"))
 
+# Recenter final exam score data
+master_original_3 <- master_original_2 %>% 
+  mutate(final_c = scale(final, scale = FALSE))
+
 master <- master_original_2 %>% 
   select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm_c, satv_c, aleksikc_c, hs_gpa_c, final_c, satm_z, satv_z, aleksikc_z, hs_gpa_z, final_z, final)
 ```
@@ -109,7 +113,7 @@ master %>%
 ```
 30.0% of students in the control year were first-generation, as were 26.2% of students in the experimental year.
 
-We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [CITATION], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data. 
+We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [Theobald 2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data. 
 
 Generally when comparing two models to each other, if the AIC for a new model increases by two, then the old model is retained, and if the AIC decreases by more than 2, then the newer model is retained. If the AIC changes by less than two, than the models are thought of as having similar fits to the data, and the least complex model is retained.
 
@@ -242,7 +246,7 @@ eop_mod1.a <- lm(final_c ~ exp + eop_id +
 summary(eop_mod1.a)
 ```
 
-This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we can not accept this trend as being statistically significant.
+This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant.
 
 ```{r}
 # `fgn_id`
@@ -254,6 +258,8 @@ summary(fgn_mod1.a)
 
 Again, we retained `exp` as a parameter in the `fgn_id` model. The coefficient associated with FGN ID has a value of -1.378524. The interpretation of this coefficient is as follows: on average, there was a final exam score *decrease* of 1.378524 for FGN students between the control year and the experimental year. The t-value for this coefficient is small, and the significance code associated with `fgn_id` performance coefficient is not statistically significant. Thus, it follows that there is no significant change in final exam scores for first-generation students between the control and experimental years of the study.
 
-## Discussion [to be expanded upon]
+## Discussion
 
-There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term. These findings reflect those of the studies discussed earlier in the introduction—two-stage exams did not facilitate student learning and retention on a long-term scale.
+There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term, since student performance data was only analyzed for a final exam. These findings reflect those of the studies discussed earlier in the introduction—two-stage exams did not facilitate student learning and retention on a long-term scale.
+
+
