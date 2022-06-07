@@ -35,17 +35,23 @@ master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_
 master_original_2 <- master_original_1 %>% 
   mutate(exp = replace_na(exp, "EXPERIMENT"))
 
+# Recenter final exam score data
+master_original_3 <- master_original_2 %>% 
+  mutate(final_c = scale(final, scale = FALSE))
+
 master <- master_original_2 %>% 
   select(two_stage_id, course_fullid, exp, exam1, exam2, ta_sect, sex_id, urm_id, eop_id, fgn_id, satm_c, satv_c, aleksikc_c, hs_gpa_c, final_c, satm_z, satv_z, aleksikc_z, hs_gpa_z, final_z, final)
 ```
 
 ## Introduction
 
-In undergraduate science courses, the implementation of collaborative testing has been an increasingly popular way to facilitate student learning. Two-stage exams are a form of collaborative learning where students first take an exam on their own, and then spread out into groups to take the same, or a very similar exam. Students typically receive credit for a mixture of both the individual and group portions of the exam, with the individual portion weighted more heavily. Student performance has been shown to generally increase on the group portion of the exam as compared to the individual portion [Gilley and Clarkston 2014], indicating evidence for immediate learning between the two stages of the exam. On the other hand, two-stage exams have recently been shown not to affect long-term retention of course information for students in a medical radiation technology class [Bentley et al. 2021]. Similarly, students who participated in two-stage exams in an introductory computer science class presented short-term gains by outperforming individually assessed students on quizzes shortly after exams, but this effect was lost on a long-term scale due to no difference in performance during a final exam [Cao and Porter 2017]. Evidently, two-stage exams can facilitate immediate, short-term learning for students, but evidence for this type of collaborative testing to augment student learning on a long-term basis is inconclusive.
+In undergraduate science courses, the implementation of collaborative testing has been an increasingly popular way to facilitate student learning. Two-stage exams are a form of collaborative learning where students first take an exam on their own, and then spread out into groups to take the same, or a very similar exam. Students typically receive credit for a mixture of both the individual and group portions of the exam, with the individual portion weighted more heavily. Student performance has been shown to generally increase on the group portion of the exam as compared to the individual portion [Gilley and Clarkston 2014], indicating evidence for immediate learning between the two stages of the exam. On the other hand, two-stage exams have recently been shown not to affect long-term retention of course information for students in a medical radiation technology class [Bentley et al. 2021]. Similarly, students who participated in two-stage exams in an introductory computer science class presented short-term gains by outperforming individually assessed students on quizzes shortly after exams, but this effect was lost on a long-term scale due to no difference in performance during a final exam [Cao and Porter 2017]. 
 
-At the University of Washington, two-stage exams were implemented as quizzes in an introductory chemistry course (CHEM 142) in Autumn 2017 to investigate if historical demographic-based achievement gaps in introductory chemistry can be alleviated by collaborative testing. These two-stage quizzes were taken by students during weekly TA-led quiz sections.
+Both the Bentley et al. paper and the Cao/Porter paper explored the effect of two-stage exams on short-term gains in student learning by administering collaborative testing to random groups of students during midterms and comparing performance to other students who tested individually. In Bentley et al., student performance was compared using scores directly from the midterms, whereas for Cao and Porter, an individual post test was administered two weeks after the two-stage midterms and scores for the post test between collaboratively and individually tested students were compared. Finally, in both studies, student performance for certain topics on the long-term were compared between collaboratively and individually tested students on a traditional final exam. In both papers, two-stage exams were indicated to facilitate immediate, short-term learning for students, but evidence for this type of collaborative testing to augment student learning on a long-term basis was inconclusive, as students who participated in two-stage exams during midterms on certain topics performed similarly on the final exam to students who were individually tested on those same topics during midterms.
 
-The demographic identifiers collected from teh UW Registrar students were binary sex ID, under-represented minority status, first generation status, and Education Opportunity Program status. Student performance on the final exam for this course was compared with a control CHEM 142 class in which two-stage exams were not implemented. Within R, linear models were generated to analyze how final exam scores change between the experimental and control years for four different demographic groups, further controlling for student performance indicators like high school GPA, SAT scores, and homework scores.
+At the University of Washington, two-stage exams were implemented as quizzes in an introductory chemistry course (CHEM 142) in Autumn 2017 to investigate if historical demographic-based achievement gaps in introductory chemistry can be alleviated by collaborative testing. These two-stage quizzes were taken by students during weekly TA-led quiz sections. Then, the performance of students on a traditional, individually-tested final exam were compared between the control and the experimental years. Unlike the Bentley et al. and the Cao and Porter studies, this study examines student data from two separate quarters rather than implementing a crossover design over the course of one class. Furthermore, this study only investigates how two-stage exams affect long-term student retention of class information rather than immediate student retention, as student performance was only compared across the final exam.
+
+To explore the effect of two-stage quizzes on achievement gaps in introductory chemistry at UW, the following demographic identifiers were collected from the UW Registrar: binary sex ID, under-represented minority status, first generation status, and Education Opportunity Program status. Student performance on the final exam for this course was compared with a control CHEM 142 class in which two-stage exams were not implemented. Within R, linear models were generated to analyze how final exam scores change between the experimental and control years for four different demographic groups, further controlling for student performance indicators like high school GPA, SAT scores, and homework scores.
 
 Here, the experimental design and data presentation for the investigation of the effect of two-stage quizzes on demographic-based achievement gaps in introductory chemistry courses at UW is presented.
 
@@ -107,11 +113,15 @@ master %>%
 ```
 30.0% of students in the control year were first-generation, as were 26.2% of students in the experimental year.
 
-We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [CITATION], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value, then we retained the less complex model as more representative of the data. [More specifics about AIC should be included here?]
+We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [Theobald 2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data. 
+
+Generally when comparing two models to each other, if the AIC for a new model increases by two, then the old model is retained, and if the AIC decreases by more than 2, then the newer model is retained. If the AIC changes by less than two, than the models are thought of as having similar fits to the data, and the least complex model is retained.
 
 Here, an annotated example of model selection for the models associated with `sex_id` by comparison of AIC values is shown.
 
 ### Model selection for `sex_id`
+
+The first step is to compare the two most complex models to each other: the fixed effects linear model and the random effects (TA section) model.
 
 ### 1. Fixed-effects only model (sex)
 
@@ -140,7 +150,9 @@ summary(sex_mod2)
 AIC(sex_mod1, sex_mod2)
 ```
 
-* The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model.
+* The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model. The original model without random effects fits the data better.
+
+The next step is to remove demographic interactions from the model and then compare it to the fixed effect model *with* interactions from a demographic identifier.
 
 ### 3. Fixed-effects only model with *no* demographic interactions (sex)
 
@@ -158,6 +170,8 @@ AIC(sex_mod1, sex_mod1.a)
 ```
 
 * The AIC *decreases* by *less than 2* for `sex_mod1.a`, so we will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+
+After this, the next step is to remove parameters one by one from the model and then compare each newer, simpler iteration of the model to the previously best-fitting model that came before it. We remove parameters from the model in order of which ones had the lowest t-values in the regression output of the previously best-fitting model.
 
 ### 4. Removal of parameters one by one
 
@@ -193,13 +207,18 @@ AIC(sex_mod1.b, sex_mod1.c)
 ```
 
 * The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model.
+
+If a parameter has a t-value with a very large magnitude (i.e., above 3 or 4), then it is assumed that the parameter is significant enough to remain in the model, so parameter removal and subsequent AIC comparison of the new model is not performed. 
+
 * Our final model is `sex_mod1.b`, which is summarized above.
 
 ## Results
 
 What is the impact of two-stage quizzes on historic demographic-based achievement gaps in introductory chemistry?
 
-The best-fitting regression models for student performance on the final exams between the control and experimental years for each demographic ID are provided along with their interpretations.
+The best-fitting regression models for student performance on the final exams between the control and experimental years for each demographic ID are provided along with their interpretations. Boxplots displaying the final exam score distribution across the control and experimental years are provided as well.
+
+#### Sex ID
 
 ```{r}
 # `sex_id`
@@ -212,6 +231,14 @@ summary(sex_mod1.b)
 We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study. 
 
 ```{r}
+ggplot(data = master, mapping = aes(x = sex_id, y = final)) +
+  geom_boxplot() +
+  facet_grid(. ~ exp) +
+  labs(title = "Boxplot of final exam score vs. sex ID")
+```
+#### URM ID
+
+```{r}
 # `urm_id`
 urm_mod1.c <- lm(final_c ~ urm_id +
                            satm_c + satv_c + aleksikc_c + hs_gpa_c,
@@ -222,6 +249,15 @@ summary(urm_mod1.c)
 Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students.
 
 ```{r}
+ggplot(data = master, mapping = aes(x = urm_id, y = final)) +
+  geom_boxplot() +
+  facet_grid(. ~ exp) +
+  labs(title = "Boxplot of final exam score vs. URM ID")
+```
+
+#### EOP ID
+
+```{r}
 # `eop_id`
 eop_mod1.a <- lm(final_c ~ exp + eop_id +
                            satm_c + satv_c + aleksikc_c + hs_gpa_c,
@@ -229,7 +265,16 @@ eop_mod1.a <- lm(final_c ~ exp + eop_id +
 summary(eop_mod1.a)
 ```
 
-This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we can not accept this trend as being statistically significant.
+This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant.
+
+```{r}
+ggplot(data = master, mapping = aes(x = eop_id, y = final)) +
+  geom_boxplot() +
+  facet_grid(. ~ exp) +
+  labs(title = "Boxplot of final exam score vs. EOP ID")
+```
+
+#### FGN ID
 
 ```{r}
 # `fgn_id`
@@ -241,6 +286,20 @@ summary(fgn_mod1.a)
 
 Again, we retained `exp` as a parameter in the `fgn_id` model. The coefficient associated with FGN ID has a value of -1.378524. The interpretation of this coefficient is as follows: on average, there was a final exam score *decrease* of 1.378524 for FGN students between the control year and the experimental year. The t-value for this coefficient is small, and the significance code associated with `fgn_id` performance coefficient is not statistically significant. Thus, it follows that there is no significant change in final exam scores for first-generation students between the control and experimental years of the study.
 
+```{r}
+ggplot(data = master, mapping = aes(x = fgn_id, y = final)) +
+  geom_boxplot() +
+  facet_grid(. ~ exp) +
+  labs(title = "Boxplot of final exam score vs. FGN ID")
+```
+
+
 ## Discussion
 
-There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term. These findings reflect those of the studies discussed earlier in the introduction—two-stage exams did not facilitate student learning and retention on a long-term scale.
+There was no evidence for significant change in final exam scores for any of the four demographic groups between the control and experimental years, indicating that two-stage exams are not shown to help narrow historical demographic-based achievement gaps in our context and implementation. The context of this study was to investigate student learning on a long-term scale throughout the entire quarter rather than short-term, since student performance data was only analyzed for a final exam. These findings reflect those of the studies discussed earlier in the introduction: two-stage exams did not affect student learning and retention on a long-term scale. In recent literature, there is no consistent methodology to measuring course content retention as a result of collaborative testing, so making strong conclusions about the effect of two-stage exams on long-term student learning is difficult.
+
+It is worth noting that the way in which teaching methods are "marketed" to students can play a role in the effectiveness of that implementation. During the experimental year of our study, CHEM 142 students were briefly introduced to the rationale behind why collaborative testing can help encourage metacognition during the learning process; as students take collaborative two-stage quizzes, they are essentially rehearsing the process of test taking, and group interactions encourage students to analyze their own thought processes. However, if students are not regularly reminded of the potential benefits of this testing method, then student affect (particularly the attitudes surrounding two-stage quizzes) may remain relatively low, and students will see collaborative testing as a box to check off rather than fully intellectually immersing themselves in the activity. Since two-stage exams were administered during TA-led quiz sections over the course of the experiment, it is not guaranteed that students were regularly reminded of the metacognitive goals behind implementing collaborative testing, and so student affect surrounding two-stage quizzes may have remained relatively low, which in turn may explain why there was no significant change in final exam score for any studied demographic group between the control and experimental year.
+
+## Conclusion
+
+Our study indicates that there is no discernible link between two-stage quizzes and improvement in test scores for students of historically underrepresented demographic groups. A future study on two-stage exams would ideally account for student affect regarding collaborative testing by consistently encouraging students during the course of the class to view collaborative testing as a test-run for exams to bolster metacognition. Due to the lack of consistent methodologies in past literature, it is difficult to draw broad conclusions about the larger impact of two-stage exams on long-term retention of course content.
