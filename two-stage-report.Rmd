@@ -45,23 +45,35 @@ master <- master_original_2 %>%
 
 ## Introduction
 
-In undergraduate science courses, the implementation of collaborative testing has been an increasingly popular way to facilitate student learning. Two-stage exams are a form of collaborative learning where students first take an exam on their own, and then spread out into groups to take the same, or a very similar exam. Students typically receive credit for a mixture of both the individual and group portions of the exam, with the individual portion weighted more heavily. Student performance has been shown to generally increase on the group portion of the exam as compared to the individual portion [Gilley and Clarkston 2014], indicating evidence for immediate learning between the two stages of the exam. On the other hand, two-stage exams have recently been shown not to affect long-term retention of course information for students in a medical radiation technology class [Bentley et al. 2021]. Similarly, students who participated in two-stage exams in an introductory computer science class presented short-term gains by outperforming individually assessed students on quizzes shortly after exams, but this effect was lost on a long-term scale due to no difference in performance during a final exam [Cao and Porter 2017]. 
+In undergraduate science courses, the implementation of collaborative testing has been an increasingly popular way to facilitate student learning. One version of collaborative testing involves "two-stage" exams, in which students first take an exam on their own, and then gather into groups to take the same, or a very similar exam. Students typically receive credit for a mixture of both the individual and group portions of the exam, with the individual portion often weighted more heavily. Student performance has been shown to generally increase on the group portion of the exam as compared to the individual portion [Gilley and Clarkston 2014], indicating evidence for immediate learning between the two stages of the exam **{CFC: HOW IS THIS NOT JUST THE "SMART" KIDS PROVIDING THE CORRECT ANSWER DURING THE GROUP PORTION?}**. On the other hand, two-stage exams have recently been shown not to affect long-term retention of course information for students in a medical radiation technology class **{CFC: HOW SO? WHAT WAS THE MEASURE THAT SHOWED NO LONG-TERM RETENTION?}** [Bentley et al. 2021]. Similarly, students who participated in two-stage exams in an introductory computer science class presented short-term gains by outperforming individually assessed students on quizzes shortly after exams, but this effect was lost on a long-term scale due to no difference in performance during a final exam [Cao and Porter 2017]. 
 
-Both the Bentley et al. paper and the Cao/Porter paper explored the effect of two-stage exams on short-term gains in student learning by administering collaborative testing to random groups of students during midterms and comparing performance to other students who tested individually. In Bentley et al., student performance was compared using scores directly from the midterms, whereas for Cao and Porter, an individual post test was administered two weeks after the two-stage midterms and scores for the post test between collaboratively and individually tested students were compared. Finally, in both studies, student performance for certain topics on the long-term were compared between collaboratively and individually tested students on a traditional final exam. In both papers, two-stage exams were indicated to facilitate immediate, short-term learning for students, but evidence for this type of collaborative testing to augment student learning on a long-term basis was inconclusive, as students who participated in two-stage exams during midterms on certain topics performed similarly on the final exam to students who were individually tested on those same topics during midterms.
+Both the Bentley et al. paper and the Cao/Porter paper explored the effect of two-stage exams on short-term gains in student learning by administering collaborative testing **{CFC: I ASSUME BOTH STUDIES USED THE "INDIVIDUAL TEST FOLLOWED BY GROUP TEST" FORMAT?}** to random groups of students during midterms and comparing performance to other students who tested individually. In Bentley et al., student performance was compared using scores directly from the midterms, whereas for Cao and Porter, an individual post test was administered two weeks after the two-stage midterms and scores for the post test between collaboratively and individually tested students were compared. Finally, in both studies, student performance for certain topics on the long-term were compared between collaboratively and individually tested students on a traditional final exam. In both papers, two-stage exams appeared to facilitate immediate, short-term learning for students, but evidence for this type of collaborative testing to augment student learning on a long-term basis was inconclusive, **{CFC: THE RESULTS OF THESE STUDIES ARE _NOT_ INCONCLUSIVE ON THIS POINT. THEY BOTH INDICATE A LACK OF LONG-TERM LEARNING. INCLUDE A REFERENCE TO THE COOKE et al. PAPER TO DESCRIBE THE RESULTS AS INCONCLUSIVE (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6755206/)}** as students who participated in two-stage exams during midterms on certain topics performed similarly on the final exam to students who were individually tested on those same topics during midterms. **{CFC: DID EITHER STUDY CONTROL FOR STUDENT DEMOGRAPHICS AND/OR PRIOR ACADEMIC MEASURES (e.g. SAT)?}**
 
-At the University of Washington, two-stage exams were implemented as quizzes in an introductory chemistry course (CHEM 142) in Autumn 2017 to investigate if historical demographic-based achievement gaps in introductory chemistry can be alleviated by collaborative testing. These two-stage quizzes were taken by students during weekly TA-led quiz sections. Then, the performance of students on a traditional, individually-tested final exam were compared between the control and the experimental years. Unlike the Bentley et al. and the Cao and Porter studies, this study examines student data from two separate quarters rather than implementing a crossover design over the course of one class. Furthermore, this study only investigates how two-stage exams affect long-term student retention of class information rather than immediate student retention, as student performance was only compared across the final exam.
+At the University of Washington, we implemented two-stage exams as quizzes in the first quarter of our three-quarter general chemistry sequence (CHEM 142) in Autumn 2017 to investigate if historical demographic-based achievement gaps in introductory chemistry can be alleviated by collaborative testing.**{CFC: THIS REFERENCE TO ACHEIVEMENT GAPS JUMPS OUT OF NOWHERE. CAN YOU TIE THIS BACK TO THE OTHER LITERATURE SOMEHOW? DID THE OTHER PAPERS LOOK AT STUDENT IDENTITY CHARACTERISTICS? MAYBE THEY DIDN'T, WHICH MEANS OUR WORK HAS A UNIQUE TAKE. I THINK THERE ARE ALSO OTHER PAPERS ON ZOTERO (https://www.zotero.org/groups/4512143/r_learning_group/collections/TEAH4IFC/items/32XHGU5Y/item-list) THAT LOOKED AT STUDENT CHARACTERISTICS, AT LEAST IN TERMS OF COURSE PERFORMANCE (Giuliodori 2008 FOR INSTANCE).}** These two-stage quizzes were taken by students during weekly TA-led quiz sections. Then, the performance of students on a traditional, individually tested final exam were compared between the control and the experimental years. Unlike the Bentley et al. and the Cao and Porter studies, this study examines student data from two separate quarters rather than implementing a crossover design over the course of one class. Furthermore, this study only investigates how two-stage exams affect long-term student retention of class information rather than immediate student retention, as student performance was only compared across the final exam. 
 
-To explore the effect of two-stage quizzes on achievement gaps in introductory chemistry at UW, the following demographic identifiers were collected from the UW Registrar: binary sex ID, under-represented minority status, first generation status, and Education Opportunity Program status. Student performance on the final exam for this course was compared with a control CHEM 142 class in which two-stage exams were not implemented. Within R, linear models were generated to analyze how final exam scores change between the experimental and control years for four different demographic groups, further controlling for student performance indicators like high school GPA, SAT scores, and homework scores.
+To explore the effect of two-stage quizzes on achievement gaps in introductory chemistry at UW, the following demographic identifiers were collected from the UW Registrar: binary sex, under-represented minority status, first generation college student status, and Education Opportunity Program  **{CFC: DESCRIBE EOP MORE. HERE'S THE WEBSITE WHERE YOU CAN PULL SOME LANGUAGE FROM: https://depts.washington.edu/omadcs/eop/}** Student performance on the final exam for this course was compared with a control CHEM 142 class from autumn 2016 in which two-stage exams were not implemented. Within R, linear models were generated to compare final exam scores between the experimental and control years for the four different demographic groups, further controlling for student performance indicators like high school GPA, SAT scores, and homework scores.
 
-Here, the experimental design and data presentation for the investigation of the effect of two-stage quizzes on demographic-based achievement gaps in introductory chemistry courses at UW is presented.
+Here, we present the experimental design and data presentation for the investigation of the effect of two-stage quizzes on demographic-based achievement gaps in the first quarter of general chemistry at UW.
 
 ## Methods
 
-All statistical analyses were conducted within the R programming environment. We collected student performance and demographic data from a control group consisting of Autumn 2016 CHEM 142 students who did not take two-stage quizzes, and from an experimental group of Autumn 2017 CHEM 142 students who participated in two-stage exams. Data from both cohorts of students were merged to a master dataset where a categorical variable titled `exp` was assigned to each student as `CONTROL` or `EXPERIMENT`. Demographic data for binary sex, under-represented minority status, first-generation status, and Education Opportunity Program status were contained within categorical variables titled `sex_id`, `urm_id`, `fgn_id`, and `eop_id`, respectively. A variety of numerical student performance indicators were included in the dataset to be used as control variables: SAT math and SAT verbal scores as `satm` and `satv`, ALEKS initial knowledge check score as `aleks_ikc`, and unweighted high school GPA as `hs_gpa`. 
+All statistical analyses were conducted with R in the RStudio programming environment. We collected student performance and demographic data from a control group consisting of Autumn 2016 CHEM 142 students who did not take two-stage quizzes, and from an experimental group of Autumn 2017 CHEM 142 students who participated in two-stage exams. Data from both cohorts of students were merged to a master dataset where a categorical variable titled `exp` was assigned to each student as `CONTROL` or `EXPERIMENT`. Demographic data for binary sex, under-represented minority status, first-generation status, and Education Opportunity Program status were contained within categorical variables titled `sex_id`, `urm_id`, `fgn_id`, and `eop_id`, respectively. A variety of numerical student performance indicators were included in the dataset to be used as control variables: SAT math and SAT verbal scores as `satm` and `satv`, ALEKS initial knowledge check score as `aleks_ikc`, and unweighted high school GPA as `hs_gpa`. 
+
+**{CFC: ALSO INCLUDE THE FOLLOWING INFORMATION ABOUT THE TWO YEARS OF THE STUDY:}**
+
+* **THE SAME INSTRUCTOR TAUGHT THE COURSES IN BOTH YEARS OF THE STUDY**
+* **TWO SECTIONS OF CHEM 142 BACK TO BACK, 8:30 AND 9:30, MWF**
+* **SECTION A QUIZ SECTIONS WERE ON THURSDAYS, SECTION B QUIZ SECTIONS WERE ON TUESDAYS**
+* **AU16: 142 A HAD 461 STUDENTS; 142 B HAD 518 STUDENTS**
+* **AU17: 142 A HAD 603 STUDENTS; 142 B HAD 609 STUDENTS**
 
 The following plots display the number of students of each demographic group participating in the control and experimental years of the study:
 
-```{r}
+
+```{r echo=FALSE} 
+
+# CFC: THE `echo=FALSE` TAG PREVENTS THE CODE FROM BEING SHOWN IN THE KNITTED DOCUMENT
+
 # Sex ID
 master %>% 
   ggplot(aes(x = sex_id)) +
@@ -72,9 +84,10 @@ master %>%
               aes(y = n, label = n),
               nudge_y = 25)
 ```
+
 53.9% of students in the control year were female, as were 54.5% of students in the experimental year.
 
-```{r}
+```{r echo=FALSE}
 # URM ID
 master %>% 
   ggplot(aes(x = urm_id)) +
@@ -85,9 +98,11 @@ master %>%
               aes(y = n, label = n),
               nudge_y = 25)
 ```
-11.2% of students in the control year were self-identified as URM. Another 9.2% of students did not disclose their URM status in the control year. In the experimental year, 12.7% of students self-identified as URM, and another 11.8% did not disclose their URM status.
 
-```{r}
+11.2% of students in the control year were self-identified as URM. Another 9.2% of students did not disclose their URM status in the control year. In the experimental year, 12.7% of students self-identified as URM, and another 11.8% did not disclose their URM status. **{CFC: IT'S NOT ACTUALLY THAT STUDENTS SELF-IDENTIFIED AS URM, RATHER THAT WE INTERPRETED THEIR SELF-REPORTED RACE AND ETHNICITY THROUGH OUR "URM" LENS AND ASSIGNED THE URM DESIGNATION ACCORDINGLY. ANYONE WHO WERE NOT AMONG THE FOLLOWING GROUPS WERE PLACED IN THE URM CATEGORY (UNLESS THEY DECLINED TO REPORT RACE/ETHNICITY, THEN WE LEFT THEM AS NA): WHITE, ASIAN, INTERNATIONAL STUDENT}** 
+
+
+```{r echo=FALSE}
 # EOP ID
 master %>% 
   ggplot(aes(x = eop_id)) +
@@ -98,9 +113,10 @@ master %>%
               aes(y = n, label = n),
               nudge_y = 25)
 ```
+
 17.9% of students in the control year were EOP, and 22.6% of students in the experimental year were EOP.
 
-```{r}
+```{r echo=FALSE}
 # FGN ID
 master %>% 
   ggplot(aes(x = fgn_id)) +
@@ -111,6 +127,7 @@ master %>%
               aes(y = n, label = n),
               nudge_y = 25)
 ```
+
 30.0% of students in the control year were first-generation, as were 26.2% of students in the experimental year.
 
 We used linear regression to generate four models to compare exam scores across the control and experimental student groups with interactions from each demographic identifier. Furthermore, we used multilevel regression to investigate if random effects on student exam performance from TA section should be accounted for within the models. Since two-stage quizzes were administered within TA-led quiz sections, it is possible that the degree to which this intervention influenced student exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike’s Information Criterion (AIC) [Theobald 2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data. 
