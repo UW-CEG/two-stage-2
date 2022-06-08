@@ -129,15 +129,13 @@ We used linear regression to estimate the association between final exam scores 
 
 ~~The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike's Information Criterion (AIC) [@theobald2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data.~~ <!--# CFC: I'm just striking this text out for now -->
 
-Generally when comparing two models to each other, if the AIC for a new model increases by two, then the old model is retained, and if the AIC decreases by more than 2, then the newer model is retained. If the AIC changes by less than two, than the models are thought of as having similar fits to the data, and the least complex model is retained.
+Generally when comparing two models to each other, if the AIC for a new model increases by 2 or more units, then the old model is retained, and if the AIC decreases by more than 2 units, then the newer model is retained. If the AIC changes by less than 2 units, then the models are considered to have similar fits to the data, and the least complex model is retained.
 
-Here, an annotated example of model selection for the models associated with `sex_id` by comparison of AIC values is shown.
+### Example: Model selection for `sex_id`
 
-### Model selection for `sex_id`
+Here we offer an annotated example of model selection for the models associated with `sex_id` by comparison of AIC values. The first step is to compare the two most complex models to each other: the fixed effects linear model and the model with a random intercept for the TA section.
 
-The first step is to compare the two most complex models to each other: the fixed effects linear model and the random effects (TA section) model.
-
-### 1. Fixed-effects only model (sex)
+#### 1. Fixed-effects only model (sex)
 
 ```{r}
 sex_mod1 <- lm(final_c ~ exp * sex_id +
@@ -147,7 +145,7 @@ sex_mod1 <- lm(final_c ~ exp * sex_id +
 summary(sex_mod1)
 ```
 
-### 2. Random intercepts model with `ta_sect`; REML = TRUE (sex)
+#### 2. Random intercepts model with `ta_sect`; REML = TRUE (sex)
 
 ```{r}
 sex_mod2 <- lmer(final_c ~ exp * sex_id +
@@ -164,17 +162,17 @@ summary(sex_mod2)
 AIC(sex_mod1, sex_mod2)
 ```
 
--   The AIC *increases* by more than 2 for `sex_mod2`, so random effects are not retained in the model. The original model without random effects fits the data better.
+The AIC *increases* by more than 2 for `sex_mod2`, so including a random intercept in the model does not improve model fit. The original model without random effects fits the data better. Therefore, the observations within a TA section can be assumed to be independent.
 
-The next step is to remove demographic interactions from the model and then compare it to the fixed effect model *with* interactions from a demographic identifier.
+#### 3. Fixed-effects only model with *no* demographic interactions (sex)
 
-### 3. Fixed-effects only model with *no* demographic interactions (sex)
+The next step is to remove demographic interactions from the model and then compare it to the fixed effect model *with* the interaction term.
 
 ```{r}
 sex_mod1.a <- lm(final_c ~ exp + sex_id +
                            satm_c + satv_c + aleksikc_c + hs_gpa_c,
                            data = master)
-summary(sex_mod1)
+summary(sex_mod1.a)
 ```
 
 #### AIC comparison of `sex_mod1` and `sex_mod1.a`
@@ -183,13 +181,13 @@ summary(sex_mod1)
 AIC(sex_mod1, sex_mod1.a)
 ```
 
--   The AIC *decreases* by *less than 2* for `sex_mod1.a`, so we will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model.
+The AIC *decreases* by *less than 2* for `sex_mod1.a`, which means the fit of `sex_mod1.a` is similar to `sex_mod1` . We will move forward with the simplest model, which is `sex_mod1.a`. Therefore, demographic interactions will not be retained in this model. This indicates that there is no disproportionate effect of the two-stage intervention on women.
 
-After this, the next step is to remove parameters one by one from the model and then compare each newer, simpler iteration of the model to the previously best-fitting model that came before it. We remove parameters from the model in order of which ones had the lowest t-values in the regression output of the previously best-fitting model.
+#### 4. Removal of parameters one by one
 
-### 4. Removal of parameters one by one
+The next step is to remove parameters one by one from `sex_mod1.a` and then compare each newer, simpler iteration of the model to the previously best-fitting model that came before it. We remove parameters from the model in order of which ones had the lowest t-values in the regression output of the previously best-fitting model.
 
--   We will start with removing `exp`, which has the lowest t-value
+We will start with removing `exp`, which has the lowest t-value.
 
 ```{r}
 sex_mod1.b <- lm(final_c ~ sex_id +
@@ -204,9 +202,9 @@ summary(sex_mod1.b)
 AIC(sex_mod1.a, sex_mod1.b)
 ```
 
--   The AIC *decreases* by *less than 2* for `sex_mod1.b`, so we will retain this model since it is the simplest.
+The AIC *decreases* by *less than 2* for `sex_mod1.b`, so we will move forward with this model since it is the simplest. Since `exp` was not retained in the model, this means that there is no difference in average final exam score for women in the two years of the study. Essentially, the two-stage intervention had no impact on final exam scores for this group. <!--# CFC: CHECK THAT THIS INTERPRETATION IS CORRECT!! -->
 
--   Now we will try removing `sex_id`
+Next, we will try removing `sex_id` .
 
 ```{r}
 sex_mod1.c <- lm(final_c ~ satm_c + satv_c + aleksikc_c + hs_gpa_c,
@@ -220,11 +218,11 @@ summary(sex_mod1.c)
 AIC(sex_mod1.b, sex_mod1.c)
 ```
 
--   The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model.
+The AIC *increases* by *more than 2* for `sex_mod1.c`, so we will retain the `sex_id` variable in our model. This means that there is a statistically significant difference between the average final exam score for women compared to men in this data set.
 
 If a parameter has a t-value with a very large magnitude (i.e., above 3 or 4), then it is assumed that the parameter is significant enough to remain in the model, so parameter removal and subsequent AIC comparison of the new model is not performed.
 
--   Our final model is `sex_mod1.b`, which is summarized above.
+Our final model is `sex_mod1.b`, which is summarized above.
 
 ## Results
 
