@@ -228,9 +228,9 @@ Our final model is `sex_mod1.b`, which is summarized above.
 
 What is the impact of two-stage quizzes on historic demographic-based achievement gaps in introductory chemistry?
 
-The best-fitting regression models for student performance on the final exams between the control and experimental years for each demographic ID are provided along with their interpretations. Boxplots displaying the final exam score distribution across the control and experimental years are provided as well.
+The best-fitting regression models for student performance on the final exams between the control and experimental years for each student demographic group are provided along with their interpretations. Boxplots displaying the final exam score distribution across the control and experimental years are provided as well.
 
-#### Sex ID
+#### Women
 
 ```{r}
 # `sex_id`
@@ -240,7 +240,7 @@ sex_mod1.b <- lm(final_c ~ sex_id +
 summary(sex_mod1.b)
 ```
 
-We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study.
+We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study. <!--# But look at that -2.4055 decrease for `sex_id`! Women earned lower final exam scores than men in both years of the study. -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = sex_id, y = final)) +
@@ -249,7 +249,7 @@ ggplot(data = master, mapping = aes(x = sex_id, y = final)) +
   labs(title = "Boxplot of final exam score vs. sex ID")
 ```
 
-#### URM ID
+#### Under-represented Minorities
 
 ```{r}
 # `urm_id`
@@ -259,7 +259,7 @@ urm_mod1.c <- lm(final_c ~ urm_id +
 summary(urm_mod1.c)
 ```
 
-Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students.
+Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students. <!--# CFC: Was `urm_id` actually retained in the model? -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = urm_id, y = final)) +
@@ -268,7 +268,7 @@ ggplot(data = master, mapping = aes(x = urm_id, y = final)) +
   labs(title = "Boxplot of final exam score vs. URM ID")
 ```
 
-#### EOP ID
+#### Education Opportunity Program Students
 
 ```{r}
 # `eop_id`
@@ -278,7 +278,7 @@ eop_mod1.a <- lm(final_c ~ exp + eop_id +
 summary(eop_mod1.a)
 ```
 
-This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year. Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant.
+This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year compared to their non-EOP counterparts. <!--# CFC:  --> Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant. <!--# CFC: Actually, yes we can, because the parameter was retained during model selection.  -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = eop_id, y = final)) +
