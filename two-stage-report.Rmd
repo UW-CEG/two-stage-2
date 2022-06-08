@@ -127,9 +127,11 @@ master %>%
 
 We used linear regression to estimate the association between final exam scores and the two-stage quiz intervention by fitting a multilevel linear regression model to the data within the `lme4` packages in R (Bates et al., 2015) <!--# CFC: add to zotero and bib -->. We fit separate models for each demographic group of interest---women, under-represented minorities, first-generation students, and EOP students---and included a two-way interaction between the demographic group and year of the study. Furthermore, our models estimated a random intercept for each TA section to account for possible non-independence of observations within each TA section. The two-stage quizzes were administered within TA-led quiz sections, so it is possible that the degree to which this intervention influenced students' final exam performance could be impacted by variables such as the time of day of the quiz section, the different TAs leading the quiz sections, or the various settings in which quiz sections were held. <!--# CFC: Here through the end of the paragraph is WFW text from a paper I am writing based on my post-doc's work. It should be modified so we are not plaigiarizing, but this gives us some language to start with. --> We conducted model selection via stepwise backward elimination to identify the best-fitting model for the data [@zuur2009]. We used the Akaike Information Criterion (AIC) as an indicator of data-model fit because it is based on maximum likelihood estimation and the number of parameters ( <!--# CFC: Need to add these references to Zotero and the bib file --> Aho et al., 2014; Burnham et al., 2002). We compared the fit of the full model and the model with the random intercept removed, favoring the most parsimonious model within 2.0 units of the lowest AIC value <!--# CFC: I'm ignoring some details here for the time being because I am struggling with how to describe them. I will need to review the model selection guide I created for this project and Elli's 2018 paper. -->. We further eliminated terms---starting with the interaction term---via stepwise backwards elimination and comparison of AIC values for competing models. Model selection was terminated when removing a term no longer improved the model fit.
 
-~~The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike's Information Criterion (AIC) [@theobald2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data.~~ <!--# CFC: I'm just striking this text out for now -->
+~~The fit of the fixed-effects linear regression models and that of the multilevel regression models associated with each demographic ID were compared using Akaike's Information Criterion (AIC) [@theobald2018], and we determined that the linear models that did not include random effects from TA sections fit the data more accurately. Next, we removed parameters from the linear models one by one, starting with the demographic ID interactions, and then moving on to the student performance indicator control variables, comparing the AIC value of each new model to the best-fitting one that came before it. If the fit of one model was better or the same than a more complex model that came before it based on its AIC value [REWORD], then we retained the less complex model as more representative of the data.~~ <!--# CFC: I'm just striking this text out for now rather than deleting it -->
 
 Generally when comparing two models to each other, if the AIC for a new model increases by 2 or more units, then the old model is retained, and if the AIC decreases by more than 2 units, then the newer model is retained. If the AIC changes by less than 2 units, then the models are considered to have similar fits to the data, and the least complex model is retained.
+
+<!--# CFC: Are the data centered or z-scored?  -->
 
 ### Example: Model selection for `sex_id`
 
@@ -240,7 +242,7 @@ sex_mod1.b <- lm(final_c ~ sex_id +
 summary(sex_mod1.b)
 ```
 
-We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study. <!--# But look at that -2.4055 decrease for `sex_id`! Women earned lower final exam scores than men in both years of the study. -->
+We did not retain `exp` as a parameter in the `sex_id` model, so there was no meaningful change in final exam score for females on average between the control and experimental years of the study. <!--# But look at that -2.4055 decrease for `sex_id`! Women earned a lower average final exam score than men over both years of the study, by (-2.405) + 1.321 = -1.084 units -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = sex_id, y = final)) +
@@ -259,7 +261,9 @@ urm_mod1.c <- lm(final_c ~ urm_id +
 summary(urm_mod1.c)
 ```
 
-Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students. <!--# CFC: Was `urm_id` actually retained in the model? -->
+Similarly, `exp` was not retained as a parameter in the `urm_id` model, so we did not find any meaningful change in final exam scores on average between the experimental and control years for URM students.
+
+<!--# CFC: Maybe I am misinterpreting these mdoel estimates, but it sure looks to me like urm students scored 0.9022 + (-0.1177) = 0.7845 units higher on the final exam on average than non-URM students, taking the two years of data as a whole. Bu this doesn't match the box plot below. ??? -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = urm_id, y = final)) +
@@ -278,7 +282,7 @@ eop_mod1.a <- lm(final_c ~ exp + eop_id +
 summary(eop_mod1.a)
 ```
 
-This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year compared to their non-EOP counterparts. <!--# CFC:  --> Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant. <!--# CFC: Actually, yes we can, because the parameter was retained during model selection.  -->
+This time, we retained `exp` as a parameter in the `eop_id` model, and the coefficient associated with EOP ID has a value of 0.630627. The interpretation of this coefficient is as follows: on average, there was a final exam score increase of 0.630627 for EOP students between the control year and the experimental year compared to their non-EOP counterparts. <!--# CFC: Also the interaction term was not retained, so there was not differential impact on the scores for EOP students. I am struggling to remember how this is different from what we have in this model though, where there is a coefficient retainted for both eop_id and exp. We can tabulate the magnitude of the effect for eop students in the exp year by adding 0.1047 + (-0.4061) + 0.6306 = 0.3292, which I think means that the average final exam score for an eop student in the experimental year was 0.3292 units higher than non-eop students in the experimental year. However, this doesn't really match the box plot below. What's going on? --> Although the model predicts a small positive trend in final exam scores for EOP students, the t-value for this coefficient is very small, and there are no significance codes associated with it. Therefore, we cannot accept this trend as being statistically significant. <!--# CFC: Actually, yes we can, because the parameter was retained during model selection.  -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = eop_id, y = final)) +
@@ -287,7 +291,7 @@ ggplot(data = master, mapping = aes(x = eop_id, y = final)) +
   labs(title = "Boxplot of final exam score vs. EOP ID")
 ```
 
-#### FGN ID
+#### First-generation Student Status
 
 ```{r}
 # `fgn_id`
@@ -297,7 +301,7 @@ fgn_mod1.a <- lm(final_c ~ exp + fgn_id +
 summary(fgn_mod1.a)
 ```
 
-Again, we retained `exp` as a parameter in the `fgn_id` model. The coefficient associated with FGN ID has a value of -1.378524. The interpretation of this coefficient is as follows: on average, there was a final exam score *decrease* of 1.378524 for FGN students between the control year and the experimental year. The t-value for this coefficient is small, and the significance code associated with `fgn_id` performance coefficient is not statistically significant. Thus, it follows that there is no significant change in final exam scores for first-generation students between the control and experimental years of the study.
+Again, we retained `exp` as a parameter in the `fgn_id` model <!--# but the itnereaction term was no retained, so no differential impacts... -->. The coefficient associated with FGN ID has a value of -1.378524. The interpretation of this coefficient is as follows: on average, there is a decrease in final exam scores by 1.378524 units for FGN students compared to non-FGN students. There was a further decrease of 0.4418 units in the experimental year versus the control year, so altogether the average final exam score for first-generation students in the experimental year is (-1.378) + (-0.4418) + 0.6542) = -1.1656 units lower than the average final exam score for continuing-generation students in the experimental year. The t-value for this coefficient is small, and the significance code associated with `fgn_id` performance coefficient is not statistically significant. Thus, it follows that there is no significant change in final exam scores for first-generation students between the control and experimental years of the study. <!--# Not so! it's retained via model selection. Model selection allows us to consider the whole model rather than just one parameter as a time. Presumably, you found that the model fit worse when you removed exp and fgn_id, which means that they are important parameters to include if we want to accurately describe the dataset. -->
 
 ```{r}
 ggplot(data = master, mapping = aes(x = fgn_id, y = final)) +
