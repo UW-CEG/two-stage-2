@@ -15,13 +15,12 @@ output:
 
 
 ```r
-proj_dir <- here()
-original_data_dir   <- here("original-data", "/")
-importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
-analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
-metadata_dir <- here("original-data", "metadata", "/")
-copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
-copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- here(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- here(importable_data_dir, "two_stage_master_wide_deid.rds")
 file.copy(copy_from, copy_to)
 ```
 
@@ -33,7 +32,7 @@ file.copy(copy_from, copy_to)
 
 
 ```r
-master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
 ```
 
 ### Change value of NAs in `exp` column to `EXPERIMENT`
@@ -50,20 +49,24 @@ master <- master_original_1 %>%
 
 
 ```r
-master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
-master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree", "Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
 ```
-
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`)
 
 
 ```r
 model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
-                                    exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
-                                    exp + sex_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_1)
 ```
@@ -123,15 +126,661 @@ summary(model_1)
 ## (555 observations deleted due to missingness)
 ```
 
+```r
+levels(master$perts_q1msfixed1)
+```
+
+```
+## [1] "Strongly Disagree" "Disagree"          "Somewhat Disagree"
+## [4] "Somewhat Agree"    "Agree"             "Strongly Agree"
+```
+
+The "L", "C", "Q", "4", and "5" suffixes on the `perts_q1msfixed` predictor variable are due to this predictor being an ordered factor. "L" stands for "linear", "C" stands for "cubic", and so on. R fits the data with a series of orthogonal polynomials (for some reason). I don't really know how to interpret the output, or why to ordering of the factor requires this sort of fitting.
+
+If the predictor variables are *un-ordered* factors, then the summary output does not contain these suffixes. I observed this in my exploration of the `effects` package vingette (find it [here](https://uwnetid-my.sharepoint.com/personal/cfcraig_uw_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%2Fexplore%2Deffect%2Dpackage&listurl=%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES&remoteItem=%7B%22mp%22%3A%7B%22webAbsoluteUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%22%2C%22listFullUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2FDocuments%22%2C%22rootFolder%22%3A%22%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2FDocuments%2F0%20ANALYSES%22%7D%2C%22rsi%22%3A%7B%22listFullUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%22%2C%22rootFolder%22%3A%22%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%2Fexplore%2Deffect%2Dpackage%22%2C%22webAbsoluteUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%22%7D%7D&viewid=3a9f768c%2D0ade%2D43f5%2D8b58%2De85651c29766)).
+
+This site helped me sort of understand what's going on with these suffixes: <https://data.library.virginia.edu/understanding-ordered-factors-in-a-linear-model/>
+
+The `perts_q1msfixed` variable has six ordered levels, and the regression output shows five polynomial fits for `perts_q1msfixed`. However, these don't seem to have a 1:1 correspondence to the different levels of `perts_q1msfixed` . Is it more about about how many factor "units" different the outcome is relative to the input? That is, if a student's pre mindset response was "Disagree" and their post response was "Somewhat Disagree", is that a linear change because it differs by one factor unit? If the post response was "Somewhat Agree", is that a quadratic change?
+
+**NOTES**:
+
+-   Some of the mindset questions are coded backwards, so we'll have to address that!!
+-   Don't I need to include "student" as a random effect? (Cynthia didn't do so in her survey analyses, from what I can tell.)
+-   Did Cynthia ever look at individual survey scores?
+
+
+```r
+# This doesn't work. There is not a native way to include random effects in
+# a polr model.
+# model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+#                   exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+#                   exp + sex_id + perts_q1msfixed1 +
+#                   satm + satv + hs_gpa + aleksikc_score + (1|two_stage_id), 
+#                   data = master)
+# 
+# summary(model_1.1)
+```
+
+Let's try the `effects` package:
+
+
+```r
+perts_q1_effects <- allEffects(model_1)
+```
+
+```
+## 
+## Re-fitting to get Hessian
+## 
+## 
+## Re-fitting to get Hessian
+## 
+## 
+## Re-fitting to get Hessian
+## 
+## 
+## Re-fitting to get Hessian
+## 
+## 
+## Re-fitting to get Hessian
+```
+
+```r
+perts_q1_effects
+```
+
+```
+##  model: perts_q1msfixed2 ~ exp * sex_id * perts_q1msfixed1 + exp * sex_id + 
+##     exp * perts_q1msfixed1 + sex_id * perts_q1msfixed1 + exp + 
+##     sex_id + perts_q1msfixed1 + satm + satv + hs_gpa + aleksikc_score
+## 
+## satm effect (probability) for Strongly Disagree
+## satm
+##        400        500        600        700        800 
+## 0.21239053 0.17316986 0.13990527 0.11216373 0.08935156 
+## 
+## satm effect (probability) for Disagree
+## satm
+##       400       500       600       700       800 
+## 0.4181960 0.3968625 0.3674023 0.3321882 0.2937820 
+## 
+## satm effect (probability) for Somewhat Disagree
+## satm
+##       400       500       600       700       800 
+## 0.2087696 0.2322617 0.2518275 0.2656087 0.2721717 
+## 
+## satm effect (probability) for Somewhat Agree
+## satm
+##       400       500       600       700       800 
+## 0.1254699 0.1528707 0.1838715 0.2178401 0.2536245 
+## 
+## satm effect (probability) for Agree
+## satm
+##        400        500        600        700        800 
+## 0.03006376 0.03826511 0.04854985 0.06135401 0.07714973 
+## 
+## satm effect (probability) for Strongly Agree
+## satm
+##         400         500         600         700         800 
+## 0.005110277 0.006570144 0.008443517 0.010845220 0.013920482 
+## 
+## satv effect (probability) for Strongly Disagree
+## satv
+##        400        500        600        700        800 
+## 0.07833264 0.09184663 0.10742034 0.12527049 0.14560297 
+## 
+## satv effect (probability) for Disagree
+## satv
+##       400       500       600       700       800 
+## 0.2714691 0.2984695 0.3249819 0.3502167 0.3733372 
+## 
+## satv effect (probability) for Somewhat Disagree
+## satv
+##       400       500       600       700       800 
+## 0.2723756 0.2717975 0.2674626 0.2595986 0.2486062 
+## 
+## satv effect (probability) for Somewhat Agree
+## satv
+##       400       500       600       700       800 
+## 0.2741433 0.2492922 0.2246162 0.2006768 0.1779119 
+## 
+## satv effect (probability) for Agree
+## satv
+##        400        500        600        700        800 
+## 0.08764304 0.07508334 0.06414046 0.05465801 0.04647931 
+## 
+## satv effect (probability) for Strongly Agree
+## satv
+##         400         500         600         700         800 
+## 0.016036302 0.013510829 0.011378480 0.009579401 0.008062459 
+## 
+## hs_gpa effect (probability) for Strongly Disagree
+## hs_gpa
+##          3        3.2        3.5        3.7          4 
+## 0.09798511 0.10226943 0.10900695 0.11371243 0.12110213 
+## 
+## hs_gpa effect (probability) for Disagree
+## hs_gpa
+##         3       3.2       3.5       3.7         4 
+## 0.3094675 0.3167135 0.3274349 0.3344596 0.3447698 
+## 
+## hs_gpa effect (probability) for Somewhat Disagree
+## hs_gpa
+##         3       3.2       3.5       3.7         4 
+## 0.2704620 0.2692264 0.2668652 0.2649615 0.2616302 
+## 
+## hs_gpa effect (probability) for Somewhat Agree
+## hs_gpa
+##         3       3.2       3.5       3.7         4 
+## 0.2390954 0.2323489 0.2223140 0.2156960 0.2059011 
+## 
+## hs_gpa effect (probability) for Agree
+## hs_gpa
+##          3        3.2        3.5        3.7          4 
+## 0.07039933 0.06742894 0.06318405 0.06048988 0.05664420 
+## 
+## hs_gpa effect (probability) for Strongly Agree
+## hs_gpa
+##           3         3.2         3.5         3.7           4 
+## 0.012590547 0.012012827 0.011195010 0.010680632 0.009952595 
+## 
+## aleksikc_score effect (probability) for Strongly Disagree
+## aleksikc_score
+##          2         35         68        100        130 
+## 0.09624945 0.11746510 0.14261920 0.17114883 0.20184183 
+## 
+## aleksikc_score effect (probability) for Disagree
+## aleksikc_score
+##         2        35        68       100       130 
+## 0.3064330 0.3398025 0.3702793 0.3954045 0.4136572 
+## 
+## aleksikc_score effect (probability) for Somewhat Disagree
+## aleksikc_score
+##         2        35        68       100       130 
+## 0.2708950 0.2633170 0.2503037 0.2334817 0.2150042 
+## 
+## aleksikc_score effect (probability) for Somewhat Agree
+## aleksikc_score
+##         2        35        68       100       130 
+## 0.2419138 0.2106338 0.1809950 0.1545185 0.1320761 
+## 
+## aleksikc_score effect (probability) for Agree
+## aleksikc_score
+##          2         35         68        100        130 
+## 0.07166977 0.05848195 0.04754453 0.03878313 0.03197316 
+## 
+## aleksikc_score effect (probability) for Strongly Agree
+## aleksikc_score
+##           2          35          68         100         130 
+## 0.012839024 0.010299603 0.008258250 0.006663352 0.005447525 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Strongly Disagree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.4046956 0.5280683
+##   EXPERIMENT 0.5493686 0.3594452
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2244493 0.1512879
+##   EXPERIMENT 0.1928970 0.1790317
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.05910907 0.08344262
+##   EXPERIMENT 0.09721810 0.07290893
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.04868712 0.04589984
+##   EXPERIMENT 0.02324003 0.03231307
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp                Male      Female
+##   CONTROL    0.01931389 0.009939136
+##   EXPERIMENT 0.03211519 0.020637122
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp                Male      Female
+##   CONTROL    0.00332965 0.008795175
+##   EXPERIMENT 0.01896482 0.007350944
+## 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Disagree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.4067410 0.3482156
+##   EXPERIMENT 0.3359134 0.4208755
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.4224382 0.3788689
+##   EXPERIMENT 0.4091531 0.4008744
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2254143 0.2821536
+##   EXPERIMENT 0.3081337 0.2594509
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.1960060 0.1875384
+##   EXPERIMENT 0.1076565 0.1421779
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.09153311 0.04981085
+##   EXPERIMENT 0.14146337 0.09705164
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.01737970 0.04438574
+##   EXPERIMENT 0.09006271 0.03742653
+## 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Somewhat Disagree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.11800109 0.07962528
+##   EXPERIMENT 0.07410243 0.13545182
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2017682 0.2453175
+##   EXPERIMENT 0.2203547 0.2287187
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2644634 0.2726026
+##   EXPERIMENT 0.2706585 0.2714057
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2532048 0.2489973
+##   EXPERIMENT 0.1846436 0.2183428
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.1653495 0.1030875
+##   EXPERIMENT 0.2177423 0.1722276
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp               Male     Female
+##   CONTROL    0.0400853 0.09352209
+##   EXPERIMENT 0.1634672 0.08070261
+## 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Somewhat Agree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp               Male     Female
+##   CONTROL    0.0563072 0.03538141
+##   EXPERIMENT 0.0326160 0.06700959
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.1184907 0.1722573
+##   EXPERIMENT 0.1380865 0.1482388
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.3156997 0.2643393
+##   EXPERIMENT 0.2403347 0.2851168
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.3409642 0.3478860
+##   EXPERIMENT 0.3920794 0.3797184
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.3908346 0.3423946
+##   EXPERIMENT 0.3801141 0.3919592
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.1928368 0.3276938
+##   EXPERIMENT 0.3903937 0.3041567
+## 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Agree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp                 Male      Female
+##   CONTROL    0.012221788 0.007473021
+##   EXPERIMENT 0.006864673 0.014755489
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.02809015 0.04455778
+##   EXPERIMENT 0.03374666 0.03682478
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.11374069 0.08247511
+##   EXPERIMENT 0.07095577 0.09380949
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.1347863 0.1416919
+##   EXPERIMENT 0.2373669 0.1876189
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.2672583 0.3735203
+##   EXPERIMENT 0.1884927 0.2564451
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp               Male    Female
+##   CONTROL    0.4532739 0.3905777
+##   EXPERIMENT 0.2702501 0.4127912
+## 
+## 
+## exp*sex_id*perts_q1msfixed1 effect (probability) for Strongly Agree
+## , , perts_q1msfixed1 = Strongly Disagree
+## 
+##             sex_id
+## exp                 Male      Female
+##   CONTROL    0.002033389 0.001236361
+##   EXPERIMENT 0.001134902 0.002462332
+## 
+## , , perts_q1msfixed1 = Disagree
+## 
+##             sex_id
+## exp                 Male      Female
+##   CONTROL    0.004763345 0.007710604
+##   EXPERIMENT 0.005762190 0.006311613
+## 
+## , , perts_q1msfixed1 = Somewhat Disagree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.02157284 0.01498675
+##   EXPERIMENT 0.01269927 0.01730823
+## 
+## , , perts_q1msfixed1 = Somewhat Agree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.02635149 0.02798651
+##   EXPERIMENT 0.05501365 0.03982896
+## 
+## , , perts_q1msfixed1 = Agree
+## 
+##             sex_id
+## exp                Male     Female
+##   CONTROL    0.06571059 0.12124769
+##   EXPERIMENT 0.04007240 0.06167931
+## 
+## , , perts_q1msfixed1 = Strongly Agree
+## 
+##             sex_id
+## exp                Male    Female
+##   CONTROL    0.29309466 0.1350255
+##   EXPERIMENT 0.06686143 0.1575720
+```
+
+polr(formula = perts_q1msfixed2 \~ exp \* sex_id \* perts_q1msfixed1 +
+
+exp \* sex_id + exp \* perts_q1msfixed1 + sex_id \* perts_q1msfixed1 +
+
+exp + sex_id + perts_q1msfixed1 + satm + satv + hs_gpa +
+
+aleksikc_score, data = master)
+
+
+```r
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+```r
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-8-2.png)<!-- -->
+
+```r
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-8-3.png)<!-- -->
+
+
+```r
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+```
+
+```
+## NOTE: sex_id:perts_q1msfixed1 is not a high-order term in the model
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+```
+
+```
+## NOTE: sex_id:perts_q1msfixed1 is not a high-order term in the model
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-9-2.png)<!-- -->
+
+```r
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
+```
+
+```
+## NOTE: sex_id:perts_q1msfixed1 is not a high-order term in the model
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-9-3.png)<!-- -->
+
+
+```r
+plot(predictorEffect("satm", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+![](POLR-survey-data-jh_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+# Try some `anova` model selection:
+
+
+```r
+Anova(model_1)
+```
+
+```
+## Analysis of Deviance Table (Type II tests)
+## 
+## Response: perts_q1msfixed2
+##                             LR Chisq Df Pr(>Chisq)    
+## exp                             0.02  1   0.891081    
+## sex_id                          2.18  1   0.139663    
+## perts_q1msfixed1              465.83  5  < 2.2e-16 ***
+## satm                           10.01  1   0.001554 ** 
+## satv                            4.50  1   0.033871 *  
+## hs_gpa                          0.73  1   0.394411    
+## aleksikc_score                  4.89  1   0.027033 *  
+## exp:sex_id                      0.32  1   0.572656    
+## exp:perts_q1msfixed1            9.43  5   0.093145 .  
+## sex_id:perts_q1msfixed1         4.36  5   0.498347    
+## exp:sex_id:perts_q1msfixed1    12.20  5   0.032119 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
+
+summary(model_1)
+```
+
+```
+## 
+## Re-fitting to get Hessian
+```
+
+```
+## Call:
+## polr(formula = perts_q1msfixed2 ~ exp * sex_id * perts_q1msfixed1 + 
+##     exp * sex_id + exp * perts_q1msfixed1 + sex_id * perts_q1msfixed1 + 
+##     exp + sex_id + perts_q1msfixed1 + satm + satv + hs_gpa + 
+##     aleksikc_score, data = master)
+## 
+## Coefficients:
+##                                                   Value Std. Error t value
+## expEXPERIMENT                                 -0.407140  0.1409928 -2.8877
+## sex_idFemale                                  -0.104299  0.1408236 -0.7406
+## perts_q1msfixed1.L                             4.164843  0.2194950 18.9747
+## perts_q1msfixed1.Q                             0.252109  0.1928028  1.3076
+## perts_q1msfixed1.C                             0.517695  0.1814118  2.8537
+## perts_q1msfixed1^4                             0.390282  0.1765054  2.2112
+## perts_q1msfixed1^5                            -0.382503  0.1549721 -2.4682
+## satm                                           0.002528  0.0008081  3.1277
+## satv                                          -0.001739  0.0008258 -2.1061
+## hs_gpa                                        -0.237781  0.1282476 -1.8541
+## aleksikc_score                                -0.006756  0.0030490 -2.2159
+## expEXPERIMENT:sex_idFemale                     0.480375  0.1722105  2.7895
+## expEXPERIMENT:perts_q1msfixed1.L              -0.799794  0.2170400 -3.6850
+## expEXPERIMENT:perts_q1msfixed1.Q              -1.339393  0.1822319 -7.3499
+## expEXPERIMENT:perts_q1msfixed1.C              -0.453599  0.1999020 -2.2691
+## expEXPERIMENT:perts_q1msfixed1^4              -0.169089  0.2031551 -0.8323
+## expEXPERIMENT:perts_q1msfixed1^5               0.972764  0.1748760  5.5626
+## sex_idFemale:perts_q1msfixed1.L               -0.166368  0.2014304 -0.8259
+## sex_idFemale:perts_q1msfixed1.Q               -0.796266  0.1770588 -4.4972
+## sex_idFemale:perts_q1msfixed1.C               -0.406120  0.1822933 -2.2278
+## sex_idFemale:perts_q1msfixed1^4               -1.052399  0.1994022 -5.2778
+## sex_idFemale:perts_q1msfixed1^5                0.182924  0.1713718  1.0674
+## expEXPERIMENT:sex_idFemale:perts_q1msfixed1.L  0.327977  0.1567375  2.0925
+## expEXPERIMENT:sex_idFemale:perts_q1msfixed1.Q  1.694220  0.1497943 11.3103
+## expEXPERIMENT:sex_idFemale:perts_q1msfixed1.C  0.480234  0.1402558  3.4240
+## expEXPERIMENT:sex_idFemale:perts_q1msfixed1^4  1.061704  0.1560331  6.8044
+## expEXPERIMENT:sex_idFemale:perts_q1msfixed1^5 -0.697007  0.1388426 -5.0201
+## 
+## Intercepts:
+##                                  Value     Std. Error t value  
+## Strongly Disagree|Disagree         -3.3945    0.0302  -112.2354
+## Disagree|Somewhat Disagree         -1.5492    0.0803   -19.2868
+## Somewhat Disagree|Somewhat Agree   -0.4305    0.0935    -4.6048
+## Somewhat Agree|Agree                1.2277    0.1214    10.1154
+## Agree|Strongly Agree                3.1874    0.2096    15.2051
+## 
+## Residual Deviance: 4717.048 
+## AIC: 4781.048 
+## (555 observations deleted due to missingness)
+```
+
+**QUESITON**: How can a 3-way interaction be significant, but the related two-way interactions and main effects *not* be significant?
+
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
 
 
 ```r
 model_2 <- polr(perts_q1msfixed2 ~ exp*urm_id*perts_q1msfixed1 +
-                                    exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
-                                    exp + urm_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
+                  exp + urm_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_2)
 ```
@@ -196,10 +845,9 @@ summary(model_2)
 
 ```r
 model_3 <- polr(perts_q1msfixed2 ~ exp*eop_id*perts_q1msfixed1 +
-                                    exp*eop_id + exp*perts_q1msfixed1 + eop_id*perts_q1msfixed1 +
-                                    exp + eop_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*eop_id + exp*perts_q1msfixed1 + eop_id*perts_q1msfixed1 +
+                  exp + eop_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_3)
 ```
@@ -264,10 +912,9 @@ summary(model_3)
 
 ```r
 model_4 <- polr(perts_q1msfixed2 ~ exp*fgn_id*perts_q1msfixed1 +
-                                    exp*fgn_id + exp*perts_q1msfixed1 + fgn_id*perts_q1msfixed1 +
-                                    exp + fgn_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*fgn_id + exp*perts_q1msfixed1 + fgn_id*perts_q1msfixed1 +
+                  exp + fgn_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_4)
 ```
@@ -384,6 +1031,10 @@ summary(model_5)
 ## (554 observations deleted due to missingness)
 ```
 
+##### As the value of `exp` changes, the log odds of (males?) answering one or more higher levels on the Likert scale decreases by 0.111639
+
+##### When we get rid of the other survey question as an interaction, the "L, Q, C, \^4 \^5" indicator in the regression output disappears
+
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`; compared within control year)
 
 
@@ -437,6 +1088,8 @@ summary(model_6)
 ## AIC: 2139.139 
 ## (251 observations deleted due to missingness)
 ```
+
+##### The log odds of females answering one or more higher levels on the Likert scale for the end of quarter survey vs. men decreases by 0.1677219?
 
 ## `urm_id`:
 
