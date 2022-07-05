@@ -25,20 +25,19 @@ library(Hmisc) # misc fxns for data analysis
 ### Designate working directories and copy file
 
 ```{r}
-proj_dir <- here()
-original_data_dir   <- here("original-data", "/")
-importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
-analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
-metadata_dir <- here("original-data", "metadata", "/")
-copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
-copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- here(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- here(importable_data_dir, "two_stage_master_wide_deid.rds")
 file.copy(copy_from, copy_to)
 ```
 
 ### Import dataset
 
 ```{r}
-master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
 ```
 
 ### Change value of NAs in `exp` column to `EXPERIMENT`
