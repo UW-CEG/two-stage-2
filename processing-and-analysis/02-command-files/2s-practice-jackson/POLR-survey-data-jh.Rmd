@@ -101,6 +101,41 @@ The `perts_q1msfixed` variable has six ordered levels, and the regression output
 # summary(model_1.1)
 ```
 
+Let's try the `effects` package:
+
+```{r}
+perts_q1_effects <- allEffects(model_1)
+perts_q1_effects
+```
+
+polr(formula = perts_q1msfixed2 \~ exp \* sex_id \* perts_q1msfixed1 +
+
+exp \* sex_id + exp \* perts_q1msfixed1 + sex_id \* perts_q1msfixed1 +
+
+exp + sex_id + perts_q1msfixed1 + satm + satv + hs_gpa +
+
+aleksikc_score, data = master)
+
+```{r}
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
+```
+
+```{r}
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
 ```
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
