@@ -90,13 +90,17 @@ The `perts_q1msfixed` variable has six ordered levels, and the regression output
 -   Did Cynthia ever look at individual survey scores?
 
 ```{r}
-model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
-                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
-                  exp + sex_id + perts_q1msfixed1 +
-                  satm + satv + hs_gpa + aleksikc_score + (1|two_stage_id), 
-                  data = master)
+# This doesn't work. There is not a native way to include random effects in
+# a polr model.
+# model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+#                   exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+#                   exp + sex_id + perts_q1msfixed1 +
+#                   satm + satv + hs_gpa + aleksikc_score + (1|two_stage_id), 
+#                   data = master)
+# 
+# summary(model_1.1)
+```
 
-summary(model_1.1)
 ```
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
