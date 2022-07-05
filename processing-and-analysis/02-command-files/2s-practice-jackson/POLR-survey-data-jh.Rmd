@@ -1,0 +1,215 @@
+---
+title: "Exploring POLR with Survey Data"
+author: "Jackson Hughes"
+date: "2/14/2022"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+library(MASS)
+library(effects)
+library(nnet)
+library(Hmisc)
+```
+
+## Set up
+
+### Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data", "/")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
+metadata_dir <- here("original-data", "metadata", "/")
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+### Import dataset
+
+```{r}
+master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+### Change value of NAs in `exp` column to `EXPERIMENT`
+
+```{r}
+master <- master_original_1 %>% 
+  mutate(exp = replace_na(exp, "EXPERIMENT"))
+```
+
+## POLR on Survey Data Part I: Relatively more complex interactions
+
+#### Ensure that survey data is ordered
+
+```{r}
+master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+```
+
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`)
+
+```{r}
+model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+                                    exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                                    exp + sex_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_1)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
+
+```{r}
+model_2 <- polr(perts_q1msfixed2 ~ exp*urm_id*perts_q1msfixed1 +
+                                    exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
+                                    exp + urm_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_2)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`eop_id`)
+
+```{r}
+model_3 <- polr(perts_q1msfixed2 ~ exp*eop_id*perts_q1msfixed1 +
+                                    exp*eop_id + exp*perts_q1msfixed1 + eop_id*perts_q1msfixed1 +
+                                    exp + eop_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_3)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`fgn_id`)
+
+```{r}
+model_4 <- polr(perts_q1msfixed2 ~ exp*fgn_id*perts_q1msfixed1 +
+                                    exp*fgn_id + exp*perts_q1msfixed1 + fgn_id*perts_q1msfixed1 +
+                                    exp + fgn_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_4)
+```
+
+## POLR on Survey Data Part II: Relatively simpler interactions
+
+#### Create a dataset that only contains data from the control year
+
+```{r}
+master_control <- master %>% 
+  filter(exp == "CONTROL")
+```
+
+## `sex_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`sex_id`; compared across years)
+
+```{r}
+model_5 <- polr(perts_q1msfixed2 ~ exp*sex_id +
+                                    exp + sex_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_5)
+```
+##### As the value of `exp` changes, the log odds of (males?) answering one or more higher levels on the Likert scale decreases by 0.111639
+##### When we get rid of the other survey question as an interaction, the "L, Q, C, ^4 ^5" indicator in the regression output disappears
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`; compared within control year)
+
+```{r}
+model_6 <- polr(perts_q1msfixed2 ~ sex_id*perts_q1msfixed1 +
+                                    sex_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_6)
+```
+##### The log odds of females answering one or more higher levels on the Likert scale for the end of quarter survey vs. men decreases by 0.1677219?
+
+## `urm_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`urm_id`; compared across years)
+
+```{r}
+model_7 <- polr(perts_q1msfixed2 ~ exp*urm_id +
+                                    exp + urm_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_7)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`; compared within control year)
+
+```{r}
+model_8 <- polr(perts_q1msfixed2 ~ urm_id*perts_q1msfixed1 +
+                                    urm_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_8)
+```
+
+## `eop_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`eop_id`; compared across years)
+
+```{r}
+model_9 <- polr(perts_q1msfixed2 ~ exp*eop_id +
+                                    exp + eop_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_9)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`eop_id`; compared within control year)
+
+```{r}
+model_10 <- polr(perts_q1msfixed2 ~ eop_id*perts_q1msfixed1 +
+                                    eop_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_10)
+```
+
+## `fgn_id`:
+
+### `perts_q1msfixed1` regressed on `exp` (`fgn_id`; compared across years)
+
+```{r}
+model_11 <- polr(perts_q1msfixed2 ~ exp*fgn_id +
+                                    exp + fgn_id +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master)
+
+summary(model_11)
+```
+
+### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`; compared within control year)
+
+```{r}
+model_12 <- polr(perts_q1msfixed2 ~ fgn_id*perts_q1msfixed1 +
+                                    fgn_id + perts_q1msfixed1 +
+                                    satm + satv + hs_gpa + aleksikc_score,
+                                    data = master_control)
+
+summary(model_12)
+```
