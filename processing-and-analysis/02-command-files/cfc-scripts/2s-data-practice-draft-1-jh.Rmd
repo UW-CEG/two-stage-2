@@ -55,6 +55,21 @@ file.copy(copy_from, copy_to)
 # CFC: IMport data set from `importable_data_dir`
 master <- readRDS(paste0(importable_data_dir, "master_2s_small_deidenitified.rds"))
 
+# CFC (2022-06-07): for some reason this line is not working for me today. I keep 
+# getting the following error msg:
+#
+# Warning in gzfile(file, "rb") :
+#   cannot open compressed file 'G:/Shared drives/CEG Two-Stage Exams Analysis/Colleen/two-stage-2/processing-and-analysis/01-importable-data/master_2s_small_deidenitified.rds', probable reason 'No such file or directory'
+# Error in gzfile(file, "rb") : cannot open the connection
+#
+# I think the problem is on my end, and has something to do with the fact that this
+# file is in a cloud synced drive (according to this post on RStudio Community:
+# https://community.rstudio.com/t/error-in-gzfile-file-rb-cannot-open-the-connection/119632),
+# but I don't know how to fix it.
+# However, I can load the rds by clicking on it in the file menu, so I will do that
+# to continue workign through the document today.
+
+master <- master_2s_small_deidentified
 ```
 
 ## Relationship 1: Scores for Exam 1, 2, and Final by:
