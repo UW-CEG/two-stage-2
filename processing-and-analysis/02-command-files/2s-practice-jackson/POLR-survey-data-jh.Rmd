@@ -14,10 +14,10 @@ library(here)
 library(skimr)
 library(moderndive)
 library(lme4)
-library(MASS)
+library(MASS) # fxns and datasets to support "Modern Applied Statistics with S"
 library(effects)
-library(nnet)
-library(Hmisc)
+library(nnet) # for neural networks and Multinomial Log-Linear Models
+library(Hmisc) # misc fxns for data analysis
 ```
 
 ## Set up
