@@ -18,6 +18,7 @@ library(MASS) # fxns and datasets to support "Modern Applied Statistics with S"
 library(effects)
 library(nnet) # for neural networks and Multinomial Log-Linear Models
 library(Hmisc) # misc fxns for data analysis
+library(car)
 ```
 
 ## Set up
@@ -137,6 +138,27 @@ plot(effect("sex_id*perts_q1msfixed1", model_1,
 plot(effect("sex_id*perts_q1msfixed1", model_1, 
      given.values = c(sex_idFemale = 0.5), latent = TRUE))
 ```
+
+```{r}
+plot(predictorEffect("satm", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+```
+
+# Try some `anova` model selection:
+
+```{r}
+Anova(model_1)
+
+model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
+
+summary(model_1)
+
+```
+
+**QUESITON**: How can a 3-way interaction be significant, but the related two-way interactions and main effects *not* be significant?
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
 
