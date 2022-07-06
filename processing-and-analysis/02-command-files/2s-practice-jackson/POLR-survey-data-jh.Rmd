@@ -14,10 +14,11 @@ library(here)
 library(skimr)
 library(moderndive)
 library(lme4)
-library(MASS)
+library(MASS) # fxns and datasets to support "Modern Applied Statistics with S"
 library(effects)
-library(nnet)
-library(Hmisc)
+library(nnet) # for neural networks and Multinomial Log-Linear Models
+library(Hmisc) # misc fxns for data analysis
+library(car)
 ```
 
 ## Set up
@@ -25,20 +26,19 @@ library(Hmisc)
 ### Designate working directories and copy file
 
 ```{r}
-proj_dir <- here()
-original_data_dir   <- here("original-data", "/")
-importable_data_dir <- here("processing-and-analysis", "01-importable-data", "/")
-analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data", "/")
-metadata_dir <- here("original-data", "metadata", "/")
-copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
-copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- here(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- here(importable_data_dir, "two_stage_master_wide_deid.rds")
 file.copy(copy_from, copy_to)
 ```
 
 ### Import dataset
 
 ```{r}
-master_original_1 <- readRDS(paste0(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
 ```
 
 ### Change value of NAs in `exp` column to `EXPERIMENT`
@@ -53,30 +53,120 @@ master <- master_original_1 %>%
 #### Ensure that survey data is ordered
 
 ```{r}
-master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
-master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
+master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree", "Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
 ```
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`)
 
 ```{r}
 model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
-                                    exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
-                                    exp + sex_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_1)
+
+levels(master$perts_q1msfixed1)
 ```
+
+The "L", "C", "Q", "4", and "5" suffixes on the `perts_q1msfixed` predictor variable are due to this predictor being an ordered factor. "L" stands for "linear", "C" stands for "cubic", and so on. R fits the data with a series of orthogonal polynomials (for some reason). I don't really know how to interpret the output, or why to ordering of the factor requires this sort of fitting.
+
+If the predictor variables are *un-ordered* factors, then the summary output does not contain these suffixes. I observed this in my exploration of the `effects` package vingette (find it [here](https://uwnetid-my.sharepoint.com/personal/cfcraig_uw_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%2Fexplore%2Deffect%2Dpackage&listurl=%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES&remoteItem=%7B%22mp%22%3A%7B%22webAbsoluteUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%22%2C%22listFullUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2FDocuments%22%2C%22rootFolder%22%3A%22%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2FDocuments%2F0%20ANALYSES%22%7D%2C%22rsi%22%3A%7B%22listFullUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%22%2C%22rootFolder%22%3A%22%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%2F0%20ANALYSES%2Fexplore%2Deffect%2Dpackage%22%2C%22webAbsoluteUrl%22%3A%22https%3A%2F%2Fuwnetid%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fcfcraig%5Fuw%5Fedu%2Fresearch%22%7D%7D&viewid=3a9f768c%2D0ade%2D43f5%2D8b58%2De85651c29766)).
+
+This site helped me sort of understand what's going on with these suffixes: <https://data.library.virginia.edu/understanding-ordered-factors-in-a-linear-model/>
+
+The `perts_q1msfixed` variable has six ordered levels, and the regression output shows five polynomial fits for `perts_q1msfixed`. However, these don't seem to have a 1:1 correspondence to the different levels of `perts_q1msfixed` . Is it more about about how many factor "units" different the outcome is relative to the input? That is, if a student's pre mindset response was "Disagree" and their post response was "Somewhat Disagree", is that a linear change because it differs by one factor unit? If the post response was "Somewhat Agree", is that a quadratic change?
+
+**NOTES**:
+
+-   Some of the mindset questions are coded backwards, so we'll have to address that!!
+-   Don't I need to include "student" as a random effect? (Cynthia didn't do so in her survey analyses, from what I can tell.)
+-   Did Cynthia ever look at individual survey scores?
+
+```{r}
+# This doesn't work. There is not a native way to include random effects in
+# a polr model.
+# model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+#                   exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+#                   exp + sex_id + perts_q1msfixed1 +
+#                   satm + satv + hs_gpa + aleksikc_score + (1|two_stage_id), 
+#                   data = master)
+# 
+# summary(model_1.1)
+```
+
+Let's try the `effects` package:
+
+```{r}
+perts_q1_effects <- allEffects(model_1)
+perts_q1_effects
+```
+
+polr(formula = perts_q1msfixed2 \~ exp \* sex_id \* perts_q1msfixed1 +
+
+exp \* sex_id + exp \* perts_q1msfixed1 + sex_id \* perts_q1msfixed1 +
+
+exp + sex_id + perts_q1msfixed1 + satm + satv + hs_gpa +
+
+aleksikc_score, data = master)
+
+```{r}
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+
+plot(effect("exp*sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
+```
+
+```{r}
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5)), style = "stacked")
+
+plot(effect("sex_id*perts_q1msfixed1", model_1, 
+     given.values = c(sex_idFemale = 0.5), latent = TRUE))
+```
+
+```{r}
+plot(predictorEffect("satm", model_1, 
+     given.values = c(sex_idFemale = 0.5)))
+```
+
+# Try some `anova` model selection:
+
+```{r}
+Anova(model_1)
+
+model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
+                  exp*sex_id + exp*perts_q1msfixed1 + sex_id*perts_q1msfixed1 +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
+
+summary(model_1)
+
+```
+
+**QUESITON**: How can a 3-way interaction be significant, but the related two-way interactions and main effects *not* be significant?
 
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`urm_id`)
 
 ```{r}
 model_2 <- polr(perts_q1msfixed2 ~ exp*urm_id*perts_q1msfixed1 +
-                                    exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
-                                    exp + urm_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*urm_id + exp*perts_q1msfixed1 + urm_id*perts_q1msfixed1 +
+                  exp + urm_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_2)
 ```
@@ -85,10 +175,9 @@ summary(model_2)
 
 ```{r}
 model_3 <- polr(perts_q1msfixed2 ~ exp*eop_id*perts_q1msfixed1 +
-                                    exp*eop_id + exp*perts_q1msfixed1 + eop_id*perts_q1msfixed1 +
-                                    exp + eop_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*eop_id + exp*perts_q1msfixed1 + eop_id*perts_q1msfixed1 +
+                  exp + eop_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_3)
 ```
@@ -97,10 +186,9 @@ summary(model_3)
 
 ```{r}
 model_4 <- polr(perts_q1msfixed2 ~ exp*fgn_id*perts_q1msfixed1 +
-                                    exp*fgn_id + exp*perts_q1msfixed1 + fgn_id*perts_q1msfixed1 +
-                                    exp + fgn_id + perts_q1msfixed1 +
-                                    satm + satv + hs_gpa + aleksikc_score,
-                                    data = master)
+                  exp*fgn_id + exp*perts_q1msfixed1 + fgn_id*perts_q1msfixed1 +
+                  exp + fgn_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
 
 summary(model_4)
 ```
