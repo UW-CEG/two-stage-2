@@ -54,7 +54,6 @@ master$perts_q1msfixed1 <- ordered(master$perts_q1msfixed1, levels=c("Strongly D
 master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2, levels=c("Strongly Disagree", "Disagree", "Somewhat Disagree", "Somewhat Agree", "Agree", "Strongly Agree"))
 ```
 
-
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`)
 
 
@@ -384,6 +383,10 @@ summary(model_5)
 ## (554 observations deleted due to missingness)
 ```
 
+##### As the value of `exp` changes, the log odds of (males?) answering one or more higher levels on the Likert scale decreases by 0.111639
+
+##### When we get rid of the other survey question as an interaction, the "L, Q, C, \^4 \^5" indicator in the regression output disappears
+
 ### `perts_q1msfixed1` versus `perts_q1msfixed2` (`sex_id`; compared within control year)
 
 
@@ -437,6 +440,8 @@ summary(model_6)
 ## AIC: 2139.139 
 ## (251 observations deleted due to missingness)
 ```
+
+##### The log odds of females answering one or more higher levels on the Likert scale for the end of quarter survey vs. men decreases by 0.1677219?
 
 ## `urm_id`:
 
