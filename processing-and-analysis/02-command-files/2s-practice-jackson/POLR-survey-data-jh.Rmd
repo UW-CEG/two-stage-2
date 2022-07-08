@@ -38,14 +38,7 @@ file.copy(copy_from, copy_to)
 ### Import dataset
 
 ```{r}
-master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
-```
-
-### Change value of NAs in `exp` column to `EXPERIMENT`
-
-```{r}
-master <- master_original_1 %>% 
-  mutate(exp = replace_na(exp, "EXPERIMENT"))
+master <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
 ```
 
 ## POLR on Survey Data Part I: Relatively more complex interactions
@@ -74,6 +67,13 @@ model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1 +
 summary(model_1)
 
 levels(master$perts_q1msfixed1)
+
+model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id +
+                  exp + sex_id + perts_q1msfixed1 +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
+
+summary(model_1.1)
+
 ```
 
 The "L", "C", "Q", "4", and "5" suffixes on the `perts_q1msfixed` predictor variable are due to this predictor being an ordered factor. "L" stands for "linear", "C" stands for "cubic", and so on. R fits the data with a series of orthogonal polynomials (for some reason). I don't really know how to interpret the output, or why to ordering of the factor requires this sort of fitting.
