@@ -88,17 +88,6 @@ summary(model_1)
 
 levels(master$perts_q1msfixed1)
 
-model_1.1 <- polr(perts_q1msfixed2 ~ exp*sex_id +
-                  exp + sex_id + perts_q1msfixed1 +
-                  satm + satv + hs_gpa + aleksikc_score, data = master)
-
-summary(model_1.1)
-
-model_1.2 <- polr(perts_q1msfixed2 ~ exp*sex_id +
-                  exp + sex_id +
-                  satm + satv + hs_gpa + aleksikc_score, data = master)
-
-summary(model_1.2)
 
 ```
 
