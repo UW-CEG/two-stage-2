@@ -72,10 +72,19 @@ resp_list <- data.frame(x1, x2)
 #### Create loop
 
 ```{r}
+i <- 1
 for (i in 1:nrow(resp_list)) {
-  formula_ <- paste0(resp_list[[1]][[i]], " ~ exp*sex_id*", resp_list[[2]][[i]], " + exp*sex_id + exp*", resp_list[[2]][[i]], " + sex_id*", resp_list[[2]][[i]], " + exp + sex_id + ", resp_list[[2]][[i]], " + satm + satv + hs_gpa + aleksikc_score")
+  formula_ <- paste0(resp_list[[1]][[i]], 
+                     " ~ exp*sex_id*", resp_list[[2]][[i]], 
+                     " + exp*sex_id + exp*", resp_list[[2]][[i]], 
+                     " + sex_id*", resp_list[[2]][[i]], 
+                     " + exp + sex_id + ",resp_list[[2]][[i]], 
+                     " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("model_", i)
-  assign(mod_name, polr(formula_, data = master))
+  cat(formula_, "\n\n")
+  # assign(mod_name, polr(formula_, data = master))
 }
+
+nrow(resp_list)
 ```
 
