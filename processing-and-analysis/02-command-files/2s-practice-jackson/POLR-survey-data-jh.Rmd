@@ -45,19 +45,15 @@ master <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
 
 #### Test three methods of coding the survey responses
 
-In Jackson's original work, he (naturally) coded both the beginning- and end-of-term
-survey responses as ordered factors for use in the POLR function. However, having 
-and ordered factor as a predictor variable leads to very strange (according to Elli) 
-model estimates with way too high t-values. 
+In Jackson's original work, he (naturally) coded both the beginning- and end-of-term survey responses as ordered factors for use in the POLR function. However, having and ordered factor as a predictor variable leads to very strange (according to Elli) model estimates with way too high t-values.
 
-So, I am trying three methods of coding the BoT survey response: 
+So, I am trying three methods of coding the BoT survey response:
 
-* as an ordered factor
-* as an unordered factor
-* as an integer
+-   as an ordered factor
+-   as an unordered factor
+-   as an integer
 
-The EoT survey response will be coded as an ordered factor in each case. Models for 
-all three cases will be compared. 
+The EoT survey response will be coded as an ordered factor in each case. Models for all three cases will be compared.
 
 ```{r}
 master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2,
@@ -67,7 +63,6 @@ master$perts_q1msfixed2 <- ordered(master$perts_q1msfixed2,
 
 ```
 
-
 ##### CASE 1: BoT response coded as an ordered factor
 
 ```{r}
@@ -76,6 +71,8 @@ master$perts_q1msfixed1_of <- ordered(master$perts_q1msfixed1,
                                    levels=c("Strongly Disagree", "Disagree", 
                                             "Somewhat Disagree","Somewhat Agree", 
                                             "Agree", "Strongly Agree"))
+
+levels(master$perts_q1msfixed1_of)
 
 ```
 
@@ -87,10 +84,36 @@ model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1_of +
 
 summary(model_1)
 
-levels(master$perts_q1msfixed1_of)
+
+```
+
+##### CASE 2: BoT response coded as an unordered factor
+
+```{r}
+
+master$perts_q1msfixed1_uf <- factor(master$perts_q1msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+
+# levels(master$perts_q1msfixed1_uf)
+# as.numeric(levels(master$perts_q1msfixed1_uf))[master$perts_q1msfixed1_uf]
+# as.numeric(as.character(master$perts_q1msfixed1_uf))
+
+```
+
+###### `perts_q1msfixed1` versus `perts_q1msfixed2_uf` (`sex_id`)
+
+```{r}
+model_2 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1_uf +
+                  satm + satv + hs_gpa + aleksikc_score, data = master)
+
+summary(model_2)
 
 
 ```
+
+#### Prior exploration of using an ordered factor as a predictor value
 
 The "L", "C", "Q", "4", and "5" suffixes on the `perts_q1msfixed` predictor variable are due to this predictor being an ordered factor. "L" stands for "linear", "C" stands for "cubic", and so on. R fits the data with a series of orthogonal polynomials (for some reason). I don't really know how to interpret the output, or why to ordering of the factor requires this sort of fitting.
 
