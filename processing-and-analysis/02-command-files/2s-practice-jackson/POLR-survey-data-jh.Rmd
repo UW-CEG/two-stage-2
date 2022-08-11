@@ -38,7 +38,8 @@ file.copy(copy_from, copy_to)
 ### Import dataset
 
 ```{r}
-master <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master2 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master <- read.csv(here(importable_data_dir, "two_stage_master_wide_deid.csv"))
 ```
 
 ## POLR on Survey Data Part I: Relatively more complex interactions
@@ -84,7 +85,10 @@ model_1 <- polr(perts_q1msfixed2 ~ exp*sex_id*perts_q1msfixed1_of +
 
 summary(model_1)
 
-
+str(master$perts_q1msfixed2)
+str(master$exp)
+levels(master$exp)
+levels(master$sex_id)
 ```
 
 ##### CASE 2: BoT response coded as an unordered factor
