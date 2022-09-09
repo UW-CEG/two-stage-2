@@ -1,0 +1,287 @@
+---
+title: "MX two stage survey data"
+author: "ChemistryR"
+date: "2022-08-18"
+output: html_document
+---
+
+## Loading the library
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+library(MASS)
+library(effects)
+library(nnet)
+library(Hmisc)
+library(dplyr)
+```
+
+## Set up
+
+## Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+## Import dataset
+
+```{r}
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
+master <- master_original_1
+```
+
+## Clean the dataset to be what we need
+
+```{r}
+master_two_stage <- master %>% 
+  dplyr::select(
+  "two_stage_id",
+  "sis_id",
+  "class.x",
+  "class.y",
+  "exp",
+  "sex_id",
+  "urm_id",
+  "eop_id",
+  "fgn_id",
+  "satm",
+  "satv",
+  "hs_gpa",
+  "aleksikc_score",
+  contains("perts_q")
+  )
+```
+
+## Ordered factor for the second survey data
+```{r}
+master_two_stage$perts_q1msfixed2_of <- ordered(master_two_stage$perts_q1msfixed2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2msfixed2_of <- ordered(master_two_stage$perts_q2msfixed2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3msfixed2_of <- ordered(master_two_stage$perts_q3msfixed2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1belong2_of <- ordered(master_two_stage$perts_q1belong2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2belongrespect2_of <- ordered(master_two_stage$perts_q2belongrespect2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3belongcomfort2_of<- ordered(master_two_stage$perts_q3belongcomfort2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4belongmyself2_of <- ordered(master_two_stage$perts_q4belongmyself2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1relevplan2_of <- ordered(master_two_stage$perts_q1relevplan2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2relevskills2_of <- ordered(master_two_stage$perts_q2relevskills2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3relevwork2_of<- ordered(master_two_stage$perts_q3relevwork2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4relevfuture2_of <- ordered(master_two_stage$perts_q4relevfuture2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1effa2_of<- ordered(master_two_stage$perts_q1effa2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2efftest2_of<- ordered(master_two_stage$perts_q2efftest2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3efftopic2_of <- ordered(master_two_stage$perts_q3efftopic2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4effgoal2_of <- ordered(master_two_stage$perts_q4effgoal2, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+```
+
+## Unordered factor for the first survey data
+```{r}
+master_two_stage$perts_q1msfixed1_uf <- factor(master_two_stage$perts_q1msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2msfixed1_uf <- factor(master_two_stage$perts_q2msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3msfixed1_uf <- factor(master_two_stage$perts_q3msfixed1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1belong1_uf <- factor(master_two_stage$perts_q1belong1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2belongrespect1_uf <- factor(master_two_stage$perts_q2belongrespect1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3belongcomfort1_uf<- factor(master_two_stage$perts_q3belongcomfort1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4belongmyself1_uf <- factor(master_two_stage$perts_q4belongmyself1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1relevplan1_uf <- factor(master_two_stage$perts_q1relevplan1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2relevskills1_uf <- factor(master_two_stage$perts_q2relevskills1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3relevwork1_uf<- factor(master_two_stage$perts_q3relevwork1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4relevfuture1_uf <- factor(master_two_stage$perts_q4relevfuture1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q1effa1_uf<- factor(master_two_stage$perts_q1effa1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q2efftest1_uf<- factor(master_two_stage$perts_q2efftest1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q3efftopic1_uf <- factor(master_two_stage$perts_q3efftopic1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+master_two_stage$perts_q4effgoal1_uf <- factor(master_two_stage$perts_q4effgoal1, 
+                                   levels=c("Strongly Disagree", "Disagree", 
+                                            "Somewhat Disagree","Somewhat Agree", 
+                                            "Agree", "Strongly Agree"))
+```
+
+Automation
+
+```{r}
+x1 <- c("perts_q1effa2_of","perts_q2efftest2_of","perts_q3efftopic2_of","perts_q4effgoal2_of")
+x2 <- c("perts_q1effa1_uf","perts_q2efftest1_uf","perts_q3efftopic1_uf","perts_q4effgoal1_uf")
+resp_list4 <- data.frame(x1, x2)
+i <- 1
+for (i in 1:nrow(resp_list4)) {
+  formula_ <- paste0(resp_list4[[1]][[i]], 
+                     " ~ exp*sex_id*", resp_list4[[2]][[i]], 
+                     " + exp*sex_id + exp*", resp_list4[[2]][[i]], 
+                     " + sex_id*", resp_list4[[2]][[i]], 
+                     " + exp + sex_id + ",resp_list4[[2]][[i]], 
+                     " + satm + satv + hs_gpa + aleksikc_score")
+  mod_name <- paste0("modeleff_", i)
+  cat(formula_, "\n\n")
+  assign(mod_name, polr(formula_, data = master_two_stage))
+}
+
+```
+
+```{r}
+x1 <- c("perts_q1relevplan2_of", "perts_q2relevskills2_of", "perts_q3relevwork2_of","perts_q4relevfuture2_of")
+x2 <- c("perts_q1relevplan1_uf", "perts_q2relevskills1_uf", "perts_q3relevwork1_uf","perts_q4relevfuture1_uf")
+resp_list3 <- data.frame(x1, x2)
+i <- 1
+for (i in 1:nrow(resp_list3)) {
+  formula_ <- paste0(resp_list3[[1]][[i]], 
+                     " ~ exp*sex_id*", resp_list3[[2]][[i]], 
+                     " + exp*sex_id + exp*", resp_list3[[2]][[i]], 
+                     " + sex_id*", resp_list3[[2]][[i]], 
+                     " + exp + sex_id + ",resp_list3[[2]][[i]], 
+                     " + satm + satv + hs_gpa + aleksikc_score")
+  mod_name <- paste0("modelrele_", i)
+  cat(formula_, "\n\n")
+  assign(mod_name, polr(formula_, data = master_two_stage))
+}
+
+```
+
+```{r}
+x1 <- c("perts_q1belong2_of", "perts_q2belongrespect2_of", "perts_q3belongcomfort2_of","perts_q4belongmyself2_of")
+x2 <- c("perts_q1belong1_uf", "perts_q2belongrespect1_uf", "perts_q3belongcomfort1_uf","perts_q4belongmyself1_uf")
+resp_list2 <- data.frame(x1, x2)
+i <- 1
+for (i in 1:nrow(resp_list2)) {
+  formula_ <- paste0(resp_list2[[1]][[i]], 
+                     " ~ exp*sex_id*", resp_list2[[2]][[i]], 
+                     " + exp*sex_id + exp*", resp_list2[[2]][[i]], 
+                     " + sex_id*", resp_list2[[2]][[i]], 
+                     " + exp + sex_id + ",resp_list2[[2]][[i]], 
+                     " + satm + satv + hs_gpa + aleksikc_score")
+  mod_name <- paste0("modelbelong_", i)
+  cat(formula_, "\n\n")
+  assign(mod_name, polr(formula_, data = master_two_stage))
+}
+
+```
+
+```{r}
+x1 <- c("perts_q1msfixed2_of", "perts_q2msfixed2_of", "perts_q3msfixed2_of")
+x2 <- c("perts_q1msfixed1_uf", "perts_q2msfixed1_uf", "perts_q3msfixed1_uf")
+resp_list1 <- data.frame(x1, x2)
+i <- 1
+for (i in 1:nrow(resp_list1)) {
+  formula_ <- paste0(resp_list1[[1]][[i]], 
+                     " ~ exp*sex_id*", resp_list1[[2]][[i]], 
+                     " + exp*sex_id + exp*", resp_list1[[2]][[i]], 
+                     " + sex_id*", resp_list1[[2]][[i]], 
+                     " + exp + sex_id + ",resp_list1[[2]][[i]], 
+                     " + satm + satv + hs_gpa + aleksikc_score")
+  mod_name <- paste0("modelms_", i)
+  cat(formula_, "\n\n")
+  assign(mod_name, polr(formula_, data = master_two_stage))
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
