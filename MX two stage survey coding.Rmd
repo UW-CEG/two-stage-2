@@ -279,6 +279,8 @@ for (i in 1:nrow(resp_list1)) {
 
 ```
 
+Polar method on the survey question 1
+Works
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
 perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed1_uf ~ perts_q1msfixed2_of, 
@@ -287,6 +289,9 @@ perts_q1msfixed1_uf_polar
 summary(perts_q1msfixed1_uf_polar)
 ```
 
+Polar method on the survey question 1
+try to do it by selecting variable in the resp_list
+not work
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
 perts_q1msfixed1_uf_polar <- polr(resp_list1$x1 ~ resp_list1$x2, 
@@ -295,11 +300,7 @@ perts_q1msfixed1_uf_polar
 summary(perts_q1msfixed1_uf_polar)
 ```
 
-
-
-
-
-
+hialle
 
 
 
