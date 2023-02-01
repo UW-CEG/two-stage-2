@@ -305,6 +305,8 @@ Polar method on the survey question 1
 Works
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
+is.ordered(master_two_stage$perts_q1msfixed1_uf)
+is.ordered(master_two_stage$perts_q1msfixed2_of)
 perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed1_uf ~ perts_q1msfixed2_of, 
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polar
