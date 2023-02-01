@@ -209,10 +209,17 @@ for (i in 1:nrow(resp_list4)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modeleff_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
+```{r}
+summary(modeleff_1)
+summary(modeleff_2)
+summary(modeleff_3)
+summary(modeleff_4)
+```
+
 
 ```{r}
 x1 <- c("perts_q1relevplan2_of", "perts_q2relevskills2_of", "perts_q3relevwork2_of","perts_q4relevfuture2_of")
@@ -228,9 +235,15 @@ for (i in 1:nrow(resp_list3)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelrele_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
+```
+```{r}
+summary(modelrele_1)
+summary(modelrele_2)
+summary(modelrele_3)
+summary(modelrele_4)
 ```
 
 ```{r}
@@ -247,10 +260,19 @@ for (i in 1:nrow(resp_list2)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelbelong_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
+
+```{r}
+summary(modelbelong_1)
+summary(modelbelong_2)
+summary(modelbelong_3)
+summary(modelbelong_4)
+```
+
+
 
 ```{r}
 x1 <- c("perts_q1msfixed2_of", "perts_q2msfixed2_of", "perts_q3msfixed2_of")
@@ -266,12 +288,17 @@ for (i in 1:nrow(resp_list1)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelms_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
 
 
+```{r}
+summary(modelms_1)
+summary(modelms_2)
+summary(modelms_3)
+```
 
 
 
