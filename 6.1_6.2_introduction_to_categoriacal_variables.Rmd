@@ -1,0 +1,80 @@
+---
+title: "Introduction to categorical variable 6.1-6.2"
+author: "ChemistryR"
+date: "2022-11-18"
+output: html_document
+---
+
+```{r}
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor)
+library(lme4)
+library(VGAM)
+library(MASS)
+```
+
+# Polview
+
+```{r}
+Polview <- read.table(here("Data Sets - updated Apr 2019", "Polviews.dat"), header = TRUE) %>% as_tibble()
+Polview
+```
+
+# VGMA
+```{r}
+fitvglm <- vglm(cbind(y1,y2,y3,y4,y5) ~ party + gender,
+                 family = cumulative(parallel = TRUE), data = Polview)
+summary(fitvglm) 
+attach (Polview)
+data.frame(gender,party, fitted(fitvglm))
+fit2vglm <- vglm(cbind(y1,y2,y3,y4,y5) ~ gender,
+                 family = cumulative(parallel = TRUE), data = Polview)
+lrtest (fitvglm, fit2vglm)
+confint (fitvglm, method = "profile")
+```
+
+# Polr
+```{r}
+Polviews <- read.csv(here("Polviews_long.csv"))
+Polview
+Polviews$resp <- factor(Polviews$resp, 
+                             levels = c("very liberal",
+                                        "slightly liberal",
+                                        "moderate",
+                                        "slightly conservative",
+                                        "very conservative"),
+                             ordered = TRUE)
+levels(Polviews$resp)
+Polviews_polar <- polr(resp ~ party + gender, 
+                      method = "logistic", data = Polviews, Hess = TRUE)
+Polviews_polar
+summary(Polviews_polar)
+```
+
+#Happy 
+```{r}
+Happy <- read.table(here("Data Sets - updated Apr 2019", "Happy.dat"), header = TRUE) %>% as_tibble()
+Happy
+fitvglm_happy <- vglm(cbind(y1,y2,y3) ~ income,
+                 family = cumulative(parallel = TRUE), 
+                 data = Happy)
+summary(fitvglm_happy) 
+fitvglm2_happy <- vglm(cbind(y1,y2,y3) ~ 1,
+                 family = cumulative(parallel = TRUE), 
+                 data = Happy)
+summary(fitvglm2_happy) 
+lrtest(fitvglm_happy,fitvglm2_happy)
+
+fitvglm_happy3 <- vglm(cbind(y1,y2,y3) ~ factor(income),
+                 family = cumulative(parallel = TRUE), 
+                 data = Happy)
+fitvglm2_happy <- vglm(cbind(y1,y2,y3) ~ 1,
+                 family = multinomial, 
+                 data = Happy)
+lrtest(fitvglm_happy3,fitvglm2_happy)
+```
+

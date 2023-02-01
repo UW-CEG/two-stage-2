@@ -19,6 +19,15 @@ library(effects)
 library(nnet)
 library(Hmisc)
 library(dplyr)
+library(here)
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(moderndive)
+library(janitor)
+library(lme4)
+library(VGAM)
+library(MASS)
 ```
 
 ## Set up
@@ -262,7 +271,6 @@ for (i in 1:nrow(resp_list2)) {
   cat(formula_, "\n\n")
   assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
-
 ```
 
 ```{r}
@@ -293,6 +301,27 @@ for (i in 1:nrow(resp_list1)) {
 
 ```
 
+Polar method on the survey question 1
+Works
+```{r}
+levels(master_two_stage$perts_q1msfixed1_uf)
+perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed1_uf ~ perts_q1msfixed2_of, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+perts_q1msfixed1_uf_polar
+summary(perts_q1msfixed1_uf_polar)
+```
+
+
+Polar method on the survey question 1
+try to do it by selecting variable in the resp_list
+not work
+```{r}
+levels(master_two_stage$perts_q1msfixed1_uf)
+perts_q1msfixed1_uf_polar <- polr(resp_list1$x1 ~ resp_list1$x2, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+perts_q1msfixed1_uf_polar
+summary(perts_q1msfixed1_uf_polar)
+```
 
 ```{r}
 summary(modelms_1)
@@ -300,13 +329,7 @@ summary(modelms_2)
 summary(modelms_3)
 ```
 
-
-
-
-
-
-
-
+hialle
 
 
 
