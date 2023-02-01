@@ -301,6 +301,13 @@ for (i in 1:nrow(resp_list1)) {
 
 ```
 
+```{r}
+summary(modelms_1)
+summary(modelms_2)
+summary(modelms_3)
+```
+
+
 Polar method on the survey question 1
 Works
 ```{r}
@@ -323,12 +330,6 @@ perts_q1msfixed1_uf_polr <- polr(resp_list1$x1 ~ resp_list1$x2,
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polr
 summary(perts_q1msfixed1_uf_polr)
-```
-
-```{r}
-summary(modelms_1)
-summary(modelms_2)
-summary(modelms_3)
 ```
 
 hialle
