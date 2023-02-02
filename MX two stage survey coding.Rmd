@@ -338,10 +338,22 @@ not work
 **CFC NOTES FOR LATER:**
 * [CODING FOR CATEGORICAL VARIABLES IN REGRESSION MODELS](https://stats.oarc.ucla.edu/r/modules/coding-for-categorical-variables-in-regression-models/)
 * [R LIBRARY CONTRAST CODING SYSTEMS FOR CATEGORICAL VARIABLES](https://stats.oarc.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/)
-  * The "Dummy Coding" section shows how R treats the multinomial (unordered factor)input variable in our `polr` models
+  * The "Dummy Coding" section shows how R treats the multinomial (unordered factor) input variable in our `polr` models
   * The "Orthogonal Polynomial Coding" section shows how R treats the ordinal (ordered factor) variables...this is where the "L", "C", "Q", etc. subscripts come from. This page also says that this coding scheme should only be used when the levels in an ordinal variable are evenly spaced, and they cite income and education as examples. So, maybe this can't be used for our Likert scale data? Can I use `polr` with an unordered outcome variable? Did the factors have to be ordered in the `vlgm` approach?
 
 
+**HERE IS A NOTE RELATED TO A WARNING MESSAGE WE KEEP GETTING:**
 
+> **[Rank](https://www.mathworks.com/help/matlab/ref/rank.html)**
+> The number of linearly independent columns in a matrix is the rank of the matrix. 
+> The row and column rank of a matrix are always equal.
 
+> A matrix is full rank if its rank is the highest possible for a matrix of the same size, 
+> and rank deficient if it does not have full rank. The rank gives a measure of the dimension 
+> of the range or column space of the matrix, which is the collection of all linear 
+> combinations of the columns.
+
+The "rank deficient" warning relates to the fact that somewhere in the regression matrix 
+algebra, there is a matrix that has at least two columns that are not linearly independent.
+As a result, some of the coefficients in the model prediction are redundant.
 
