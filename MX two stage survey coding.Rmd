@@ -335,6 +335,11 @@ not work
 ```
 
 
+**CFC NOTES FOR LATER:**
+* [CODING FOR CATEGORICAL VARIABLES IN REGRESSION MODELS](https://stats.oarc.ucla.edu/r/modules/coding-for-categorical-variables-in-regression-models/)
+* [R LIBRARY CONTRAST CODING SYSTEMS FOR CATEGORICAL VARIABLES](https://stats.oarc.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/)
+  * The "Dummy Coding" section shows how R treats the multinomial (unordered factor)input variable in our `polr` models
+  * The "Orthogonal Polynomial Coding" section shows how R treats the ordinal (ordered factor) variables...this is where the "L", "C", "Q", etc. subscripts come from. This page also says that this coding scheme should only be used when the levels in an ordinal variable are evenly spaced, and they cite income and education as examples. So, maybe this can't be used for our Likert scale data? Can I use `polr` with an unordered outcome variable? Did the factors have to be ordered in the `vlgm` approach?
 
 
 
