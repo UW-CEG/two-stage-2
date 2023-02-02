@@ -318,6 +318,8 @@ perts_q1msfixed1_uf_polr <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf,
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polr
 summary(perts_q1msfixed1_uf_polr)
+exp(coef(perts_q1msfixed1_uf_polr))
+fitted(perts_q1msfixed1_uf_polr)
 ```
 
 
