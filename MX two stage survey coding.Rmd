@@ -357,3 +357,22 @@ The "rank deficient" warning relates to the fact that somewhere in the regressio
 algebra, there is a matrix that has at least two columns that are not linearly independent.
 As a result, some of the coefficients in the model prediction are redundant.
 
+```{r}
+m1 <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf + sex_id, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+summary(m1)
+exp(coef(m1))
+```
+
+```{r}
+m2 <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf*sex_id, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+summary(m2)
+exp(coef(m2))
+```
+
+```{r}
+allEffects(m1)
+allEffects(m2)
+```
+
