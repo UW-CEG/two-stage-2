@@ -327,14 +327,14 @@ Polar method on the survey question 1
 try to do it by selecting variable in the resp_list
 not work
 ```{r}
-levels(master_two_stage$perts_q1msfixed1_uf)
-perts_q1msfixed1_uf_polr <- polr(resp_list1$x1 ~ resp_list1$x2, 
-                      method = "logistic", data = master_two_stage, Hess = TRUE)
-perts_q1msfixed1_uf_polr
-summary(perts_q1msfixed1_uf_polr)
+# levels(master_two_stage$perts_q1msfixed1_uf)
+# perts_q1msfixed1_uf_polr <- polr(resp_list1$x1 ~ resp_list1$x2, 
+#                       method = "logistic", data = master_two_stage, Hess = TRUE)
+# perts_q1msfixed1_uf_polr
+# summary(perts_q1msfixed1_uf_polr)
 ```
 
-hialle
+
 
 
 
