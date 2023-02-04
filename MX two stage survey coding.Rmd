@@ -244,14 +244,11 @@ for (i in 1:nrow(resp_list3)) {
 ```
 Make the resp list into factor_unordered
 ```{r}
+resp_list3$x1 <- factor(resp_list3$x1)
+resp_list3$x2 <- ordered(resp_list3$x2)
 resp_list4$x1 <- factor(resp_list4$x1)
 resp_list4$x2 <- ordered(resp_list4$x2)
 ```
-
-```{r}
-levels(resp_list4)
-```
-
 
 
 ```{r}
