@@ -200,6 +200,7 @@ master_two_stage$perts_q4effgoal1_uf <- factor(master_two_stage$perts_q4effgoal1
                                    levels=c("Strongly Disagree", "Disagree", 
                                             "Somewhat Disagree","Somewhat Agree", 
                                             "Agree", "Strongly Agree"))
+levels(master_two_stage$perts_q4effgoal1_uf)
 ```
 
 Automation
@@ -241,6 +242,17 @@ for (i in 1:nrow(resp_list3)) {
 }
 
 ```
+Make the resp list into factor_unordered
+```{r}
+resp_list4$x1 <- factor(resp_list4$x1)
+resp_list4$x2 <- ordered(resp_list4$x2)
+```
+
+```{r}
+levels(resp_list4)
+```
+
+
 
 ```{r}
 x1 <- c("perts_q1belong2_of", "perts_q2belongrespect2_of", "perts_q3belongcomfort2_of","perts_q4belongmyself2_of")
@@ -283,7 +295,7 @@ Polar method on the survey question 1
 Works
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
-perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed1_uf ~ perts_q1msfixed2_of, 
+perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf, 
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polar
 summary(perts_q1msfixed1_uf_polar)
@@ -294,13 +306,12 @@ try to do it by selecting variable in the resp_list
 not work
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
-perts_q1msfixed1_uf_polar <- polr(resp_list1$x1 ~ resp_list1$x2, 
+perts_q1msfixed1_uf_polar <- polr(resp_list4[[1]][[1]] ~ resp_list4[[1]][[2]], 
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polar
 summary(perts_q1msfixed1_uf_polar)
 ```
 
-hialle
 
 
 
