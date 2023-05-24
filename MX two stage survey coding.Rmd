@@ -219,10 +219,17 @@ for (i in 1:nrow(resp_list4)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modeleff_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
+```{r}
+summary(modeleff_1)
+summary(modeleff_2)
+summary(modeleff_3)
+summary(modeleff_4)
+```
+
 
 ```{r}
 x1 <- c("perts_q1relevplan2_of", "perts_q2relevskills2_of", "perts_q3relevwork2_of","perts_q4relevfuture2_of")
@@ -238,16 +245,25 @@ for (i in 1:nrow(resp_list3)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelrele_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
+
 Make the resp list into factor_unordered
 ```{r}
 resp_list3$x1 <- factor(resp_list3$x1)
 resp_list3$x2 <- ordered(resp_list3$x2)
 resp_list4$x1 <- factor(resp_list4$x1)
 resp_list4$x2 <- ordered(resp_list4$x2)
+```
+
+
+```{r}
+summary(modelrele_1)
+summary(modelrele_2)
+summary(modelrele_3)
+summary(modelrele_4)
 ```
 
 
@@ -265,9 +281,18 @@ for (i in 1:nrow(resp_list2)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelbelong_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 ```
+
+```{r}
+summary(modelbelong_1)
+summary(modelbelong_2)
+summary(modelbelong_3)
+summary(modelbelong_4)
+```
+
+
 
 ```{r}
 x1 <- c("perts_q1msfixed2_of", "perts_q2msfixed2_of", "perts_q3msfixed2_of")
@@ -283,34 +308,96 @@ for (i in 1:nrow(resp_list1)) {
                      " + satm + satv + hs_gpa + aleksikc_score")
   mod_name <- paste0("modelms_", i)
   cat(formula_, "\n\n")
-  assign(mod_name, polr(formula_, data = master_two_stage))
+  assign(mod_name, polr(formula_, data = master_two_stage, Hess = TRUE))
 }
 
 ```
+
+```{r}
+summary(modelms_1)
+summary(modelms_2)
+summary(modelms_3)
+```
+
 
 Polar method on the survey question 1
 Works
 ```{r}
 levels(master_two_stage$perts_q1msfixed1_uf)
-perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf, 
+
+perts_q1msfixed1_uf_polar <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf) 
+
+is.ordered(master_two_stage$perts_q1msfixed1_uf)
+is.ordered(master_two_stage$perts_q1msfixed2_of)
+perts_q1msfixed1_uf_polr <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf, 
+
                       method = "logistic", data = master_two_stage, Hess = TRUE)
-perts_q1msfixed1_uf_polar
-summary(perts_q1msfixed1_uf_polar)
+perts_q1msfixed1_uf_polr
+summary(perts_q1msfixed1_uf_polr)
+exp(coef(perts_q1msfixed1_uf_polr))
+fitted(perts_q1msfixed1_uf_polr)
 ```
+
 
 Polar method on the survey question 1
 try to do it by selecting variable in the resp_list
 not work
 ```{r}
+
 levels(master_two_stage$perts_q1msfixed1_uf)
 perts_q1msfixed1_uf_polar <- polr(resp_list4[[1]][[1]] ~ resp_list4[[1]][[2]], 
                       method = "logistic", data = master_two_stage, Hess = TRUE)
 perts_q1msfixed1_uf_polar
 summary(perts_q1msfixed1_uf_polar)
+
+# levels(master_two_stage$perts_q1msfixed1_uf)
+# perts_q1msfixed1_uf_polr <- polr(resp_list1$x1 ~ resp_list1$x2, 
+#                       method = "logistic", data = master_two_stage, Hess = TRUE)
+# perts_q1msfixed1_uf_polr
+# summary(perts_q1msfixed1_uf_polr)
+
 ```
 
 
+**CFC NOTES FOR LATER:**
+* [CODING FOR CATEGORICAL VARIABLES IN REGRESSION MODELS](https://stats.oarc.ucla.edu/r/modules/coding-for-categorical-variables-in-regression-models/)
+* [R LIBRARY CONTRAST CODING SYSTEMS FOR CATEGORICAL VARIABLES](https://stats.oarc.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/)
+  * The "Dummy Coding" section shows how R treats the multinomial (unordered factor) input variable in our `polr` models
+  * The "Orthogonal Polynomial Coding" section shows how R treats the ordinal (ordered factor) variables...this is where the "L", "C", "Q", etc. subscripts come from. This page also says that this coding scheme should only be used when the levels in an ordinal variable are evenly spaced, and they cite income and education as examples. So, maybe this can't be used for our Likert scale data? Can I use `polr` with an unordered outcome variable? Did the factors have to be ordered in the `vlgm` approach?
 
 
+**HERE IS A NOTE RELATED TO A WARNING MESSAGE WE KEEP GETTING:**
+
+> **[Rank](https://www.mathworks.com/help/matlab/ref/rank.html)**
+> The number of linearly independent columns in a matrix is the rank of the matrix. 
+> The row and column rank of a matrix are always equal.
+
+> A matrix is full rank if its rank is the highest possible for a matrix of the same size, 
+> and rank deficient if it does not have full rank. The rank gives a measure of the dimension 
+> of the range or column space of the matrix, which is the collection of all linear 
+> combinations of the columns.
+
+The "rank deficient" warning relates to the fact that somewhere in the regression matrix 
+algebra, there is a matrix that has at least two columns that are not linearly independent.
+As a result, some of the coefficients in the model prediction are redundant.
+
+```{r}
+m1 <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf + sex_id, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+summary(m1)
+exp(coef(m1))
+```
+
+```{r}
+m2 <- polr(perts_q1msfixed2_of ~ perts_q1msfixed1_uf*sex_id, 
+                      method = "logistic", data = master_two_stage, Hess = TRUE)
+summary(m2)
+exp(coef(m2))
+```
+
+```{r}
+allEffects(m1)
+allEffects(m2)
+```
 
 
