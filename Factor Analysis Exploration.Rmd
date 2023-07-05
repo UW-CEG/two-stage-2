@@ -1,0 +1,408 @@
+---
+title: "Factor Analysis exploration"
+author: "ChemistryR"
+date: "2023-04-19"
+output: html_document
+---
+
+Loading Library
+```{r}
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(lme4)
+library(MASS)
+library(nnet)
+library(Hmisc)
+library(knitr)
+library(janitor)
+library(VGAM)
+library(MASS)
+library(ggplot2)
+library(reshape2)
+```
+
+## Set up
+
+## Designate working directories and copy file
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+file.copy(copy_from, copy_to)
+```
+
+## Import dataset
+
+```{r}
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+## Clean the dataset to be what we need
+
+```{r}
+master_two_stage <- master_original_1 %>% 
+  dplyr::select(
+  "two_stage_id",
+  "sis_id",
+  "class.x",
+  "class.y",
+  "exp",
+  "sex_id",
+  "urm_id",
+  "eop_id",
+  "fgn_id",
+  "satm",
+  "satv",
+  "hs_gpa",
+  "aleksikc_score",
+  contains("perts_q")
+  )
+```
+
+## Clean to original and final data
+```{r}
+survey_result_original <- master_two_stage %>% 
+  dplyr::select(
+  contains("1"),
+  contains("exp")
+  )
+
+survey_result_final <- master_two_stage %>% 
+  dplyr::select(
+  contains("2"),
+  contains("exp")
+  )
+
+survey_result_original <- survey_result_original[,!names(survey_result_original) %in%
+                                               c("perts_q1effa2", "perts_q1relevplan2",
+                                                 "perts_q1belong2", "perts_q1msfixed2")]
+
+survey_result_final <- survey_result_final[,!names(survey_result_final) %in%
+                                               c("perts_q2efftest1", "perts_q2relevskills1",
+                                              "perts_q2belongrespect1","perts_q2msfixed1")]
+```
+
+Rename the data original
+```{r}
+names(survey_result_original) = gsub(pattern = "perts_", replacement = "", x =
+                                       names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "msfixed", replacement = "msf", x =
+                                       names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "belong", replacement = "bl", x =
+                                       names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "relev", replacement = "rl", x =
+                                       names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "respect", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "comfort", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "work", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "myself", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "plan", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "skills", 
+                                  replacement = "", x = names(survey_result_original))
+names(survey_result_original) = gsub(pattern = "future", 
+                                  replacement = "", x = names(survey_result_original))
+```
+
+Rename the data final
+```{r}
+names(survey_result_final) = gsub(pattern = "perts_", replacement = "", x = 
+                                    names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "msfixed", replacement = "msf", x =
+                                       names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "belong", replacement = "bl", x =
+                                       names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "relev", replacement = "rl", x =
+                                       names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "respect", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "comfort", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "work", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "myself", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "plan", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "skills", 
+                                  replacement = "", x = names(survey_result_final))
+names(survey_result_final) = gsub(pattern = "future", 
+                                  replacement = "", x = names(survey_result_final))
+```
+
+original-control and experiment
+```{r}
+survey_result_original_control <-filter(survey_result_original, exp == "CONTROL")
+survey_result_original_experiment <-filter(survey_result_original, exp == "EXPERIMENTAL")
+survey_result_original_control <- survey_result_original_control [,!names(survey_result_original_control)
+                                                                  %in% c("exp")]
+survey_result_original_experiment <- survey_result_original_experiment [,!names(survey_result_original_experiment)
+                                                                  %in% c("exp")]
+colnames(survey_result_original_experiment) <- paste(colnames(survey_result_original_experiment),"E",sep="")
+colnames(survey_result_original_control) <- paste(colnames(survey_result_original_control),"C",sep="")
+```
+
+final control and experiment
+```{r}
+survey_result_final_control <-filter(survey_result_final, exp == "CONTROL")
+survey_result_final_experiment <-filter(survey_result_final, exp == "EXPERIMENTAL")
+survey_result_final_control <- survey_result_final_control [,!names(survey_result_final_control)
+                                                                  %in% c("exp")]
+survey_result_final_experiment <- survey_result_final_experiment [,!names(survey_result_final_experiment)
+                                                                  %in% c("exp")]
+colnames(survey_result_final_experiment) <- paste(colnames(survey_result_final_experiment),"E",sep="")
+colnames(survey_result_final_control) <- paste(colnames(survey_result_final_control),"C",sep="")
+```
+
+## Factor the Survey Data
+```{r}
+lvl <- c("Strongly Disagree", "Disagree", 
+        "Somewhat Disagree","Somewhat Agree", 
+        "Agree", "Strongly Agree")
+survey_result_orginal_experiment <- lapply(survey_result_original_experiment, factor, levels = lvl)
+survey_result_final_experiment <- lapply(survey_result_final_experiment, factor, levels = lvl)
+survey_result_orginal_control <- lapply(survey_result_original_control, factor, levels = lvl)
+survey_result_final_control <- lapply(survey_result_final_control, factor, levels = lvl)
+```
+order factor the data
+```{r}
+
+survey_result_orginal_experiment <- factor(c(lvl), 
+                                           levels = lvl, 
+                                           ordered = TRUE)
+survey_result_final_experiment <- factor(c(lvl), 
+                                           levels = lvl, 
+                                           ordered = TRUE)
+survey_result_final_control <- factor(c(lvl), 
+                                           levels = lvl, 
+                                           ordered = TRUE)
+survey_result_orginal_control <- factor(c(lvl), 
+                                           levels = lvl, 
+                                           ordered = TRUE)
+## Data Summary
+
+glimpse(survey_result_orginal_control)
+glimpse(survey_result_final_experiment)
+glimpse(survey_result_orginal_control)
+glimpse(survey_result_final_control)
+```
+
+## First Try
+
+survey_result_year_1_plot_n <- data.frame(survey_result_year_1)
+survey_result_year_1_plot_n$question <- row.names(survey_result_year_1_plot_n)
+library(reshape2)
+melt_survey_result_year_1_plot_n <- melt(survey_result_year_1_plot_n,"question")
+library(ggplot2)
+survey_result_year_1_plot_n <- ggplot(melt_survey_result_year_1_plot_n,
+                                    aes(x = variable, fill = value))
+survey_result_year_1_plot_n + geom_dotplot(stackgroups = TRUE,binwidth = 0.1)
+
+
+
+## Change Factor variable to numerical variable
+```{r}
+survey_result_orginal_experiment <- lapply(survey_result_orginal_experiment, as.numeric)
+survey_result_year_2 <- lapply(survey_result_year_2, as.numeric)
+```
+
+
+## Data Summary
+
+glimpse(survey_result_year_1)
+glimpse(survey_result_year_2)
+
+## Second Try
+
+survey_result_year_1_plot = data.frame(survey_result_year_1)
+plot(survey_result_year_1_plot, aes(variable,value))
+
+
+## Third Try
+
+column_survey_result_year_1<-melt(survey_result_year_1)
+ggplot(column_survey_result_year_1,aes(L1,value))+geom_point()
+
+
+## Forth Try
+
+library(plot.matrix)
+matplot(as.data.frame(survey_result_year_1), type = "l")
+
+
+## fifth Try
+
+library(psych)
+survey_result_year_1 <-data.frame(survey_result_year_1)
+head(survey_result_year_1)
+plot(survey_result_year_1, pch = 1, cex = 0.2)
+
+
+## Six Try: Individually
+
+msfix1_survey_result <- survey_result_year_1 %>% 
+  dplyr::select(
+    contains("msfixed")
+  )
+library(psych)
+msfix1_survey_result <-data.frame(msfix1_survey_result)
+head(msfix1_survey_result)
+plot(msfix1_survey_result, pch = 10, cex = 2)
+
+
+
+belong_survey_result <- survey_result_year_1 %>% 
+  dplyr::select(
+    contains("belong")
+  )
+library(psych)
+msfix1_survey_result <-data.frame(belong_survey_result)
+head(belong_survey_result)
+plot(belong_survey_result, pch = 10, cex = 2)
+
+
+
+rele_survey_result <- survey_result_year_1 %>% 
+  dplyr::select(
+    contains("rele")
+  )
+library(psych)
+msfix1_survey_result <-data.frame(rele_survey_result)
+head(rele_survey_result)
+plot(rele_survey_result, pch = 10, cex = 2)
+
+
+eff_survey_result <- survey_result_year_1 %>% 
+  dplyr::select(
+    contains("eff")
+  )
+library(psych)
+eff_survey_result <-data.frame(eff_survey_result)
+head(eff_survey_result)
+plot(eff_survey_result, pch = 10, cex = 2)
+
+
+## create_data_table for experiment final
+```{r}
+column_survey_result_final_experiment <- melt(survey_result_final_experiment)
+colnames(column_survey_result_final_experiment)[2] = "question_name"
+column_survey_result_final_experiment %>% group_by(question_name) %>% tally() %>% arrange(desc(n))
+pivot_long_column_survey_result_final_experiment <- column_survey_result_final_experiment %>%
+  group_by(question_name, value) %>% tally() %>% 
+  arrange(desc(n))
+pivot_long_column_survey_result_final_experiment
+```
+## create_data_table for control final
+```{r}
+column_survey_result_final_control <- melt(survey_result_final_control)
+colnames(column_survey_result_final_control)[2] = "question_name"
+column_survey_result_final_control %>% group_by(question_name) %>% tally() %>% arrange(desc(n))
+pivot_long_column_survey_result_final_control <- column_survey_result_final_control %>%
+  group_by(question_name, value) %>% tally() %>% 
+  arrange(desc(n))
+pivot_long_column_survey_result_final_control
+```
+## create_data_table for control original
+```{r}
+column_survey_result_original_control <- melt(survey_result_orginal_control)
+colnames(column_survey_result_original_control)[2] = "question_name"
+column_survey_result_original_control %>% group_by(question_name) %>% tally() %>% arrange(desc(n))
+pivot_long_column_survey_result_original_control <- column_survey_result_original_control %>%
+  group_by(question_name, value) %>% tally() %>% 
+  arrange(desc(n))
+pivot_long_column_survey_result_original_control
+```
+
+## create_data_table for experiment original
+```{r}
+column_survey_result_original_experiment <- melt(survey_result_orginal_experiment)
+colnames(column_survey_result_original_experiment)[2] = "question_name"
+column_survey_result_original_experiment %>% group_by(question_name) %>% tally() %>% arrange(desc(n))
+pivot_long_column_survey_result_original_experiment <- column_survey_result_original_experiment %>%
+  group_by(question_name, value) %>% tally() %>% 
+  arrange(desc(n))
+pivot_long_column_survey_result_original_experiment
+```
+
+Graph experiment final
+```{r}
+ggplot(data = subset(pivot_long_column_survey_result_final_experiment, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(1, 8))
+```
+
+Graph control final
+```{r}
+ggplot(data = subset(pivot_long_column_survey_result_final_control, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(1, 8))
+```
+
+Graph control original
+```{r}
+ggplot(data = subset(pivot_long_column_survey_result_original_control, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(1, 8))
+```
+
+Graph experiment original
+```{r}
+ggplot(data = subset(pivot_long_column_survey_result_original_experiment, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(1, 8))
+```
+
+data comparison:
+```{r}
+year_con <- rbind(pivot_long_column_survey_result_original_control,
+                  pivot_long_column_survey_result_final_control)
+year_con <- arrange(year_con, desc(question_name))
+year_exp <- rbind(pivot_long_column_survey_result_original_experiment,
+                  pivot_long_column_survey_result_final_experiment)
+year_exp <- arrange(year_exp, desc(question_name))
+```
+
+Control year
+```{r}
+ggplot(data = subset(year_con, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(0.5, 3))
+```
+
+Experiment year
+```{r}
+ggplot(data = subset(year_exp, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(0.5, 3))
+```
+
+
+Total comparison
+```{r}
+con_exp <- rbind(year_con, year_exp)
+con_exp <- arrange(con_exp, desc(question_name))
+```
+Comparison graph
+```{r}
+ggplot(data = subset(con_exp, !is.na(value)),
+       aes(question_name,value)) + 
+  geom_point(aes(size = n)) +
+  scale_size_continuous(range = c(0.2, 2))
+```

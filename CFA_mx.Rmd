@@ -1,0 +1,258 @@
+---
+title: "CFA-mx-perts"
+author: "ChemistryR"
+date: "2023-05-17"
+output: html_document
+---
+
+```{r}
+library(lavaan)
+library(tidyverse)
+library(here)
+library(skimr)
+library(moderndive)
+library(dplyr)
+```
+
+```{r}
+proj_dir <- here()
+original_data_dir   <- here("original-data")
+importable_data_dir <- here("processing-and-analysis", "01-importable-data")
+analysis_data_dir   <- here("processing-and-analysis", "03-analysis-data")
+metadata_dir <- here("original-data", "metadata")
+copy_from <- paste0(original_data_dir, "two_stage_master_wide_deid.rds")
+copy_to <- paste0(importable_data_dir, "two_stage_master_wide_deid.rds")
+```
+
+## Import dataset
+
+```{r}
+master_original_1 <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds"))
+```
+
+## Two stage data set
+
+```{r}
+master_two_stage <- readRDS(here(importable_data_dir, "two_stage_master_wide_deid.rds")) %>% 
+  dplyr::select(
+  "two_stage_id",
+  "sis_id",
+  "class.x",
+  "class.y",
+  "exp",
+  "sex_id",
+  "urm_id",
+  "eop_id",
+  "fgn_id",
+  "satm",
+  "satv",
+  "hs_gpa",
+  "aleksikc_score",
+  contains("perts_q")
+  )
+
+factorise <- function(x) {
+   case_when(x %in% c("Strongly Disagree") ~ 1,
+             x %in% c("Disagree") ~ 2,
+             x %in% c("Somewhat Disagree") ~ 3,
+             x %in% c("Somewhat Agree") ~ 4,
+             x %in% c("Agree") ~ 5,
+             x %in% c("Strongly Agree") ~ 6)}
+master_two_stage <- mutate_at(master_two_stage, c("perts_q1msfixed1", "perts_q2msfixed1",
+                                                  "perts_q3msfixed1","perts_q1belong1",
+                                                  "perts_q4belongmyself1", "perts_q3belongcomfort1",
+                                                  "perts_q2belongrespect1",
+                                                  "perts_q1effa1",
+                                                  "perts_q2efftest1",
+                                                  "perts_q3efftopic1","perts_q4effgoal1"), 
+                              factorise)
+master_two_stage <- mutate_at(master_two_stage, c("perts_q1msfixed2", "perts_q2msfixed2",
+                                                  "perts_q3msfixed2","perts_q1belong2",
+                                                  "perts_q4belongmyself2", "perts_q3belongcomfort2",
+                                                  "perts_q2belongrespect2",
+                                                  "perts_q1effa2",
+                                                  "perts_q2efftest2",
+                                                  "perts_q3efftopic2","perts_q4effgoal2"), 
+                              factorise)
+
+factorise_reverse <- function(x) {
+   case_when(x %in% c("Strongly Disagree") ~ 6,
+             x %in% c("Disagree") ~ 5,
+             x %in% c("Somewhat Disagree") ~ 4,
+             x %in% c("Somewhat Agree") ~ 3,
+             x %in% c("Agree") ~ 2,
+             x %in% c("Strongly Agree") ~ 1)}
+master_two_stage <- mutate_at(master_two_stage, c("perts_q1relevplan1",
+                                                  "perts_q2relevskills1",
+                                                  "perts_q3relevwork1","perts_q4relevfuture1",
+                                                  "perts_q1relevplan2",
+                                                  "perts_q2relevskills2",
+                                                  "perts_q3relevwork2","perts_q4relevfuture2"),
+                              factorise_reverse)
+```
+
+
+## control & experiment original
+
+```{r}
+survey_result_original <- master_two_stage %>% 
+  dplyr::select(
+  contains("1"),
+  contains("exp")
+  )
+survey_result_original <- survey_result_original[,!names(survey_result_original) %in%
+                                               c("perts_q1effa2", "perts_q1relevplan2",
+                                                 "perts_q1belong2", "perts_q1msfixed2")]
+```
+
+## control & experiment experimental
+
+```{r}
+survey_result_final <- master_two_stage %>% 
+  dplyr::select(
+  contains("2"),
+  contains("exp")
+  )
+survey_result_final <- survey_result_final[,!names(survey_result_final) %in%
+                                               c("perts_q2efftest1", "perts_q2relevskills1",
+                                              "perts_q2belongrespect1","perts_q2msfixed1")]
+
+```
+
+## original_control
+
+```{r}
+original_control <-filter(survey_result_original, exp == "CONTROL")
+original_control <- original_control [,!names(original_control)
+                                                                  %in% c("exp")]
+colnames(original_control) <- paste(colnames(original_control),"C",sep="")
+
+oc_data <- 'fmsfixed =~ perts_q1msfixed1C + perts_q2msfixed1C + perts_q3msfixed1C
+            fbelong =~ perts_q1belong1C + perts_q3belongcomfort1C + perts_q4belongmyself1C + perts_q2belongrespect1C
+            frelev =~ perts_q1relevplan1C + perts_q2relevskills1C + perts_q3relevwork1C + 
+perts_q4relevfuture1C
+            feffa =~ perts_q1effa1C + perts_q2efftest1C + perts_q3efftopic1C + perts_q4effgoal1C'
+model_oc <- cfa(oc_data, data = original_control, std.lv = TRUE) 
+summary(model_oc, fit.measures=TRUE, standardized = TRUE) 
+```
+
+## original_experiment
+
+```{r}
+original_experiment <-filter(survey_result_original, exp == "EXPERIMENTAL")
+original_experiment <- original_experiment [,!names(original_experiment)
+                                                                  %in% c("exp")]
+colnames(original_experiment) <- paste(colnames(original_experiment),"E",sep="")
+
+oe_data <- 'fmsfixed =~ perts_q1msfixed1E + perts_q2msfixed1E + perts_q3msfixed1E
+            fbelong =~ perts_q1belong1E + perts_q3belongcomfort1E + perts_q4belongmyself1E + perts_q2belongrespect1E
+            frelev =~ perts_q1relevplan1E + perts_q2relevskills1E + perts_q3relevwork1E + 
+perts_q4relevfuture1E
+            feffa =~ perts_q1effa1E + perts_q2efftest1E + perts_q3efftopic1E + perts_q4effgoal1E'
+model_oe <- cfa(oe_data, data = original_experiment, std.lv = TRUE) 
+summary(model_oe, fit.measures=TRUE, standardized = TRUE) 
+```
+
+## final_control
+
+```{r}
+final_control <-filter(survey_result_final, exp == "CONTROL")
+final_control <- final_control [,!names(final_control)
+                                                                  %in% c("exp")]
+colnames(final_control) <- paste(colnames(final_control),"C",sep="")
+
+fc_data <- 'fmsfixed =~ perts_q1msfixed2C + perts_q2msfixed2C + perts_q3msfixed2C
+            fbelong =~ perts_q1belong2C + perts_q3belongcomfort2C + perts_q4belongmyself2C + perts_q2belongrespect2C
+            frelev =~ perts_q1relevplan2C + perts_q2relevskills2C + perts_q3relevwork2C + 
+perts_q4relevfuture2C
+            feffa =~ perts_q1effa2C + perts_q2efftest2C + perts_q3efftopic2C + perts_q4effgoal2C'
+model_fc <- cfa(fc_data, data = final_control, std.lv = TRUE) 
+summary(model_fc, fit.measures=TRUE, standardized = TRUE) 
+```
+
+## final_experiment
+
+```{r}
+final_experiment <-filter(survey_result_final, exp == "EXPERIMENTAL")
+final_experiment <- final_experiment [,!names(final_experiment)
+                                                                  %in% c("exp")]
+colnames(final_experiment) <- paste(colnames(final_experiment),"E",sep="")
+
+fe_data <- 'fmsfixed =~ perts_q1msfixed2E + perts_q2msfixed2E + perts_q3msfixed2E
+            fbelong =~ perts_q1belong2E + perts_q3belongcomfort2E + perts_q4belongmyself2E + perts_q2belongrespect2E
+            frelev =~ perts_q1relevplan2E + perts_q2relevskills2E + perts_q3relevwork2E + 
+perts_q4relevfuture2E
+            feffa =~ perts_q1effa2E + perts_q2efftest2E + perts_q3efftopic2E + perts_q4effgoal2E'
+model_fe <- cfa(fe_data, data = final_experiment, std.lv = TRUE) 
+summary(model_fe, fit.measures=TRUE, standardized = TRUE) 
+```
+
+<!-- ### subset1_msfix -->
+
+<!-- ## original_control -->
+<!-- ```{r} -->
+<!-- msfix_oc <- original_control %>%  -->
+<!--   dplyr::select( -->
+<!--     contains("msfixed") -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ## original_experiment -->
+<!-- ```{r} -->
+<!-- msfix_oe <- original_experiment %>%  -->
+<!--   dplyr::select( -->
+<!--     contains("msfixed") -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ## final_control -->
+<!-- ```{r} -->
+<!-- msfix_fc <- final_control %>%  -->
+<!--   dplyr::select( -->
+<!--     contains("msfixed") -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ## final_experiment -->
+<!-- ```{r} -->
+<!-- msfix_fe <- final_experiment %>%  -->
+<!--   dplyr::select( -->
+<!--     contains("msfixed") -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- # Comformational Factor Analysis -->
+<!-- ## msfixed -->
+<!-- ```{r} -->
+<!-- oc_msfixed <- 'f =~ perts_q1msfixed1C + perts_q2msfixed1C + perts_q3msfixed1C' -->
+<!-- model_oc <- cfa(oc_msfixed, data = msfix_oc) -->
+<!-- summary(model_oc, fit.measures=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- oe_msfixed <- 'f =~ perts_q1msfixed1E + perts_q2msfixed1E + perts_q3msfixed1E' -->
+<!-- model_oe <- cfa(oe_msfixed, data = msfix_oe) -->
+<!-- summary(model_oe, fit.measures=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- fc_msfixed <- 'f =~ perts_q1msfixed2C + perts_q2msfixed2C + perts_q3msfixed2C' -->
+<!-- model_fc <- cfa(fc_msfixed, data = msfix_fc) -->
+<!-- summary(model_fc, fit.measures=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- fe_msfixed <- 'f =~ perts_q1msfixed2E + perts_q2msfixed2E + perts_q3msfixed2E' -->
+<!-- model_fe <- cfa(fe_msfixed, data = msfix_fe) -->
+<!-- summary(model_fe, fit.measures=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- msfixed <- 'f =~ perts_q1msfixed2 + perts_q2msfixed2 + perts_q3msfixed2 + perts_q1msfixed1 + perts_q2msfixed1 + perts_q3msfixed1' -->
+<!-- model_msfixed <- cfa(msfixed, data = master_two_stage) -->
+<!-- summary(model_msfixed, fit.measures=TRUE) -->
+<!-- ``` -->
+
+
+
+
