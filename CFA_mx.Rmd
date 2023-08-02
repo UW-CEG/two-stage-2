@@ -129,8 +129,7 @@ colnames(original_control) <- paste(colnames(original_control),"C",sep="")
 
 oc_data <- 'fmsfixed =~ perts_q1msfixed1C + perts_q2msfixed1C + perts_q3msfixed1C
             fbelong =~ perts_q1belong1C + perts_q3belongcomfort1C + perts_q4belongmyself1C + perts_q2belongrespect1C
-            frelev =~ perts_q1relevplan1C + perts_q2relevskills1C + perts_q3relevwork1C + 
-perts_q4relevfuture1C
+            frelev =~ perts_q1relevplan1C + perts_q2relevskills1C + perts_q3relevwork1C + perts_q4relevfuture1C
             feffa =~ perts_q1effa1C + perts_q2efftest1C + perts_q3efftopic1C + perts_q4effgoal1C'
 model_oc <- cfa(oc_data, data = original_control, std.lv = TRUE) 
 summary(model_oc, fit.measures=TRUE, standardized = TRUE) 
@@ -146,8 +145,7 @@ colnames(original_experiment) <- paste(colnames(original_experiment),"E",sep="")
 
 oe_data <- 'fmsfixed =~ perts_q1msfixed1E + perts_q2msfixed1E + perts_q3msfixed1E
             fbelong =~ perts_q1belong1E + perts_q3belongcomfort1E + perts_q4belongmyself1E + perts_q2belongrespect1E
-            frelev =~ perts_q1relevplan1E + perts_q2relevskills1E + perts_q3relevwork1E + 
-perts_q4relevfuture1E
+            frelev =~ perts_q1relevplan1E + perts_q2relevskills1E + perts_q3relevwork1E + perts_q4relevfuture1E
             feffa =~ perts_q1effa1E + perts_q2efftest1E + perts_q3efftopic1E + perts_q4effgoal1E'
 model_oe <- cfa(oe_data, data = original_experiment, std.lv = TRUE) 
 summary(model_oe, fit.measures=TRUE, standardized = TRUE) 
@@ -163,8 +161,7 @@ colnames(final_control) <- paste(colnames(final_control),"C",sep="")
 
 fc_data <- 'fmsfixed =~ perts_q1msfixed2C + perts_q2msfixed2C + perts_q3msfixed2C
             fbelong =~ perts_q1belong2C + perts_q3belongcomfort2C + perts_q4belongmyself2C + perts_q2belongrespect2C
-            frelev =~ perts_q1relevplan2C + perts_q2relevskills2C + perts_q3relevwork2C + 
-perts_q4relevfuture2C
+            frelev =~ perts_q1relevplan2C + perts_q2relevskills2C + perts_q3relevwork2C + perts_q4relevfuture2C
             feffa =~ perts_q1effa2C + perts_q2efftest2C + perts_q3efftopic2C + perts_q4effgoal2C'
 model_fc <- cfa(fc_data, data = final_control, std.lv = TRUE) 
 summary(model_fc, fit.measures=TRUE, standardized = TRUE) 
@@ -180,8 +177,7 @@ colnames(final_experiment) <- paste(colnames(final_experiment),"E",sep="")
 
 fe_data <- 'fmsfixed =~ perts_q1msfixed2E + perts_q2msfixed2E + perts_q3msfixed2E
             fbelong =~ perts_q1belong2E + perts_q3belongcomfort2E + perts_q4belongmyself2E + perts_q2belongrespect2E
-            frelev =~ perts_q1relevplan2E + perts_q2relevskills2E + perts_q3relevwork2E + 
-perts_q4relevfuture2E
+            frelev =~ perts_q1relevplan2E + perts_q2relevskills2E + perts_q3relevwork2E + perts_q4relevfuture2E
             feffa =~ perts_q1effa2E + perts_q2efftest2E + perts_q3efftopic2E + perts_q4effgoal2E'
 model_fe <- cfa(fe_data, data = final_experiment, std.lv = TRUE) 
 summary(model_fe, fit.measures=TRUE, standardized = TRUE) 
